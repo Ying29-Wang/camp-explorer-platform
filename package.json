@@ -1,0 +1,24 @@
+{
+  "name": "camp-explorer-platform",
+  "version": "1.0.0",
+  "description": "\"A platform for discovering and researching children's camps\"",
+  "main": "index.js",
+  "scripts": {
+    "start": "node server/bin/www",
+    "server": "nodemon server/bin/www",
+    "client": "cd client && npm run dev",
+    "dev": "concurrently \"npm run server\" \"npm run client\"",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "camp",
+    "explorer",
+    "platform"
+  ],
+  "author": "Dominic Ejiogu, Ying Wang",
+  "license": "ISC",
+  "devDependencies": {
+    "concurrently": "^9.1.2",
+    "nodemon": "^3.1.9"
+  }
+}
