@@ -25,8 +25,9 @@ app.use(express.urlencoded({ extended: false }));
 // app.use(express.static(path.join(__dirname, 'public')));
 
 // Routes
-app.use('/', indexRouter);
-app.use('/users', usersRouter);
+app.use('/api/camps', require('./routes/camps'));
+app.use('/api/reviews', require('./routes/reviews'));
+app.use('/api/users', require('./routes/users'));
 
 // Default route
 app.get('/', (req, res) => {
