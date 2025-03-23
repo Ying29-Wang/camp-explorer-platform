@@ -17,7 +17,7 @@ const FeaturedCamps = () => {
       <div className="camp-grid">
         {featuredCamps.map((camp) => (
           <div key={camp.id} className="camp-card">
-            <img src={camp.image} alt={`Camp ${camp.id}`} />
+            <img className='camp-img' src={camp.image} alt={`Camp ${camp.id}`} />
             <p>{camp.text}</p>
           </div>
         ))}
