@@ -1,8 +1,8 @@
 import React from 'react';
 import './RecentlyViewed.css';
-import camp1 from '../assets/camp1.jpg'; // Ensure this path is correct
-import camp2 from '../assets/camp2.jpg';
-import camp3 from '../assets/camp3.jpg';
+import camp1 from '../../assets/camp1.jpg';
+import camp2 from '../../assets/camp2.jpg';
+import camp3 from '../../assets/camp3.jpg';
 
 const RecentlyViewed = ({ camps }) => {
   if (!camps || camps.length === 0) return null;

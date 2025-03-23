@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
-import Header from './components/Header';
-import FeaturedCamps from './components/FeaturedCamps';
-import RecentlyViewed from './components/RecentlyViewed';
-import Footer from './components/Footer';
+import Header from './components/layout/Header';
+import FeaturedCamps from './components/features/FeaturedCamps';
+import RecentlyViewed from './components/features/RecentlyViewed';
+import Footer from './components/common/Footer';
 import './App.css';
 
 function App() {
