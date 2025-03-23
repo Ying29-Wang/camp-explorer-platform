@@ -20,6 +20,29 @@ const UserSchema = new mongoose.Schema({
         enum: ['parent', 'camp_owner', 'admin'],
         default: 'parent',
     },
+    // Embedded children array
+    children: [{
+        firstName: {
+            type: String,
+            required: true
+        },
+        lastName: {
+            type: String,
+            required: true
+        },
+        dateOfBirth: {
+            type: Date,
+            required: true
+        },
+        interests: {
+            type: [String],
+            default: []
+        },
+        medicalNotes: {
+            type: String,
+            default: ''
+        }
+    }],
     date: {
         type: Date,
         default: Date.now,

@@ -49,9 +49,6 @@ router.get('/:id', async (req, res) => {
 // @desc    Create a new camp
 // @access  Public for now
 router.post('/', async (req, res) => {
-    console.log('Headers:', req.headers);
-    console.log('Body received:', req.body);
-    console.log('Body type:', typeof req.body);
     try {
         const newCamp = new Camp(req.body);
         const camp = await newCamp.save();

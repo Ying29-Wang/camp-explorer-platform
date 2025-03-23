@@ -40,7 +40,7 @@ router.get('/:id', async (req, res) => {
 // @access Public
 router.post('/', async (req, res) => {
   try {
-    const { name, email, password, role } = req.body;
+    const { username, email, password, role, children } = req.body;
 
     let user = await User.findOne({ email });
     if (user) {
@@ -48,10 +48,11 @@ router.post('/', async (req, res) => {
     }
 
     user = new User({
-      name,
+      username,
       email,
       password,
       role,
+      children
     });
 
     await user.save();
