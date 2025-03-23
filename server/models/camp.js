@@ -4,7 +4,6 @@ const CampSchema = new mongoose.Schema({
     name: {
         type: String,
         required: true,
-        unique: true,
     },
     description: {
         type: String,
@@ -37,7 +36,7 @@ const CampSchema = new mongoose.Schema({
         required: true,
     },
     image: {
-        type: String,
+        type: [String],
         default: [],
     },
     source: {

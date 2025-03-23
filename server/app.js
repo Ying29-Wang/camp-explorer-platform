@@ -5,13 +5,13 @@ const path = require('path');
 // var cookieParser = require('cookie-parser');
 // var logger = require('morgan');
 
-require('dotenv').config();
+require('dotenv').config({ path: './server/.env' });
 
 // var indexRouter = require('./routes/index');
 // var usersRouter = require('./routes/users');
 
 const app = express();
-const PORT = process.env.PORT || 5000;
+const PORT = process.env.PORT || 5001;
 
 // Connect to MongoDB
 connectDB();
