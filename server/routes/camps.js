@@ -107,4 +107,22 @@ router.delete('/:id', async (req, res) => {
     }
 });
 
+router.get('/homepage', async (req, res) => {
+    try {
+        const featuredCamps = await Camp.find()
+        .sort({ createdAt: -1 })
+        .limit(3);
+
+        const categoryCounts = await Camp.aggregate([
+            { $group: { _id: '$category', count: { $sum: 1 } } },
+            { $sort: { count: -1 } }
+        ]);
+
+        res.json({ featuredCamps, categoryCounts });
+    } catch (err) {
+        console.error(err.message);
+        res.status(500).json({ message: 'Server Error' });
+    }
+});
+
 module.exports = router;
