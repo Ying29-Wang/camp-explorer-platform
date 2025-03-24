@@ -1,4 +1,4 @@
-const API_URL = 'http://localhost:5001/api'; // Replace with your backend URL
+const API_URL = 'http://localhost:5001/api'; // Backend URL
 
 export const fetchCamps = async () => {
     const response = await fetch(`${API_URL}/camps`);
