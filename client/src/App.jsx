@@ -3,6 +3,7 @@ import Header from './components/layout/Header';
 import FeaturedCamps from './components/features/FeaturedCamps';
 import RecentlyViewed from './components/features/RecentlyViewed';
 import Footer from './components/common/Footer';
+import { SearchProvider } from './context/SearchContext'; // Ensure this path is correct
 import './App.css';
 
 function App() {
