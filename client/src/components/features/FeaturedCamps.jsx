@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from 'react';
-import { fetchCamps } from '../services/campService'; // Import the API service
+import { Link } from 'react-router-dom';
+import { fetchCamps } from '../../services/campService';
 import './FeaturedCamps.css';
-import camp1 from '../../assets/camp1.jpg'; // Keep your default images as fallback
+import camp1 from '../../assets/camp1.jpg';
 import camp2 from '../../assets/camp2.jpg';
 import camp3 from '../../assets/camp3.jpg';
 
@@ -36,14 +37,6 @@ const FeaturedCamps = () => {
     <section className="featured-camps">
       <h2>Featured Camps</h2>
       <div className="camp-grid">
-        {/* Either use featuredCamps OR campsToDisplay, not both without separation */}
-        {featuredCamps.map((camp) => (
-          <div key={camp.id} className="camp-card">
-            <img className='camp-img' src={camp.image} alt={`Camp ${camp.id}`} />
-            <p>{camp.text}</p>
-          </div>
-        ))}
-        
         {campsToDisplay.map((camp) => (
           <div key={camp._id} className="camp-card">
             <img src={camp.image || 'default-camp.jpg'} alt={camp.name} />
@@ -57,5 +50,6 @@ const FeaturedCamps = () => {
       </div>
     </section>
   );
+};
 
 export default FeaturedCamps;
