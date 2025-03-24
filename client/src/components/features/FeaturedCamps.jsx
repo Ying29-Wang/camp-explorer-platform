@@ -36,12 +36,14 @@ const FeaturedCamps = () => {
     <section className="featured-camps">
       <h2>Featured Camps</h2>
       <div className="camp-grid">
-<<<<<<< HEAD
+        {/* Either use featuredCamps OR campsToDisplay, not both without separation */}
         {featuredCamps.map((camp) => (
           <div key={camp.id} className="camp-card">
             <img className='camp-img' src={camp.image} alt={`Camp ${camp.id}`} />
             <p>{camp.text}</p>
-=======
+          </div>
+        ))}
+        
         {campsToDisplay.map((camp) => (
           <div key={camp._id} className="camp-card">
             <img src={camp.image || 'default-camp.jpg'} alt={camp.name} />
@@ -50,12 +52,10 @@ const FeaturedCamps = () => {
             <p>Ages: {camp.ageRange.min}-{camp.ageRange.max}</p>
             <p>${camp.price}</p>
             <Link to={`/camps/${camp._id}`}>View Details</Link>
->>>>>>> SearchResultPage
           </div>
         ))}
       </div>
     </section>
   );
-};
 
 export default FeaturedCamps;
