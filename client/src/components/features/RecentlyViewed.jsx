@@ -1,8 +1,8 @@
 import React from 'react';
-import './RecentlyViewed.css';
 import camp1 from '../../assets/camp1.jpg';
 import camp2 from '../../assets/camp2.jpg';
 import camp3 from '../../assets/camp3.jpg';
+import './RecentlyViewed.css';
 
 const RecentlyViewed = ({ camps }) => {
   if (!camps || camps.length === 0) return null;
@@ -19,7 +19,15 @@ const RecentlyViewed = ({ camps }) => {
       <div className="camp-list">
         {recentlyViewedCamps.map((camp) => (
           <div key={camp.id} className="camp-item">
-            <img src={camp.image} alt={`Camp ${camp.id}`} />
+            <img 
+              src={camp.image} 
+              alt={`Camp ${camp.id}`} 
+              className="camp-image"
+              onError={(e) => {
+                console.error('Image failed to load:', camp.image);
+                e.target.src = [camp1, camp2, camp3][Math.floor(Math.random() * 3)];
+              }}
+            />
             <p>{camp.name}</p>
           </div>
         ))}

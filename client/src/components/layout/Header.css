@@ -2,14 +2,34 @@
   display: flex; /* Makes the header a flex container */
   justify-content: space-between; /* Spaces out the logo and navigation */
   align-items: center; /* Vertically centers the items */
-  padding: 1rem; /* Adds padding inside the header */
+  padding: 1rem 2rem; /* Adds padding inside the header */
   background-color: #333; /* Sets a dark background color */
   color: white; /* Sets the text color to white */
   width: 100%; /* Ensures the header takes the full width of the screen */
 }
 
+.logo a {
+  color: white;
+  text-decoration: none;
+  font-size: 1.5rem;
+  font-weight: bold;
+}
+
+.nav-area {
+  display: flex;
+  align-items: center;
+  gap: 2rem;
+  padding-right: 2rem; /* 添加右侧内边距 */
+}
+
 .nav-area a {
-  margin: 0 1rem; /* Adds spacing between navigation links */
-  color: white; /* Sets the link text color to white */
-  text-decoration: none; /* Removes underline from links */
+  color: white;
+  text-decoration: none;
+  padding: 0.5rem 1rem;
+  border-radius: 4px;
+  transition: background-color 0.3s ease;
+}
+
+.nav-area a:hover {
+  background-color: rgba(255, 255, 255, 0.1);
 }

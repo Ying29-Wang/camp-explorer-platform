@@ -1,28 +1,15 @@
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { fetchCamps } from '../../services/campService';
-import './FeaturedCamps.css';
 import camp1 from '../../assets/camp1.jpg';
 import camp2 from '../../assets/camp2.jpg';
 import camp3 from '../../assets/camp3.jpg';
+import './FeaturedCamps.css';
 
 const FeaturedCamps = () => {
   const [featuredCamps, setFeaturedCamps] = useState([]);
   const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    const getCamps = async () => {
-      try {
-        const data = await fetchCamps(); // Fetch camps from the backend
-        setFeaturedCamps(data.slice(0, 6)); // Get first 6 camps
-        setLoading(false);
-      } catch (error) {
-        console.error('Error fetching camps:', error);
-        setLoading(false);
-      }
-    };
-    getCamps();
-  }, []);
+  const [error, setError] = useState(false);
 
   // Fallback mock data if backend data is not available
   const fallbackCamps = [
@@ -31,7 +18,57 @@ const FeaturedCamps = () => {
     { _id: 3, image: camp3, name: 'Science Explorers Camp', location: 'Default Location', ageRange: { min: 7, max: 15 }, price: 150 },
   ];
 
-  const campsToDisplay = loading ? fallbackCamps : featuredCamps;
+  useEffect(() => {
+    const getCamps = async () => {
+      try {
+        const data = await fetchCamps();
+        console.log('Backend data:', data);
+        if (data && data.length > 0) {
+          // 确保至少有3个营地显示
+          let processedData = data.slice(0, 6).map((camp, index) => ({
+            ...camp,
+            _id: camp._id || index + 1,
+            image: camp.image || [camp1, camp2, camp3][index % 3],
+            name: camp.name || `Camp ${index + 1}`,
+            location: camp.location || 'Default Location',
+            ageRange: camp.ageRange || { min: 5, max: 15 },
+            price: camp.price || 100 + (index * 20)
+          }));
+
+          // 如果后端返回的数据少于3个，用fallback数据补充
+          if (processedData.length < 3) {
+            const remainingCount = 3 - processedData.length;
+            const additionalCamps = fallbackCamps.slice(0, remainingCount).map((camp, index) => ({
+              ...camp,
+              _id: `fallback-${index + processedData.length + 1}`
+            }));
+            processedData = [...processedData, ...additionalCamps];
+          }
+
+          console.log('Processed data:', processedData);
+          setFeaturedCamps(processedData);
+          setError(false);
+        } else {
+          console.log('No data received from backend');
+          setError(true);
+        }
+      } catch (error) {
+        console.error('Error fetching camps:', error);
+        setError(true);
+      } finally {
+        setLoading(false);
+      }
+    };
+    getCamps();
+  }, []);
+
+  // 只在加载失败或没有数据时使用完整的 fallbackCamps
+  const campsToDisplay = error ? fallbackCamps : featuredCamps;
+  console.log('Camps to display:', campsToDisplay);
+
+  if (loading) {
+    return <div>Loading...</div>;
+  }
 
   return (
     <section className="featured-camps">
@@ -39,12 +76,21 @@ const FeaturedCamps = () => {
       <div className="camp-grid">
         {campsToDisplay.map((camp) => (
           <div key={camp._id} className="camp-card">
-            <img src={camp.image || 'default-camp.jpg'} alt={camp.name} />
-            <h3>{camp.name}</h3>
-            <p>{camp.location}</p>
-            <p>Ages: {camp.ageRange.min}-{camp.ageRange.max}</p>
-            <p>${camp.price}</p>
-            <Link to={`/camps/${camp._id}`}>View Details</Link>
+            <img 
+              src={camp.image} 
+              alt={camp.name} 
+              className="camp-image"
+              onError={(e) => {
+                e.target.src = [camp1, camp2, camp3][Math.floor(Math.random() * 3)];
+              }}
+            />
+            <div className="camp-card-content">
+              <h3>{camp.name}</h3>
+              <p>{camp.location}</p>
+              <p>Ages: {camp.ageRange.min}-{camp.ageRange.max}</p>
+              <p>${camp.price}</p>
+              <Link to={`/camps/${camp._id}`}>View Details</Link>
+            </div>
           </div>
         ))}
       </div>
