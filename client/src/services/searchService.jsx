@@ -1,3 +1,4 @@
+const API_URL = 'http://localhost:5001/api'; // Backend URL
 const fetchSearchResults = async () => {
     // Replace with actual API call
     const response = await fetch('/api/search');
