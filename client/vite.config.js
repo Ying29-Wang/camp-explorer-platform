@@ -12,4 +12,6 @@ export default defineConfig({
   optimizeDeps: {
     include: ['react-router-dom'],
   },
+  assetsInclude: ['**/*.jpg', '**/*.png', '**/*.gif'],
+  publicDir: 'public',
 })
