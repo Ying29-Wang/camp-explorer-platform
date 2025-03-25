@@ -38,6 +38,4 @@ app.get('/', (req, res) => {
     res.json({ message: 'Welcome to Camp Explorer API' });
 });
 
-});
-
 module.exports = app;
