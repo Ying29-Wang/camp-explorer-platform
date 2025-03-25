@@ -5,20 +5,19 @@ const path = require('path');
 // var cookieParser = require('cookie-parser');
 // var logger = require('morgan');
 
+// Load environment variables with explicit path
 require('dotenv').config({ path: path.join(__dirname, '.env') });
 
-// var indexRouter = require('./routes/index');
-// var usersRouter = require('./routes/users');
-
 const app = express();
-const PORT = process.env.PORT || 5001;
+const port = normalizePort(process.env.PORT || '3000');
+app.set('port', port);
 
 // Connect to MongoDB
 connectDB();
 
 // Middleware
 app.use(cors({
-    origin: '*', // 在生产环境中应该设置具体的域名
+    origin: '*', 
     methods: ['GET', 'POST', 'PUT', 'DELETE'],
     allowedHeaders: ['Content-Type', 'Authorization'],
 }));
@@ -37,5 +36,24 @@ app.use('/api/users', require('./routes/users'));
 app.get('/', (req, res) => {
     res.json({ message: 'Welcome to Camp Explorer API' });
 });
+
+/**
+ * Normalize a port into a number, string, or false.
+ */
+function normalizePort(val) {
+    var port = parseInt(val, 10);
+
+    if (isNaN(port)) {
+        // named pipe
+        return val;
+    }
+
+    if (port >= 0) {
+        // port number
+        return port;
+    }
+
+    return false;
+}
 
 module.exports = app;
