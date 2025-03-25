@@ -13,8 +13,6 @@ try {
   }
 
 const app = express();
-const port = normalizePort(process.env.PORT || '3000');
-app.set('port', port);
 
 // Connect to MongoDB
 connectDB();
@@ -60,11 +58,35 @@ function normalizePort(val) {
     return false;
 }
 
-if (require.main === module) {
-    const PORT = normalizePort(process.env.PORT || 5000);
-    app.listen(PORT, () => {
-      console.log(`Server running on port ${PORT}`);
-    });
+const PORT = normalizePort(process.env.PORT || 5000);
+const server = app.listen(PORT, () => {
+  console.log(`Server running on port ${PORT}`);
+});
+
+// Add error handling for the server
+server.on('error', (error) => {
+  if (error.syscall !== 'listen') {
+    throw error;
   }
+
+  const bind = typeof PORT === 'string' ? 'Pipe ' + PORT : 'Port ' + PORT;
+
+  // Handle specific listen errors with friendly messages
+  switch (error.code) {
+    case 'EACCES':
+      console.error(bind + ' requires elevated privileges');
+      process.exit(1);
+      break;
+    case 'EADDRINUSE':
+      console.error(bind + ' is already in use');
+      // Try a different port
+      const newPort = PORT + 1;
+      console.log(`Trying port ${newPort} instead`);
+      app.listen(newPort);
+      break;
+    default:
+      throw error;
+  }
+});
 
 module.exports = app;
