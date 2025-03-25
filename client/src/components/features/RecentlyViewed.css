@@ -1,0 +1,19 @@
+.recently-viewed {
+  margin: 2rem 0; /* Adds spacing around the recently viewed section */
+  width: 100%; /* Ensures the section takes the full width of the screen */
+}
+
+.camp-list {
+  display: flex; /* Displays camp items in a row */
+  gap: 1rem; /* Adds spacing between camp items */
+  justify-content: center; /* Centers the camp items horizontally */
+  flex-wrap: wrap; /* Allows camp items to wrap to the next line if needed */
+}
+
+.camp-item {
+  border: 1px solid #ccc; /* Adds a border around each camp item */
+  padding: 1rem; /* Adds padding inside each camp item */
+  border-radius: 8px; /* Rounds the corners of each camp item */
+  width: 200px; /* Sets a fixed width for each camp item */
+}
+

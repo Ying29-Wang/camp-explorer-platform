@@ -1,0 +1,15 @@
+.header {
+  display: flex; /* Makes the header a flex container */
+  justify-content: space-between; /* Spaces out the logo and navigation */
+  align-items: center; /* Vertically centers the items */
+  padding: 1rem; /* Adds padding inside the header */
+  background-color: #333; /* Sets a dark background color */
+  color: white; /* Sets the text color to white */
+  width: 100%; /* Ensures the header takes the full width of the screen */
+}
+
+.nav-area a {
+  margin: 0 1rem; /* Adds spacing between navigation links */
+  color: white; /* Sets the link text color to white */
+  text-decoration: none; /* Removes underline from links */
+}

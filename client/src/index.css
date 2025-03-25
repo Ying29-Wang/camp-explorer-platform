@@ -66,3 +66,9 @@ button:focus-visible {
     background-color: #f9f9f9;
   }
 }
+
+img.camp-img{
+  width: 100%;
+  height: 200px !important;
+  border-radius: 8px;
+}

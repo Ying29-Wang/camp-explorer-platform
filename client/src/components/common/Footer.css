@@ -1,0 +1,7 @@
+.footer {
+  padding: 1rem; /* Adds padding inside the footer */
+  background-color: #333; /* Sets a dark background color */
+  color: white; /* Sets the text color to white */
+  text-align: center; /* Centers the text horizontally */
+  width: 100%; /* Ensures the footer takes the full width of the screen */
+}
