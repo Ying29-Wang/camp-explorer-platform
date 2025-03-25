@@ -38,9 +38,6 @@ app.get('/', (req, res) => {
     res.json({ message: 'Welcome to Camp Explorer API' });
 });
 
-// Start server
-app.listen(PORT, () => {
-    console.log(`Server running on port ${PORT}`);
 });
 
 module.exports = app;
