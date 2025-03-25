@@ -6,7 +6,11 @@ const path = require('path');
 // var logger = require('morgan');
 
 // Load environment variables with explicit path
-require('dotenv').config({ path: path.join(__dirname, '.env') });
+try {
+    require('dotenv').config({ path: path.join(__dirname, '.env') });
+  } catch (error) {
+    console.log('No .env file found, using environment variables');
+  }
 
 const app = express();
 const port = normalizePort(process.env.PORT || '3000');
