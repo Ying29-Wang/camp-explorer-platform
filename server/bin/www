@@ -1,4 +1,19 @@
 #!/usr/bin/env node
+// Load environment variables first
+const path = require('path');
+
+// Try to load .env file but don't fail if it doesn't exist (for production environments)
+try {
+  require('dotenv').config({ path: path.join(__dirname, '..', '.env') });
+} catch (error) {
+  console.log('No .env file found, using environment variables');
+}
+
+// Debug log to help troubleshoot
+console.log('Environment check in bin/www - PORT:', process.env.PORT);
+console.log('Environment check in bin/www - NODE_ENV:', process.env.NODE_ENV);
+console.log('Environment check in bin/www - MONGO_URI exists:', !!process.env.MONGO_URI);
+
 
 /**
  * Module dependencies.
