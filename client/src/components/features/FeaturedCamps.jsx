@@ -62,7 +62,7 @@ const FeaturedCamps = () => {
     getCamps();
   }, []);
 
-  // 只在加载失败或没有数据时使用完整的 fallbackCamps
+  // Only use complete fallbackCamps when loading fails or no data is available
   const campsToDisplay = error ? fallbackCamps : featuredCamps;
   console.log('Camps to display:', campsToDisplay);
 
