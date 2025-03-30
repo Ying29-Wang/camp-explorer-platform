@@ -5,6 +5,7 @@ const path = require('path');
 // var cookieParser = require('cookie-parser');
 // var logger = require('morgan');
 
+
 // Load environment variables with explicit path
 try {
     require('dotenv').config({ path: path.join(__dirname, '.env') });
@@ -14,12 +15,25 @@ try {
 
 const app = express();
 
+
+require('dotenv').config({ path: path.join(__dirname, '.env') });
+
+// var indexRouter = require('./routes/index');
+// var usersRouter = require('./routes/users');
+
+const app = express();
+const PORT = process.env.PORT || 5001;
+
 // Connect to MongoDB
 connectDB();
 
 // Middleware
 app.use(cors({
+
     origin: '*', 
+
+    origin: process.env.CORS_ORIGIN,
+
     methods: ['GET', 'POST', 'PUT', 'DELETE'],
     allowedHeaders: ['Content-Type', 'Authorization'],
 }));
@@ -38,6 +52,7 @@ app.use('/api/users', require('./routes/users'));
 app.get('/', (req, res) => {
     res.json({ message: 'Welcome to Camp Explorer API' });
 });
+
 
 /**
  * Normalize a port into a number, string, or false.
@@ -87,6 +102,12 @@ server.on('error', (error) => {
     default:
       throw error;
   }
+
+
+// Start server
+app.listen(PORT, () => {
+    console.log(`Server running on port ${PORT}`);
+
 });
 
 module.exports = app;

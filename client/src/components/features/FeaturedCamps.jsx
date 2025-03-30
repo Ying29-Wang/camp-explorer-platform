@@ -24,7 +24,7 @@ const FeaturedCamps = () => {
         const data = await fetchCamps();
         console.log('Backend data:', data);
         if (data && data.length > 0) {
-          // display 6 camps
+
           let processedData = data.slice(0, 6).map((camp, index) => ({
             ...camp,
             _id: camp._id || index + 1,
@@ -35,9 +35,14 @@ const FeaturedCamps = () => {
             price: camp.price || 100 + (index * 20)
           }));
 
+
           // if the backend data is less than 6, use the fallback data to supplement
           if (processedData.length < 6) {
             const remainingCount = 6 - processedData.length;
+
+          if (processedData.length < 3) {
+            const remainingCount = 3 - processedData.length;
+
             const additionalCamps = fallbackCamps.slice(0, remainingCount).map((camp, index) => ({
               ...camp,
               _id: `fallback-${index + processedData.length + 1}`
@@ -62,7 +67,9 @@ const FeaturedCamps = () => {
     getCamps();
   }, []);
 
+
   // Only use complete fallbackCamps when loading fails or no data is available
+
   const campsToDisplay = error ? fallbackCamps : featuredCamps;
   console.log('Camps to display:', campsToDisplay);
 
