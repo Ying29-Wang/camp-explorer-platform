@@ -1,0 +1,80 @@
+/* src/components/features/reviews/ReviewCard.css */
+
+.review-card {
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    padding: 1.5rem;
+    margin-bottom: 1rem;
+    background: white;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  }
+  
+  .review-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+  }
+  
+  .review-user {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+  }
+  
+  .user-avatar {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background-color: #007bff;
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+  }
+  
+  .user-name {
+    font-weight: 600;
+    color: #333;
+  }
+  
+  .review-meta {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 0.25rem;
+  }
+  
+  .review-stars {
+    color: #ffc107;
+    font-size: 1.1rem;
+  }
+  
+  .star.filled {
+    color: #ffc107;
+  }
+  
+  .review-date {
+    color: #666;
+    font-size: 0.8rem;
+  }
+  
+  .review-content {
+    color: #333;
+    line-height: 1.5;
+  }
+  
+  /* Responsive adjustments */
+  @media (max-width: 768px) {
+    .review-header {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 0.5rem;
+    }
+    .review-meta {
+      flex-direction: row;
+      align-items: center;
+      width: 100%;
+    }
+  }
