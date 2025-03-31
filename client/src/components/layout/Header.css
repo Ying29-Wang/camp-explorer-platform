@@ -33,3 +33,16 @@
 .nav-area a:hover {
   background-color: rgba(255, 255, 255, 0.1);
 }
+
+.logout-button {
+  background: none;
+  border: none;
+  color: white;
+  cursor: pointer;
+  font: inherit;
+  padding: 0.5rem 1rem;
+}
+
+.logout-button:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+}
