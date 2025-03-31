@@ -10,8 +10,34 @@ const Review = require('../models/review');
 // @access  Public
 router.get('/', async (req, res) => {
     try {
-        const camps = await Camp.find().sort({ createdAt: -1 });
+        const limit = req.query.limit ? parseInt(req.query.limit) : 0;
+        const query = Camp.find().sort({ createdAt: -1 });
+        
+        // Apply limit if specified
+        if (limit > 0) {
+            query.limit(limit);
+        }
+        
+        const camps = await query;
         res.json(camps);
+    } catch (err) {
+        console.error(err.message);
+        res.status(500).json({ message: 'Server Error' });
+    }
+});
+
+router.get('/homepage', async (req, res) => {
+    try {
+        const featuredCamps = await Camp.find()
+        .sort({ createdAt: -1 })
+        .limit(3);
+
+        const categoryCounts = await Camp.aggregate([
+            { $group: { _id: '$category', count: { $sum: 1 } } },
+            { $sort: { count: -1 } }
+        ]);
+
+        res.json({ featuredCamps, categoryCounts });
     } catch (err) {
         console.error(err.message);
         res.status(500).json({ message: 'Server Error' });
@@ -107,22 +133,5 @@ router.delete('/:id', async (req, res) => {
     }
 });
 
-router.get('/homepage', async (req, res) => {
-    try {
-        const featuredCamps = await Camp.find()
-        .sort({ createdAt: -1 })
-        .limit(3);
-
-        const categoryCounts = await Camp.aggregate([
-            { $group: { _id: '$category', count: { $sum: 1 } } },
-            { $sort: { count: -1 } }
-        ]);
-
-        res.json({ featuredCamps, categoryCounts });
-    } catch (err) {
-        console.error(err.message);
-        res.status(500).json({ message: 'Server Error' });
-    }
-});
 
 module.exports = router;

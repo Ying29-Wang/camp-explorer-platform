@@ -1,5 +1,22 @@
 const mongoose = require('mongoose');
 
+const CAMP_CATEGORIES = [
+    'Adventure',
+    'Arts',
+    'Science',
+    'Technology',
+    'Sports',
+    'Music',
+    'Academic',
+    'Nature',
+    'Leadership',
+    'Special Needs',
+    'Language',
+    'Religious',
+    'Cooking',
+    'General'
+  ];
+
 const CampSchema = new mongoose.Schema({
     name: {
         type: String,
@@ -26,6 +43,7 @@ const CampSchema = new mongoose.Schema({
     category: {
         type: String,
         required: true,
+        enum: CAMP_CATEGORIES,
     },
     activities: {
         type: [String],
@@ -81,5 +99,7 @@ const CampSchema = new mongoose.Schema({
         default: Date.now,
     }
 });
+
+CampSchema.statics.CATEGORIES = CAMP_CATEGORIES;
 
 module.exports = mongoose.model('Camp', CampSchema);
