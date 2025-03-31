@@ -33,6 +33,7 @@ app.use(express.urlencoded({ extended: false }));
 app.use('/api/camps', require('./routes/camps'));
 app.use('/api/reviews', require('./routes/reviews'));
 app.use('/api/users', require('./routes/users'));
+app.use('/api/auth', require('./routes/auth'));
 
 // Default route
 app.get('/', (req, res) => {
