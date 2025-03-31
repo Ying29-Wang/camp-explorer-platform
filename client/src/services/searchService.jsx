@@ -1,7 +1,7 @@
-const API_URL = 'http://localhost:5001/api'; // Backend URL
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+
 const fetchSearchResults = async () => {
-    // Replace with actual API call
-    const response = await fetch('/api/search');
+    const response = await fetch(`${API_URL}/api/camps`); // Use camps endpoint for now
     if (!response.ok) {
         throw new Error('Failed to fetch search results');
     }
