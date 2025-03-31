@@ -1,11 +1,14 @@
-import React from 'react';
+import React, { useContext } from 'react';
+import { AuthContext } from '../../context/AuthContext';
 import camp1 from '../../assets/camp1.jpg';
 import camp2 from '../../assets/camp2.jpg';
 import camp3 from '../../assets/camp3.jpg';
 import './RecentlyViewed.css';
 
 const RecentlyViewed = ({ camps }) => {
-  if (!camps || camps.length === 0) return null;
+  const { isLoggedIn } = useContext(AuthContext);
+
+  if (!isLoggedIn || !camps || camps.length === 0) return null;
 
   const recentlyViewedCamps = [
     { id: 1, image: camp1, name: 'Camp 1' },
