@@ -2,6 +2,8 @@ import { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { fetchCampById } from '../services/campService';
 import { fetchReviewsByCampId } from '../services/reviewService';
+import { API_URL } from '../config/api.js';
+
 import Map from '../components/common/Map.jsx';
 import weatherService from '../components/common/weatherService.jsx';
 import ReviewCard from '../components/features/reviews/ReviewCard.jsx';
@@ -46,7 +48,7 @@ const CampDetailsPage = () => {
 
     const handleReviewSubmit = async (reviewData) => {
         try {
-            const response = await fetch('/api/reviews', {
+            const response = await fetch(`${API_URL}/reviews`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ 

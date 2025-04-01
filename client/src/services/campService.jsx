@@ -1,7 +1,8 @@
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000'; // Remove extra /api
+// const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000'; // Remove extra /api
+import { API_URL } from '../config/api'; // Ensure this is the correct path
 
 export const fetchCamps = async () => {
-    const response = await fetch(`${API_URL}/api/camps`); // Double /api here
+    const response = await fetch(`${API_URL}/camps`); // Double /api here
     if (!response.ok) {
         throw new Error(`Failed to fetch camps: ${response.status} ${response.statusText}`);
     }
@@ -17,7 +18,7 @@ export const fetchCamps = async () => {
 };
 
 export const fetchCampById = async (id) => {
-    const response = await fetch(`${API_URL}/api/camps/${id}`); // Double /api here
+    const response = await fetch(`${API_URL}/camps/${id}`); // Double /api here
     if (!response.ok) {
         throw new Error(`Failed to fetch camp: ${response.status} ${response.statusText}`);
     }
