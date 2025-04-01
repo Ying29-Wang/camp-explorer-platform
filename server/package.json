@@ -5,7 +5,8 @@
   "scripts": {
     "start": "node app.js",
     "dev": "nodemon bin/www",
-    "seed": "node ./seeds/index.js"
+    "seed": "node ./seeds/index.js",
+    "build": "echo 'No build step required for server'"
   },
   "dependencies": {
     "bcryptjs": "^3.0.2",

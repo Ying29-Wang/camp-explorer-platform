@@ -1,0 +1,14 @@
+services:
+  - type: web
+    name: camp-explorer-api
+    env: node
+    buildCommand: cd server && npm install
+    startCommand: cd server && npm start
+    healthCheckPath: /
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: MONGO_URI
+        sync: false # This will be provided via the Render dashboard
+      - key: JWT_SECRET
+        sync: false # This will be provided via the Render dashboard

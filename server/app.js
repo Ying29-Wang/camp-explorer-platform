@@ -18,13 +18,24 @@ const app = express();
 // Connect to MongoDB
 connectDB();
 
-// Middleware
-app.use(cors({
-    origin: ['http://localhost:5173', 'http://127.0.0.1:5173'], // Allow both localhost and 127.0.0.1 
-    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'], // Include OPTIONS for preflight requests
-    allowedHeaders: ['Content-Type', 'Authorization'],
-    credentials: true // Allow cookies if you need authentication
-}));
+// For production deployment on Render
+if (process.env.NODE_ENV === 'production') {
+    // Updated CORS for production
+    app.use(cors({
+        origin: ['https://camp-explorer-platform.onrender.com', 'https://camp-explorer.onrender.com'], 
+        methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+        allowedHeaders: ['Content-Type', 'Authorization'],
+        credentials: true
+    }));
+} else {
+    // Development CORS settings
+    app.use(cors({
+        origin: ['http://localhost:5173', 'http://127.0.0.1:5173'], 
+        methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+        allowedHeaders: ['Content-Type', 'Authorization'],
+        credentials: true
+    }));
+}
 
 // Log requests for debugging
 app.use((req, res, next) => {
@@ -86,6 +97,14 @@ function normalizePort(val) {
     }
 
     return false;
+}
+
+// For direct execution (needed for Render deployment)
+if (require.main === module) {
+    const PORT = process.env.PORT || 3001;
+    app.listen(PORT, '0.0.0.0', () => {
+        console.log(`Server running on port ${PORT}`);
+    });
 }
 
 // We're going to let bin/www handle server creation

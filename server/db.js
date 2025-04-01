@@ -6,15 +6,27 @@ const connectDB = async () => {
     
     if (!mongoUri) {
       console.error('MongoDB URI is undefined. Please check your environment variables.');
-      process.exit(1);
+      // Don't exit in production, allow it to continue and fail gracefully
+      if (process.env.NODE_ENV !== 'production') {
+        process.exit(1);
+      }
+      return null;
     }
     
-    const conn = await mongoose.connect(mongoUri);
+    const conn = await mongoose.connect(mongoUri, {
+      // Connection options (these are the defaults in newer versions)
+      // useNewUrlParser: true,
+      // useUnifiedTopology: true,
+    });
     console.log(`MongoDB Connected: ${conn.connection.host}`);
     return conn;
   } catch (error) {
-    console.error(`Error: ${error.message}`);
-    process.exit(1);
+    console.error(`MongoDB Connection Error: ${error.message}`);
+    // Don't exit in production, allow it to continue and fail gracefully
+    if (process.env.NODE_ENV !== 'production') {
+      process.exit(1);
+    }
+    return null;
   }
 };
 
