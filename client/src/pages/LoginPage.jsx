@@ -1,7 +1,8 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { useAuth } from '../context/AuthContext'; // Assuming you've created AuthContext
-import { API_URL } from '../config/api';
+import { useAuth } from '../context/AuthContext';
+// Use relative URL for API calls via the Vite proxy
+const API_BASE = '/api';
 import './LoginPage.css'; // Optional styling
 
 const LoginPage = () => {
@@ -15,7 +16,7 @@ const LoginPage = () => {
     e.preventDefault();
     try {
       // Replace with actual API call
-      const response = await fetch(`${API_URL}/auth/login`, {
+      const response = await fetch(`${API_BASE}/auth/login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, password })
