@@ -2,6 +2,8 @@ const express = require('express');
 const router = express.Router();
 const Camp = require('../models/camp');
 const Review = require('../models/review');
+const auth = require('../middleware/auth');
+
 // const { validateCamp, isLoggedIn, isAuthor } = require('../middleware');
 // const ExpressError = require('../utils/ExpressError');
 
@@ -73,10 +75,19 @@ router.get('/:id', async (req, res) => {
 
 // @route   POST /api/camps
 // @desc    Create a new camp
-// @access  Public for now
-router.post('/', async (req, res) => {
+// @access  Private
+router.post('/', auth, async (req, res) => {
     try {
-        const newCamp = new Camp(req.body);
+        // Check if user is a camp owner
+        if(req.user.role !== 'campOwner') {
+            return res.status(403).json({ message: 'Access denied' });
+        }
+
+        const newCamp = new Camp({
+            ...req.body,
+            createdBy: req.user.id // Associate the camp with the logged-in user
+        });
+
         const camp = await newCamp.save();
         res.json(camp);
     } catch (err) {
@@ -88,12 +99,17 @@ router.post('/', async (req, res) => {
 // @route   PUT /api/camps/:id
 // @desc    Update a camp
 // @access  Public for now
-router.put('/:id', async (req, res) => {
+router.put('/:id', auth, async (req, res) => {
     try {
         const camp = await Camp.findById(req.params.id);
 
         if (!camp) {
             return res.status(404).json({ message: 'Camp not found' });
+        }
+
+        // Check if user is authorized to update the camp
+        if (camp.createdBy && camp.createdBy.toString() !== req.user.id && req.user.role !== 'admin') {
+            return res.status(403).json({ message: 'Access denied' });
         }
 
         const updatedCamp = await Camp.findByIdAndUpdate(
@@ -112,12 +128,17 @@ router.put('/:id', async (req, res) => {
 // @route   DELETE /api/camps/:id
 // @desc    Delete a camp
 // @access  Public for now
-router.delete('/:id', async (req, res) => {
+router.delete('/:id', auth, async (req, res) => {
     try {
         const camp = await Camp.findById(req.params.id);
 
         if (!camp) {
             return res.status(404).json({ message: 'Camp not found' });
+        }
+
+        // Check if user is authorized to delete the camp
+        if (camp.createdBy && camp.createdBy.toString() !== req.user.id && req.user.role !== 'admin') {
+            return res.status(403).json({ message: 'Access denied' });
         }
 
         await camp.deleteOne();
