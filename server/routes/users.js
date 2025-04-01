@@ -1,12 +1,18 @@
 const express = require('express');
 const router = express.Router();
 const User = require('../models/user');
+const auth = require('../middleware/auth');
 
 // @route GET api/users
 // @desc Get all users
-// @access Public
-router.get('/', async (req, res) => {
+// @access Private 
+router.get('/', auth, async (req, res) => {
   try {
+    // Check if the user is an admin
+    if (req.user.role !== 'admin') {
+      return res.status(403).json({ message: 'Access denied' });
+    }
+
     const users = await User.find().select('-password');
     res.json(users);
   } catch (err) {
@@ -17,9 +23,14 @@ router.get('/', async (req, res) => {
 
 // @route GET api/users/:id
 // @desc Get user by id
-// @access Public
-router.get('/:id', async (req, res) => {
+// @access Private
+router.get('/:id', auth, async (req, res) => {
   try {
+    // Check if the user is an admin or the user themselves
+    if (req.user.role !== 'admin' && req.user.id !== req.params.id) {
+      return res.status(403).json({ message: 'Access denied' });
+    }
+
     const user = await User.findById(req.params.id).select('-password');
     if (!user) {
       return res.status(404).json({ message: 'User not found' });
@@ -65,12 +76,23 @@ router.post('/', async (req, res) => {
 
 // @route PUT api/users/:id
 // @desc Update a user
-// @access Public
-router.put('/:id', async (req, res) => {
+// @access Private
+router.put('/:id', auth, async (req, res) => {
   try {
+    // Check if the user is an admin or the user themselves
+    if (req.user.role !== 'admin' && req.user.id !== req.params.id) {
+      return res.status(403).json({ message: 'Access denied' });
+    }
+
     const user = await User.findById(req.params.id);
     if (!user) {
       return res.status(404).json({ message: 'User not found' });
+    }
+
+    //Role change not allowed unless admin
+    if (req.body.role && req.user.role !== 'admin') {
+      // return res.status(403).json({ message: 'Access denied' });
+      delete req.body.role;
     }
 
     const updatedUser = await User.findByIdAndUpdate(
@@ -87,9 +109,14 @@ router.put('/:id', async (req, res) => {
 
 // @route DELETE api/users/:id
 // @desc Delete a user
-// @access Public
-router.delete('/:id', async (req, res) => {
+// @access Private
+router.delete('/:id', auth, async (req, res) => {
   try {
+    // Check if the user is deleting their own account or is an admin
+    if (req.user.id !== req.params.id && req.user.role !== 'admin') {
+      return res.status(403).json({ message: 'Access denied' });
+    }
+    
     const user = await User.findById(req.params.id);
     if (!user) {
       return res.status(404).json({ message: 'User not found' });

@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const Review = require('../models/review');
+const auth = require('../middleware/auth');
 
 // @route   GET /api/reviews
 // @desc    Get all reviews
@@ -31,21 +32,14 @@ router.get('/camp/:campId', async (req, res) => {
 
 // @route   POST /api/reviews
 // @desc    Create a new review
-// @access  Public for now
-router.post('/', async (req, res) => {
+// @access  Private
+router.post('/', auth, async (req, res) => {
     try {
-        const {
-            userId,
-            campId,
-            rating,
-            reviewText,
-        } = req.body;
-
         const newReview = new Review({
-            userId,
-            campId,
-            rating,
-            reviewText
+            userId: req.user.id, // Use the authenticated user's ID
+            campId: req.body.campId,
+            rating: req.body.rating,
+            reviewText: req.body.reviewText
         });
 
         const review = await newReview.save();
@@ -58,8 +52,8 @@ router.post('/', async (req, res) => {
 
 // @route  PUT /api/reviews/:id
 // @desc   Update a review
-// @access Public for now
-router.put('/:id', async (req, res) => {
+// @access Private
+router.put('/:id', auth, async (req, res) => {
     try {
         const review = await Review.findById(req.params.id);
 
@@ -67,12 +61,17 @@ router.put('/:id', async (req, res) => {
             return res.status(404).json({ message: 'Review not found' });
         }
 
+        // Check if the user is the owner of the review
+        if (review.userId.toString() !== req.user.id && req.user.role !== 'admin') {
+            return res.status(403).json({ message: 'Access denied' });
+        }
+
         const updatedReview = await Review.findByIdAndUpdate(
             req.params.id,
             { $set: req.body },
             { new: true }
         );
-        res.json(review);
+        res.json(updatedReview);
     } catch (err) {
         console.error(err.message);
         res.status(500).json({ message: 'Server Error' });
@@ -81,13 +80,18 @@ router.put('/:id', async (req, res) => {
 
 // @route   DELETE /api/reviews/:id
 // @desc    Delete a review
-// @access  Public for now
-router.delete('/:id', async (req, res) => {
+// @access  Private
+router.delete('/:id', auth, async (req, res) => {
     try {
         const review = await Review.findById(req.params.id);
 
         if (!review) {
             return res.status(404).json({ message: 'Review not found' });
+        }
+
+        // Check if the user is the owner of the review
+        if (review.userId.toString() !== req.user.id && req.user.role !== 'admin') {
+            return res.status(403).json({ message: 'Access denied' });
         }
 
         await review.deleteOne();
