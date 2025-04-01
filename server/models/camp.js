@@ -1,4 +1,5 @@
 const mongoose = require('mongoose');
+const { create } = require('./user');
 
 const CAMP_CATEGORIES = [
     'Adventure',
@@ -97,7 +98,11 @@ const CampSchema = new mongoose.Schema({
     createdAt: {
         type: Date,
         default: Date.now,
-    }
+    },
+    createdBy: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User',
+    },
 });
 
 CampSchema.statics.CATEGORIES = CAMP_CATEGORIES;

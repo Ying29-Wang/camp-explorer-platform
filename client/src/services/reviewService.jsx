@@ -1,7 +1,12 @@
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+// Import API URL configuration
+import { API_URL } from '../config/api'; // Base URL including /api path
+
+// When using Vite's proxy, use a relative URL instead
+const API_BASE = '/api'; // Using relative URL with Vite proxy
+// const API_BASE = API_URL; // Commented out absolute URL
 
 export const fetchReviewsByCampId = async (campId) => {
-    const response = await fetch(`${API_URL}/api/reviews/${campId}`);
+    const response = await fetch(`${API_BASE}/reviews/${campId}`);
     if (!response.ok) {
         throw new Error('Failed to fetch reviews');
     }
@@ -9,7 +14,7 @@ export const fetchReviewsByCampId = async (campId) => {
 };
 
 export const createReview = async (reviewData) => {
-    const response = await fetch(`${API_URL}/api/reviews`, {
+    const response = await fetch(`${API_BASE}/reviews`, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
