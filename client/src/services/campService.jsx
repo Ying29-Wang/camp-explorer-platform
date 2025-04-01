@@ -1,8 +1,12 @@
-// const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000'; // Remove extra /api
-import { API_URL } from '../config/api'; // Ensure this is the correct path
+// Import API URL configuration
+import { API_URL } from '../config/api';
+
+// When using Vite's proxy, you can use a relative URL instead
+const API_BASE = '/api'; // Using relative URL with Vite proxy
+// const API_BASE = API_URL; // Commenting out absolute URL
 
 export const fetchCamps = async () => {
-    const response = await fetch(`${API_URL}/camps`); // Double /api here
+    const response = await fetch(`${API_BASE}/camps`);
     if (!response.ok) {
         throw new Error(`Failed to fetch camps: ${response.status} ${response.statusText}`);
     }
@@ -18,7 +22,7 @@ export const fetchCamps = async () => {
 };
 
 export const fetchCampById = async (id) => {
-    const response = await fetch(`${API_URL}/camps/${id}`); // Double /api here
+    const response = await fetch(`${API_BASE}/camps/${id}`);
     if (!response.ok) {
         throw new Error(`Failed to fetch camp: ${response.status} ${response.statusText}`);
     }
