@@ -42,6 +42,7 @@ app.use('/api/camps', require('./routes/camps'));
 app.use('/api/reviews', require('./routes/reviews'));
 app.use('/api/users', require('./routes/users'));
 app.use('/api/auth', require('./routes/auth'));
+app.use('/api/maps', require('./routes/maps'));
 
 // Default route
 app.get('/', (req, res) => {
