@@ -7,6 +7,11 @@ const camps = [
     name: 'Adventure Wilderness Camp',
     description: 'An outdoor adventure camp focused on survival skills, hiking, and nature exploration.',
     location: 'Boulder, Colorado',
+    coordinates: {
+      type: 'Point',
+      coordinates: [-105.2705, 40.0150] // Boulder, CO coordinates
+    },
+    formattedAddress: 'Boulder, Boulder County, Colorado, United States',
     ageRange: {
       min: 8,
       max: 14
@@ -29,6 +34,11 @@ const camps = [
     name: 'Tech Innovation Camp',
     description: 'A coding and robotics camp where kids learn programming, robotics, and app development.',
     location: 'Austin, Texas',
+    coordinates: {
+      type: 'Point',
+      coordinates: [-97.7437, 30.2711] // Austin, TX coordinates
+    },
+    formattedAddress: 'Austin, Travis County, Texas, United States',
     ageRange: {
       min: 10,
       max: 16
@@ -51,6 +61,11 @@ const camps = [
     name: 'Creative Arts Camp',
     description: 'A camp focused on developing artistic abilities through painting, sculpture, and digital arts.',
     location: 'Portland, Oregon',
+    coordinates: {
+      type: 'Point',
+      coordinates: [-122.6765, 45.5155] // Portland, OR coordinates
+    },
+    formattedAddress: 'Portland, Multnomah County, Oregon, United States',
     ageRange: {
       min: 7,
       max: 15
@@ -73,6 +88,11 @@ const camps = [
     name: 'Sports Elite Camp',
     description: 'A high-energy sports camp covering multiple sports with professional coaching.',
     location: 'Chicago, Illinois',
+    coordinates: {
+      type: 'Point',
+      coordinates: [-87.6298, 41.8781] // Chicago, IL coordinates
+    },
+    formattedAddress: 'Chicago, Cook County, Illinois, United States',
     ageRange: {
       min: 9,
       max: 16
@@ -95,6 +115,11 @@ const camps = [
     name: 'Science Explorers Camp',
     description: 'A hands-on science camp featuring experiments, field trips, and STEM activities.',
     location: 'Seattle, Washington',
+    coordinates: {
+      type: 'Point',
+      coordinates: [-122.3321, 47.6062] // Seattle, WA coordinates
+    },
+    formattedAddress: 'Seattle, King County, Washington, United States',
     ageRange: {
       min: 8,
       max: 14

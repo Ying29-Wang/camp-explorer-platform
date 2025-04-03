@@ -5,6 +5,11 @@ const SAMPLE_CAMPS = [
     name: 'Adventure Wilderness Camp',
     description: 'An outdoor adventure camp focused on survival skills, hiking, and nature exploration.',
     location: 'Boulder, Colorado',
+    coordinates: {
+      type: 'Point',
+      coordinates: [-105.2705, 40.0150] // Boulder, CO coordinates
+    },
+    formattedAddress: 'Boulder, Boulder County, Colorado, United States',
     ageRange: {
       min: 8,
       max: 14
@@ -28,6 +33,11 @@ const SAMPLE_CAMPS = [
     name: 'Tech Innovation Camp',
     description: 'A coding and robotics camp where kids learn programming, robotics, and app development.',
     location: 'Austin, Texas',
+    coordinates: {
+      type: 'Point',
+      coordinates: [-97.7437, 30.2711] // Austin, TX coordinates
+    },
+    formattedAddress: 'Austin, Travis County, Texas, United States',
     ageRange: {
       min: 10,
       max: 16
@@ -51,6 +61,11 @@ const SAMPLE_CAMPS = [
     name: 'Creative Arts Camp',
     description: 'A camp focused on developing artistic abilities through painting, sculpture, and digital arts.',
     location: 'Portland, Oregon',
+    coordinates: {
+      type: 'Point',
+      coordinates: [-122.6765, 45.5155] // Portland, OR coordinates
+    },
+    formattedAddress: 'Portland, Multnomah County, Oregon, United States',
     ageRange: {
       min: 7,
       max: 15
