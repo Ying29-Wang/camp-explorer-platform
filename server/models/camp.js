@@ -31,6 +31,21 @@ const CampSchema = new mongoose.Schema({
         type: String,
         required: true,
     },
+    coordinates: {
+        type: {
+            type: String,
+            enum: ['Point'],
+            default: 'Point'
+        },
+        coordinates: {
+            type: [Number], // [longitude, latitude]
+            required: false
+        }
+    },
+    formattedAddress: {
+        type: String,
+        required: false
+    },
     ageRange: {
         min: {
             type: Number,
