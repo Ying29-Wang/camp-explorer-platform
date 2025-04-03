@@ -69,55 +69,13 @@ app.get('/api/dbcheck', async (req, res) => {
     }
 });
 
-/**
- * Normalize a port into a number, string, or false.
- */
-function normalizePort(val) {
-    var port = parseInt(val, 10);
+// Set port
+const PORT = process.env.PORT || 5001;
+app.set('port', PORT);
 
-    if (isNaN(port)) {
-        // named pipe
-        return val;
-    }
-
-    if (port >= 0) {
-        // port number
-        return port;
-    }
-
-    return false;
-}
-
-// We're going to let bin/www handle server creation
-// const PORT = normalizePort(process.env.PORT || 4000);
-// const server = app.listen(PORT, () => {
-//   console.log(`Server running on port ${PORT}`);
-// });
-
-// // Add error handling for the server
-// server.on('error', (error) => {
-//   if (error.syscall !== 'listen') {
-//     throw error;
-//   }
-
-//   const bind = typeof PORT === 'string' ? 'Pipe ' + PORT : 'Port ' + PORT;
-
-//   // Handle specific listen errors with friendly messages
-//   switch (error.code) {
-//     case 'EACCES':
-//       console.error(bind + ' requires elevated privileges');
-//       process.exit(1);
-//       break;
-//     case 'EADDRINUSE':
-//       console.error(bind + ' is already in use');
-//       // Try a different port
-//       const newPort = PORT + 1;
-//       console.log(`Trying port ${newPort} instead`);
-//       app.listen(newPort);
-//       break;
-//     default:
-//       throw error;
-//   }
-// });
+// Start server
+app.listen(PORT, () => {
+    console.log(`Server is running on port ${PORT}`);
+});
 
 module.exports = app;

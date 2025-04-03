@@ -78,6 +78,93 @@ const Review = require('../models/review');
 // This middleware is imported but should not be applied to GET routes
 const auth = require('../middleware/auth');
 
+// @route   GET/POST /api/camps/search
+// @desc    Search camps with multiple criteria
+// @access  Public
+async function handleSearch(req, res) {
+    try {
+        // Get search parameters from either query or body
+        const params = req.method === 'GET' ? req.query : req.body;
+        
+        // Build query
+        const query = {};
+        
+        // Category filter
+        if (params.category) {
+            query.category = params.category;
+        }
+        
+        // Location filter
+        if (params.location) {
+            query.location = { $regex: params.location, $options: 'i' };
+        }
+        
+        // Age range filter
+        if (params.minAge || params.maxAge) {
+            query['ageRange.min'] = { $gte: parseInt(params.minAge) || 0 };
+            query['ageRange.max'] = { $lte: parseInt(params.maxAge) || 100 };
+        }
+        
+        // Price range filter
+        if (params.minPrice || params.maxPrice) {
+            query.price = {};
+            if (params.minPrice) query.price.$gte = parseFloat(params.minPrice);
+            if (params.maxPrice) query.price.$lte = parseFloat(params.maxPrice);
+        }
+        
+        // Date range filter
+        if (params.startDate || params.endDate) {
+            query.startDate = {};
+            if (params.startDate) query.startDate.$gte = new Date(params.startDate);
+            if (params.endDate) query.startDate.$lte = new Date(params.endDate);
+        }
+        
+        // Activities filter
+        if (params.activities) {
+            const activities = Array.isArray(params.activities) 
+                ? params.activities 
+                : params.activities.split(',');
+            query.activities = { $in: activities };
+        }
+        
+        // Build sort options
+        const sortOptions = {};
+        if (params.sortBy) {
+            sortOptions[params.sortBy] = params.sortOrder === 'desc' ? -1 : 1;
+        }
+        
+        // Build pagination options
+        const page = parseInt(params.page) || 1;
+        const limit = parseInt(params.limit) || 10;
+        const skip = (page - 1) * limit;
+        
+        // Execute query
+        const camps = await Camp.find(query)
+            .sort(sortOptions)
+            .skip(skip)
+            .limit(limit);
+            
+        // Get total count for pagination
+        const total = await Camp.countDocuments(query);
+        
+        res.json({
+            camps,
+            pagination: {
+                total,
+                page,
+                pages: Math.ceil(total / limit)
+            }
+        });
+    } catch (err) {
+        console.error('Search error:', err);
+        res.status(500).json({ message: 'Server Error' });
+    }
+}
+
+// Define search routes
+router.get('/search', handleSearch);
+router.post('/search', handleSearch);
+
 // @route   GET /api/camps
 // @desc    Get all camps
 // @access  Public
@@ -240,6 +327,5 @@ router.delete('/:id', auth, async (req, res) => {
         res.status(500).json({ message: 'Server Error' });
     }
 });
-
 
 module.exports = router;
