@@ -1,11 +1,11 @@
 const express = require('express');
 const router = express.Router();
 const axios = require('axios');
-const { GOOGLE_MAPS_API_KEY, GOOGLE_MAPS_ENDPOINTS } = require('../config/maps');
+const MAP_CONFIG = require('../config/maps');
 const Camp = require('../models/camp');
 
 // @route   GET /api/maps/geocode
-// @desc    Geocode a location
+// @desc    Geocode a location using OpenStreetMap Nominatim
 // @access  Public
 router.get('/geocode', async (req, res) => {
     try {
@@ -15,18 +15,25 @@ router.get('/geocode', async (req, res) => {
             return res.status(400).json({ message: 'Location is required' });
         }
 
-        const response = await axios.get(GOOGLE_MAPS_ENDPOINTS.geocoding, {
+        const response = await axios.get(MAP_CONFIG.geocoding.baseUrl, {
             params: {
-                address: location,
-                key: GOOGLE_MAPS_API_KEY
+                q: location,
+                format: MAP_CONFIG.geocoding.format,
+                limit: MAP_CONFIG.geocoding.limit
+            },
+            headers: {
+                'User-Agent': 'CampExplorer/1.0' // Required by Nominatim's terms of service
             }
         });
 
-        if (response.data.status === 'OK' && response.data.results.length > 0) {
-            const result = response.data.results[0];
+        if (response.data && response.data.length > 0) {
+            const result = response.data[0];
             res.json({
-                formattedAddress: result.formatted_address,
-                location: result.geometry.location,
+                formattedAddress: result.display_name,
+                location: {
+                    lat: parseFloat(result.lat),
+                    lng: parseFloat(result.lon)
+                },
                 placeId: result.place_id
             });
         } else {
