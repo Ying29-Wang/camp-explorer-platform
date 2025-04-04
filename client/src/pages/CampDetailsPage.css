@@ -1,0 +1,19 @@
+.reviews-list {
+    margin: 1rem 0;
+    gap: 1rem;
+    display: flex;
+    flex-direction: column;
+}
+
+.camp-details-list {
+    list-style: none;
+    padding: 0;
+}
+
+.camp-details-list li {
+    margin: 0.5rem 0;
+}
+
+.camp-section {
+    margin: 2rem 0;
+}
