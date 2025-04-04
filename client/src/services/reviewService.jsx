@@ -6,7 +6,7 @@ const API_BASE = '/api'; // Using relative URL with Vite proxy
 // const API_BASE = API_URL; // Commented out absolute URL
 
 export const fetchReviewsByCampId = async (campId) => {
-    const response = await fetch(`${API_BASE}/reviews/${campId}`);
+    const response = await fetch(`${API_BASE}/reviews/camp/${campId}`);
     if (!response.ok) {
         throw new Error('Failed to fetch reviews');
     }
