@@ -1,6 +1,6 @@
 import React from 'react';
-import SearchResultsList from '../components/features/search/SearchResultsList'; // Ensure this path is correct
-import useSearchResults from '../hooks/useSearchResults'; // Ensure this path is correct
+import SearchResultsList from '../components/features/search/SearchResultsList';
+import useSearchResults from '../hooks/useSearchResults';
 
 const SearchResults = () => {
     const { results, loading, error } = useSearchResults();
@@ -16,4 +16,4 @@ const SearchResults = () => {
     );
 };
 
-export default SearchResults; // Ensure this line is present
+export default SearchResults;
