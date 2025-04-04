@@ -4,7 +4,7 @@ import { AuthContext } from '../../context/AuthContext';
 import './Header.css';
 
 const Header = () => {
-  const { isLoggedIn, logout } = useContext(AuthContext);
+  const { isLoggedIn, logout, user } = useContext(AuthContext);
   const navigate = useNavigate();
 
   const handleLogout = () => {
@@ -23,6 +23,9 @@ const Header = () => {
         {isLoggedIn ? (
           <>
             <Link to="/profile">Profile</Link>
+            {(user?.role === 'admin' || user?.role === 'camp_owner') && (
+              <Link to="/manage-camps">Manage Camps</Link>
+            )}
             <button 
               onClick={handleLogout}
               className="logout-button"

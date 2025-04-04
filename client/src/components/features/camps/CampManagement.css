@@ -1,0 +1,116 @@
+.camp-management {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 2rem;
+}
+
+.camp-form {
+    background: #fff;
+    padding: 2rem;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    margin-bottom: 2rem;
+}
+
+.form-group {
+    margin-bottom: 1.5rem;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: 600;
+    color: #333;
+}
+
+.form-group input,
+.form-group textarea {
+    width: 100%;
+    padding: 0.75rem;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 1rem;
+}
+
+.form-group textarea {
+    min-height: 100px;
+    resize: vertical;
+}
+
+.submit-btn {
+    background-color: #4CAF50;
+    color: white;
+    padding: 0.75rem 1.5rem;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 1rem;
+    font-weight: 600;
+    transition: background-color 0.3s;
+}
+
+.submit-btn:hover {
+    background-color: #45a049;
+}
+
+.camps-list {
+    margin-top: 2rem;
+}
+
+.camp-item {
+    background: #fff;
+    padding: 1.5rem;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    margin-bottom: 1rem;
+}
+
+.camp-item h4 {
+    margin: 0 0 0.5rem 0;
+    color: #333;
+}
+
+.camp-item p {
+    margin: 0 0 1rem 0;
+    color: #666;
+}
+
+.camp-actions {
+    display: flex;
+    gap: 1rem;
+}
+
+.camp-actions button {
+    padding: 0.5rem 1rem;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    transition: background-color 0.3s;
+}
+
+.camp-actions button:first-child {
+    background-color: #2196F3;
+    color: white;
+}
+
+.camp-actions button:first-child:hover {
+    background-color: #1976D2;
+}
+
+.camp-actions button:last-child {
+    background-color: #f44336;
+    color: white;
+}
+
+.camp-actions button:last-child:hover {
+    background-color: #d32f2f;
+}
+
+.error {
+    color: #f44336;
+    padding: 1rem;
+    background-color: #ffebee;
+    border-radius: 4px;
+    margin-bottom: 1rem;
+} 
