@@ -17,7 +17,7 @@ const RegistrationPage = () => {
     role: ''
   });
   const [submitError, setSubmitError] = useState('');
-  const { login } = useAuth();
+  const { register } = useAuth();
   const navigate = useNavigate();
 
   const validateEmail = (email) => {
@@ -79,21 +79,10 @@ const RegistrationPage = () => {
     if (!validateForm()) return;
 
     try {
-      const response = await fetch('/api/auth/register', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData)
-      });
-
-      if (response.ok) {
-        login();
-        navigate('/profile');
-      } else {
-        const errorData = await response.json();
-        setSubmitError(errorData.message || 'Registration failed');
-      }
+      await register(formData);
+      navigate('/profile');
     } catch (err) {
-      setSubmitError('Network error. Please try again.');
+      setSubmitError(err.message || 'Registration failed. Please try again.');
     }
   };
 

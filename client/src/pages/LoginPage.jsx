@@ -50,21 +50,10 @@ const LoginPage = () => {
     if (!validateForm()) return;
 
     try {
-      const response = await fetch('/api/auth/login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password })
-      });
-
-      if (response.ok) {
-        const { token } = await response.json();
-        login(token);
-        navigate('/profile');
-      } else {
-        setSubmitError('Invalid email or password');
-      }
+      await login(email, password);
+      navigate('/profile');
     } catch (err) {
-      setSubmitError('Login failed. Please try again.');
+      setSubmitError(err.message || 'Login failed. Please try again.');
     }
   };
 

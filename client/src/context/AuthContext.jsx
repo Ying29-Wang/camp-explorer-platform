@@ -29,14 +29,34 @@ export const AuthProvider = ({ children }) => {
             });
 
             if (!response.ok) {
-                throw new Error('Login failed');
+                const errorData = await response.json();
+                throw new Error(errorData.msg || 'Login failed');
             }
 
-            const data = await response.json();
-            localStorage.setItem('token', data.token);
-            localStorage.setItem('user', JSON.stringify(data.user));
+            const { token } = await response.json();
+            
+            // Store token immediately
+            localStorage.setItem('token', token);
+
+            // Get user data using the token
+            const userResponse = await fetch('/api/auth/me', {
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            });
+
+            if (!userResponse.ok) {
+                // If getting user data fails, remove the token
+                localStorage.removeItem('token');
+                throw new Error('Failed to fetch user data');
+            }
+
+            const userData = await userResponse.json();
+            
+            // Store user data
+            localStorage.setItem('user', JSON.stringify(userData));
             setIsLoggedIn(true);
-            setUser(data.user);
+            setUser(userData);
             navigate('/');
         } catch (error) {
             console.error('Login error:', error);
@@ -55,14 +75,34 @@ export const AuthProvider = ({ children }) => {
             });
 
             if (!response.ok) {
-                throw new Error('Registration failed');
+                const errorData = await response.json();
+                throw new Error(errorData.msg || 'Registration failed');
             }
 
-            const data = await response.json();
-            localStorage.setItem('token', data.token);
-            localStorage.setItem('user', JSON.stringify(data.user));
+            const { token } = await response.json();
+            
+            // Store token immediately
+            localStorage.setItem('token', token);
+
+            // Get user data using the token
+            const userResponse = await fetch('/api/auth/me', {
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            });
+
+            if (!userResponse.ok) {
+                // If getting user data fails, remove the token
+                localStorage.removeItem('token');
+                throw new Error('Failed to fetch user data');
+            }
+
+            const newUserData = await userResponse.json();
+            
+            // Store user data
+            localStorage.setItem('user', JSON.stringify(newUserData));
             setIsLoggedIn(true);
-            setUser(data.user);
+            setUser(newUserData);
             navigate('/');
         } catch (error) {
             console.error('Registration error:', error);
