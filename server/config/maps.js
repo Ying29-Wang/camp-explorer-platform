@@ -1,14 +1,18 @@
-// Google Maps API configuration
-const GOOGLE_MAPS_API_KEY = process.env.GOOGLE_MAPS_API_KEY;
-
-// Google Maps API endpoints
-const GOOGLE_MAPS_ENDPOINTS = {
-    geocoding: 'https://maps.googleapis.com/maps/api/geocode/json',
-    places: 'https://maps.googleapis.com/maps/api/place',
-    directions: 'https://maps.googleapis.com/maps/api/directions/json'
+// OpenStreetMap configuration
+const MAP_CONFIG = {
+    // OpenStreetMap tile layer URL
+    tileLayer: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
+    
+    // Default map settings
+    defaultCenter: [0, 0],
+    defaultZoom: 2,
+    
+    // Geocoding service (using Nominatim)
+    geocoding: {
+        baseUrl: 'https://nominatim.openstreetmap.org/search',
+        format: 'json',
+        limit: 1
+    }
 };
 
-module.exports = {
-    GOOGLE_MAPS_API_KEY,
-    GOOGLE_MAPS_ENDPOINTS
-}; 
+module.exports = MAP_CONFIG; 

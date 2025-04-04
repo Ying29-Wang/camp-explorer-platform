@@ -120,6 +120,20 @@ const CampSchema = new mongoose.Schema({
     },
 });
 
+// Add 2dsphere index for geospatial queries
+CampSchema.index({ coordinates: '2dsphere' });
+
 CampSchema.statics.CATEGORIES = CAMP_CATEGORIES;
 
-module.exports = mongoose.model('Camp', CampSchema);
+const Camp = mongoose.model('Camp', CampSchema);
+
+// Ensure index exists when model is initialized
+Camp.on('index', function(err) {
+    if (err) {
+        console.error('Error creating geospatial index:', err);
+    } else {
+        console.log('Geospatial index created successfully');
+    }
+});
+
+module.exports = Camp;
