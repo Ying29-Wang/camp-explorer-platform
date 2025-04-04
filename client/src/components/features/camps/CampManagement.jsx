@@ -278,11 +278,15 @@ const CampManagement = () => {
                 <h3>{user.role === 'admin' ? 'All Camps' : 'Your Camps'}</h3>
                 {camps.map(camp => (
                     <div key={camp._id} className="camp-item">
-                        <h4>{camp.name}</h4>
-                        <p>{camp.description}</p>
-                        <div className="camp-actions">
-                            <button onClick={() => handleEdit(camp)}>Edit</button>
-                            <button onClick={() => handleDelete(camp._id)}>Delete</button>
+                        <div className="camp-item-content">
+                            <div className="camp-item-info">
+                                <h4>{camp.name}</h4>
+                                <p>{camp.location} • {camp.category}</p>
+                            </div>
+                            <div className="camp-actions">
+                                <button onClick={() => handleEdit(camp)}>Edit</button>
+                                <button onClick={() => handleDelete(camp._id)}>Delete</button>
+                            </div>
                         </div>
                     </div>
                 ))}
