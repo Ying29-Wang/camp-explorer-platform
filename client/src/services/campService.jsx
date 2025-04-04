@@ -14,7 +14,6 @@ export const fetchCamps = async () => {
     // Handle potential HTML responses
     const contentType = response.headers.get('content-type');
     if (!contentType || !contentType.includes('application/json')) {
-        const text = await response.text();
         throw new Error(`Invalid content type. Received: ${contentType || 'none'}`);
     }
 
@@ -30,7 +29,6 @@ export const fetchCampById = async (id) => {
     // Same content-type check as above
     const contentType = response.headers.get('content-type');
     if (!contentType || !contentType.includes('application/json')) {
-        const text = await response.text();
         throw new Error(`Invalid content type. Received: ${contentType || 'none'}`);
     }
 
@@ -53,62 +51,36 @@ export const fetchCampsWithFallback = async () => {
 };
 
 export const searchCamps = async (searchParams) => {
-    // Convert searchParams to URL query string
-    const queryString = new URLSearchParams(searchParams).toString();
-    const response = await fetch(`${API_BASE}/camps/search?${queryString}`);
-    
-    if (!response.ok) {
-        throw new Error(`Failed to search camps: ${response.status} ${response.statusText}`);
+    try {
+        const response = await fetch(`${API_BASE}/camps/search?${new URLSearchParams(searchParams)}`);
+        if (!response.ok) {
+            throw new Error(`Failed to search camps: ${response.status} ${response.statusText}`);
+        }
+        return response.json();
+    } catch (error) {
+        console.error('Search error:', error);
+        throw error;
     }
-    
-    const contentType = response.headers.get('content-type');
-    if (!contentType || !contentType.includes('application/json')) {
-        const text = await response.text();
-        throw new Error(`Invalid content type. Received: ${contentType || 'none'}`);
-    }
-
-    return response.json();
 };
 
 export const searchCampsWithFallback = async (searchParams) => {
     try {
         return await searchCamps(searchParams);
     } catch (error) {
-        console.error('Search failed, using fallback data:', error);
-        // Filter fallback data based on search params
-        let filteredCamps = [...fallbackCamps];
-        
-        if (searchParams.category) {
-            filteredCamps = filteredCamps.filter(camp => 
-                camp.category === searchParams.category
-            );
+        console.error('Using fallback data for search:', error);
+        return fallbackCamps;
+    }
+};
+
+export const fetchCampsByQuickFilter = async (filters) => {
+    try {
+        const response = await fetch(`${API_BASE}/camps/search?${new URLSearchParams(filters)}`);
+        if (!response.ok) {
+            throw new Error(`Failed to fetch camps by filter: ${response.status} ${response.statusText}`);
         }
-        
-        if (searchParams.location) {
-            filteredCamps = filteredCamps.filter(camp => 
-                camp.location.toLowerCase().includes(searchParams.location.toLowerCase())
-            );
-        }
-        
-        if (searchParams.minPrice) {
-            filteredCamps = filteredCamps.filter(camp => 
-                camp.price >= parseFloat(searchParams.minPrice)
-            );
-        }
-        
-        if (searchParams.maxPrice) {
-            filteredCamps = filteredCamps.filter(camp => 
-                camp.price <= parseFloat(searchParams.maxPrice)
-            );
-        }
-        
-        return {
-            camps: filteredCamps,
-            pagination: {
-                total: filteredCamps.length,
-                page: parseInt(searchParams.page) || 1,
-                pages: Math.ceil(filteredCamps.length / (parseInt(searchParams.limit) || 10))
-            }
-        };
+        return response.json();
+    } catch (error) {
+        console.error('Filter search error:', error);
+        throw error;
     }
 };

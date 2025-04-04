@@ -183,9 +183,10 @@ router.post('/search', handleSearch);
 // @route   GET /api/camps
 // @desc    Get all camps
 // @access  Public
-// No auth middleware for public routes
 router.get('/', async (req, res) => {
     try {
+        console.log('Attempting to fetch camps from database...');
+        
         // Check if MongoDB is connected
         if (mongoose.connection.readyState !== 1) {
             console.log('MongoDB not connected, returning sample data');
@@ -199,21 +200,19 @@ router.get('/', async (req, res) => {
         if (limit > 0) {
             query.limit(limit);
         }
-        
+
         const camps = await query;
+        console.log(`Found ${camps.length} camps in database`);
         
-        // Return sample data if no camps found
-        if (!camps || camps.length === 0) {
+        if (camps.length === 0) {
             console.log('No camps found in database, returning sample data');
             return res.json(SAMPLE_CAMPS);
         }
-        
+
         res.json(camps);
     } catch (err) {
-        console.error('Error fetching camps:', err.message);
-        // Return sample data on error
-        console.log('Error in camps route, returning sample data');
-        res.json(SAMPLE_CAMPS);
+        console.error('Error fetching camps:', err);
+        res.status(500).json({ message: 'Server Error', error: err.message });
     }
 });
 
