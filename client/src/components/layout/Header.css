@@ -19,7 +19,7 @@
   display: flex;
   align-items: center;
   gap: 2rem;
-  padding-right: 2rem; /* 添加右侧内边距 */
+  padding-right: 2rem; /* Add right padding */
 }
 
 .nav-area a {
