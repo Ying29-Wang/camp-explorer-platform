@@ -14,7 +14,7 @@ const SAMPLE_CAMPS = [
     location: 'Boulder, Colorado',
     coordinates: {
       type: 'Point',
-      coordinates: [-105.2705, 40.0150] // Boulder, CO coordinates
+      coordinates: [-105.2705, 40.0150]
     },
     formattedAddress: 'Boulder, Boulder County, Colorado, United States',
     ageRange: {
@@ -42,7 +42,7 @@ const SAMPLE_CAMPS = [
     location: 'Austin, Texas',
     coordinates: {
       type: 'Point',
-      coordinates: [-97.7437, 30.2711] // Austin, TX coordinates
+      coordinates: [-97.7437, 30.2711]
     },
     formattedAddress: 'Austin, Travis County, Texas, United States',
     ageRange: {
@@ -70,7 +70,7 @@ const SAMPLE_CAMPS = [
     location: 'Portland, Oregon',
     coordinates: {
       type: 'Point',
-      coordinates: [-122.6765, 45.5155] // Portland, OR coordinates
+      coordinates: [-122.6765, 45.5155]
     },
     formattedAddress: 'Portland, Multnomah County, Oregon, United States',
     ageRange: {
@@ -111,7 +111,7 @@ router.get('/geocode', async (req, res) => {
                 limit: MAP_CONFIG.geocoding.limit
             },
             headers: {
-                'User-Agent': 'CampExplorer/1.0' // Required by Nominatim's terms of service
+                'User-Agent': 'CampExplorer/1.0'
             }
         });
 
@@ -141,36 +141,67 @@ router.get('/camps', async (req, res) => {
     try {
         // Check if MongoDB is connected
         if (mongoose.connection.readyState !== 1) {
-            console.log('MongoDB not connected, returning sample data');
-            return res.json(SAMPLE_CAMPS);
+            return res.status(200).json(SAMPLE_CAMPS);
         }
 
-        const camps = await Camp.find({ 'coordinates.coordinates': { $exists: true } });
-        
-        // Return sample data if no camps found
+        // Find all camps
+        const camps = await Camp.find({}).lean();
+
+        // If no camps found, return sample data
         if (!camps || camps.length === 0) {
-            console.log('No camps found in database, returning sample data');
-            return res.json(SAMPLE_CAMPS);
+            return res.status(200).json(SAMPLE_CAMPS);
         }
         
-        res.json(camps);
+        res.status(200).json(camps);
     } catch (err) {
         console.error('Error fetching camps:', err);
-        // Return sample data on error
-        console.log('Error in maps camps route, returning sample data');
-        res.json(SAMPLE_CAMPS);
+        res.status(200).json(SAMPLE_CAMPS);
+    }
+});
+
+// @route   GET /api/maps/camps/nearby
+// @desc    Get camps within a radius of a location
+// @access  Public
+router.get('/camps/nearby', async (req, res) => {
+    try {
+        const { lat, lng, radius = 50 } = req.query;
+        
+        if (!lat || !lng) {
+            return res.status(400).json({ message: 'Latitude and longitude are required' });
+        }
+
+        const point = {
+            type: 'Point',
+            coordinates: [parseFloat(lng), parseFloat(lat)]
+        };
+
+        const camps = await Camp.find({
+            coordinates: {
+                $near: {
+                    $geometry: point,
+                    $maxDistance: parseFloat(radius) * 1000 // Convert km to meters
+                }
+            }
+        }).lean();
+
+        res.json(camps);
+    } catch (err) {
+        console.error('Error finding nearby camps:', err);
+        res.status(500).json({ message: 'Server Error' });
     }
 });
 
 // @route   GET /api/maps/camps/:id
-// @desc    Get camp details with coordinates
+// @desc    Get a specific camp by ID
 // @access  Public
 router.get('/camps/:id', async (req, res) => {
     try {
-        const camp = await Camp.findById(req.params.id);
+        const camp = await Camp.findById(req.params.id).lean();
+        
         if (!camp) {
             return res.status(404).json({ message: 'Camp not found' });
         }
+        
         res.json(camp);
     } catch (err) {
         console.error('Error fetching camp:', err);

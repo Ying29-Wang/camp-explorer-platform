@@ -141,12 +141,35 @@ const camps = [
 ];
 
 const seedCamps = async () => {
-  // Insert camps into database
-  const createdCamps = await Camp.insertMany(camps);
-  console.log(`${createdCamps.length} camps created`);
-  
-  // Return the created camps for use in other seed files
-  return createdCamps;
+  try {
+    console.log('Starting to seed camps...');
+    
+    // Clear existing data
+    await Camp.deleteMany({});
+    console.log('Cleared existing camp data');
+
+    // Insert camps into database
+    console.log('Inserting camps with coordinates...');
+    const createdCamps = await Camp.insertMany(camps);
+    console.log(`${createdCamps.length} camps created`);
+
+    // Verify the camps were created with coordinates
+    const campsWithCoordinates = await Camp.find({ 'coordinates.coordinates': { $exists: true } });
+    console.log(`${campsWithCoordinates.length} camps have coordinates`);
+
+    // Check if geospatial index exists
+    const indexes = await Camp.collection.indexes();
+    const hasGeospatialIndex = indexes.some(index => 
+      index.key && index.key.coordinates === '2dsphere'
+    );
+    console.log('Has geospatial index:', hasGeospatialIndex);
+    
+    // Return the created camps for use in other seed files
+    return createdCamps;
+  } catch (err) {
+    console.error('Error seeding camps:', err);
+    throw err;
+  }
 };
 
 module.exports = seedCamps;
