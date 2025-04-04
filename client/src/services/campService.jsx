@@ -37,10 +37,12 @@ export const fetchCampById = async (id) => {
 
 // Create new camp
 export const createCamp = async (campData) => {
+    const token = localStorage.getItem('token');
     const response = await fetch(`${API_BASE}/camps`, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
         },
         body: JSON.stringify(campData),
     });
@@ -54,10 +56,12 @@ export const createCamp = async (campData) => {
 
 // Update existing camp
 export const updateCamp = async (id, campData) => {
+    const token = localStorage.getItem('token');
     const response = await fetch(`${API_BASE}/camps/${id}`, {
         method: 'PUT',
         headers: {
             'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
         },
         body: JSON.stringify(campData),
     });
@@ -71,8 +75,12 @@ export const updateCamp = async (id, campData) => {
 
 // Delete camp
 export const deleteCamp = async (id) => {
+    const token = localStorage.getItem('token');
     const response = await fetch(`${API_BASE}/camps/${id}`, {
         method: 'DELETE',
+        headers: {
+            'Authorization': `Bearer ${token}`
+        }
     });
 
     if (!response.ok) {
