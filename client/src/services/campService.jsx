@@ -35,6 +35,53 @@ export const fetchCampById = async (id) => {
     return response.json();
 };
 
+// Create new camp
+export const createCamp = async (campData) => {
+    const response = await fetch(`${API_BASE}/camps`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(campData),
+    });
+
+    if (!response.ok) {
+        throw new Error(`Failed to create camp: ${response.status} ${response.statusText}`);
+    }
+
+    return response.json();
+};
+
+// Update existing camp
+export const updateCamp = async (id, campData) => {
+    const response = await fetch(`${API_BASE}/camps/${id}`, {
+        method: 'PUT',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(campData),
+    });
+
+    if (!response.ok) {
+        throw new Error(`Failed to update camp: ${response.status} ${response.statusText}`);
+    }
+
+    return response.json();
+};
+
+// Delete camp
+export const deleteCamp = async (id) => {
+    const response = await fetch(`${API_BASE}/camps/${id}`, {
+        method: 'DELETE',
+    });
+
+    if (!response.ok) {
+        throw new Error(`Failed to delete camp: ${response.status} ${response.statusText}`);
+    }
+
+    return true;
+};
+
 // Fallback data
 const fallbackCamps = [
     { _id: 1, name: "Adventure Camp", /*...*/ },

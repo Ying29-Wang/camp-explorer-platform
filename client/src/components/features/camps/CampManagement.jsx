@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { useAuth } from '../../../contexts/AuthContext';
-import { campService } from '../../../services/campService';
+import { useAuth } from '../../../context/AuthContext';
+import { createCamp, updateCamp, deleteCamp, fetchCamps } from '../../../services/campService';
 import './CampManagement.css';
 
 const CampManagement = () => {
@@ -32,12 +32,12 @@ const CampManagement = () => {
             setLoading(false);
             return;
         }
-        fetchCamps();
+        fetchCampsList();
     }, [user]);
 
-    const fetchCamps = async () => {
+    const fetchCampsList = async () => {
         try {
-            const data = await campService.fetchCamps();
+            const data = await fetchCamps();
             // Filter camps based on user role
             const filteredCamps = user.role === 'admin' 
                 ? data 
@@ -62,9 +62,9 @@ const CampManagement = () => {
         e.preventDefault();
         try {
             if (editingCamp) {
-                await campService.updateCamp(editingCamp._id, formData);
+                await updateCamp(editingCamp._id, formData);
             } else {
-                await campService.createCamp(formData);
+                await createCamp(formData);
             }
             setEditingCamp(null);
             setFormData({
@@ -82,7 +82,7 @@ const CampManagement = () => {
                 capacity: '',
                 activities: []
             });
-            fetchCamps();
+            fetchCampsList();
         } catch (error) {
             setError(error.message || 'Failed to save camp');
         }
@@ -122,8 +122,8 @@ const CampManagement = () => {
 
         if (window.confirm('Are you sure you want to delete this camp?')) {
             try {
-                await campService.deleteCamp(campId);
-                fetchCamps();
+                await deleteCamp(campId);
+                fetchCampsList();
             } catch (error) {
                 setError(error.message || 'Failed to delete camp');
             }
