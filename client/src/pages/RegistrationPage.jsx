@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import Header from '../components/layout/Header';
 import './RegistrationPage.css';
 
 const RegistrationPage = () => {
@@ -87,70 +88,73 @@ const RegistrationPage = () => {
   };
 
   return (
-    <div className="registration-container">
-      <h2>Create Account</h2>
-      {submitError && <div className="error-message">{submitError}</div>}
-      
-      <form onSubmit={handleSubmit}>
-        <div className="form-group">
-          <label>Username</label>
-          <input
-            type="text"
-            name="username"
-            autoComplete="username"
-            value={formData.username}
-            onChange={handleChange}
-            className={errors.username ? 'error-border' : ''}
-          />
-          {errors.username && <div className="field-error">{errors.username}</div>}
-        </div>
+    <div className="registration-page">
+      <Header />
+      <div className="registration-container">
+        <h2>Create Account</h2>
+        {submitError && <div className="error-message">{submitError}</div>}
+        
+        <form onSubmit={handleSubmit}>
+          <div className="form-group">
+            <label>Username</label>
+            <input
+              type="text"
+              name="username"
+              autoComplete="username"
+              value={formData.username}
+              onChange={handleChange}
+              className={errors.username ? 'error-border' : ''}
+            />
+            {errors.username && <div className="field-error">{errors.username}</div>}
+          </div>
 
-        <div className="form-group">
-          <label>Email</label>
-          <input
-            type="email"
-            name="email"
-            autoComplete="email"
-            value={formData.email}
-            onChange={handleChange}
-            className={errors.email ? 'error-border' : ''}
-          />
-          {errors.email && <div className="field-error">{errors.email}</div>}
-        </div>
+          <div className="form-group">
+            <label>Email</label>
+            <input
+              type="email"
+              name="email"
+              autoComplete="email"
+              value={formData.email}
+              onChange={handleChange}
+              className={errors.email ? 'error-border' : ''}
+            />
+            {errors.email && <div className="field-error">{errors.email}</div>}
+          </div>
 
-        <div className="form-group">
-          <label>Password</label>
-          <input
-            type="password"
-            name="password"
-            autoComplete="new-password"
-            value={formData.password}
-            onChange={handleChange}
-            className={errors.password ? 'error-border' : ''}
-          />
-          {errors.password && <div className="field-error">{errors.password}</div>}
-        </div>
+          <div className="form-group">
+            <label>Password</label>
+            <input
+              type="password"
+              name="password"
+              autoComplete="new-password"
+              value={formData.password}
+              onChange={handleChange}
+              className={errors.password ? 'error-border' : ''}
+            />
+            {errors.password && <div className="field-error">{errors.password}</div>}
+          </div>
 
-        <div className="form-group">
-          <label>Account Type</label>
-          <select
-            name="role"
-            value={formData.role}
-            onChange={handleChange}
-          >
-            <option value="parent">Parent</option>
-            <option value="camp_owner">Camp Owner</option>
-          </select>
-        </div>
+          <div className="form-group">
+            <label>Account Type</label>
+            <select
+              name="role"
+              value={formData.role}
+              onChange={handleChange}
+            >
+              <option value="parent">Parent</option>
+              <option value="camp_owner">Camp Owner</option>
+            </select>
+          </div>
 
-        <button type="submit" className="submit-button">
-          Register
-        </button>
-      </form>
+          <button type="submit" className="submit-button">
+            Register
+          </button>
+        </form>
 
-      <p className="login-link">
-        Already have an account? <Link to="/login">Login here</Link>
-      </p>
+        <p className="login-link">
+          Already have an account? <Link to="/login">Login here</Link>
+        </p>
+      </div>
     </div>
   );
 };
