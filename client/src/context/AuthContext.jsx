@@ -6,16 +6,73 @@ export const AuthContext = createContext();
 export const AuthProvider = ({ children }) => {
     const [isLoggedIn, setIsLoggedIn] = useState(false);
     const [user, setUser] = useState(null);
+    const [isLoading, setIsLoading] = useState(true);
     const navigate = useNavigate();
 
-    useEffect(() => {
-        // Check if user is logged in on initial load
-        const token = localStorage.getItem('token');
-        const userData = localStorage.getItem('user');
-        if (token && userData) {
-            setIsLoggedIn(true);
-            setUser(JSON.parse(userData));
+    const validateToken = async (token) => {
+        try {
+            const response = await fetch('/api/auth/me', {
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            });
+
+            if (!response.ok) {
+                throw new Error('Token validation failed');
+            }
+
+            const userData = await response.json();
+            return userData;
+        } catch (error) {
+            console.error('Token validation error:', error);
+            throw error;
         }
+    };
+
+    useEffect(() => {
+        const checkAuth = async () => {
+            try {
+                const token = localStorage.getItem('token');
+                const storedUser = localStorage.getItem('user');
+
+                if (!token || !storedUser) {
+                    setIsLoggedIn(false);
+                    setUser(null);
+                    setIsLoading(false);
+                    return;
+                }
+
+                // Set initial state from stored data
+                setUser(JSON.parse(storedUser));
+                setIsLoggedIn(true);
+                setIsLoading(false);
+
+                // Validate token in the background
+                try {
+                    const userData = await validateToken(token);
+                    // Only update if the validation was successful
+                    setUser(userData);
+                    localStorage.setItem('user', JSON.stringify(userData));
+                } catch (error) {
+                    console.error('Background token validation failed:', error);
+                    // Only clear auth if the token is actually invalid
+                    localStorage.removeItem('token');
+                    localStorage.removeItem('user');
+                    setIsLoggedIn(false);
+                    setUser(null);
+                    navigate('/login');
+                }
+            } catch (error) {
+                console.error('Auth check error:', error);
+                localStorage.removeItem('token');
+                localStorage.removeItem('user');
+                setIsLoggedIn(false);
+                setUser(null);
+                setIsLoading(false);
+            }
+        };
+
+        checkAuth();
     }, []);
 
     const login = async (email, password) => {
@@ -34,26 +91,9 @@ export const AuthProvider = ({ children }) => {
             }
 
             const { token } = await response.json();
-            
-            // Store token immediately
             localStorage.setItem('token', token);
 
-            // Get user data using the token
-            const userResponse = await fetch('/api/auth/me', {
-                headers: {
-                    'Authorization': `Bearer ${token}`
-                }
-            });
-
-            if (!userResponse.ok) {
-                // If getting user data fails, remove the token
-                localStorage.removeItem('token');
-                throw new Error('Failed to fetch user data');
-            }
-
-            const userData = await userResponse.json();
-            
-            // Store user data
+            const userData = await validateToken(token);
             localStorage.setItem('user', JSON.stringify(userData));
             setIsLoggedIn(true);
             setUser(userData);
@@ -80,26 +120,9 @@ export const AuthProvider = ({ children }) => {
             }
 
             const { token } = await response.json();
-            
-            // Store token immediately
             localStorage.setItem('token', token);
 
-            // Get user data using the token
-            const userResponse = await fetch('/api/auth/me', {
-                headers: {
-                    'Authorization': `Bearer ${token}`
-                }
-            });
-
-            if (!userResponse.ok) {
-                // If getting user data fails, remove the token
-                localStorage.removeItem('token');
-                throw new Error('Failed to fetch user data');
-            }
-
-            const newUserData = await userResponse.json();
-            
-            // Store user data
+            const newUserData = await validateToken(token);
             localStorage.setItem('user', JSON.stringify(newUserData));
             setIsLoggedIn(true);
             setUser(newUserData);
@@ -119,7 +142,7 @@ export const AuthProvider = ({ children }) => {
     };
 
     return (
-        <AuthContext.Provider value={{ isLoggedIn, user, login, register, logout }}>
+        <AuthContext.Provider value={{ isLoggedIn, user, login, register, logout, isLoading }}>
             {children}
         </AuthContext.Provider>
     );

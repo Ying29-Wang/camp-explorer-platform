@@ -11,9 +11,14 @@ import CampDetailsPage from './pages/CampDetailsPage';
 import CampManagement from './components/features/camps/CampManagement';
 import UserManagement from './components/features/admin/UserManagement';
 import { useAuth } from './context/AuthContext';
+import LoadingSpinner from './components/common/LoadingSpinner';
 
 const ProtectedRoute = ({ children, roles }) => {
-    const { user } = useAuth();
+    const { user, isLoading } = useAuth();
+    
+    if (isLoading) {
+        return <LoadingSpinner />;
+    }
     
     if (!user) {
         return <Navigate to="/login" />;
@@ -36,24 +41,10 @@ const AppRoutes = () => {
                         <Route path="/search" element={<SearchResults />} />
                         <Route path="/login" element={<LoginPage />} />
                         <Route path="/register" element={<RegistrationPage />} />
-                        <Route path="/profile" element={<ProfilePage />} />
+                        <Route path="/profile" element={<ProtectedRoute roles={['admin', 'user']}><ProfilePage /></ProtectedRoute>} />
                         <Route path="/camps/:id" element={<CampDetailsPage />} />
-                        <Route 
-                            path="/manage-camps" 
-                            element={
-                                <ProtectedRoute roles={['admin', 'camp_owner']}>
-                                    <CampManagement />
-                                </ProtectedRoute>
-                            } 
-                        />
-                        <Route 
-                            path="/manage-users" 
-                            element={
-                                <ProtectedRoute roles={['admin']}>
-                                    <UserManagement />
-                                </ProtectedRoute>
-                            } 
-                        />
+                        <Route path="/manage-camps" element={<ProtectedRoute roles={['admin', 'camp_owner']}><CampManagement /></ProtectedRoute>} />
+                        <Route path="/manage-users" element={<ProtectedRoute roles={['admin']}><UserManagement /></ProtectedRoute>} />
                     </Routes>
                 </SearchProvider>
             </AuthProvider>
