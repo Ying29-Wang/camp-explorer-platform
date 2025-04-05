@@ -4,9 +4,14 @@ import { API_URL } from '../config/api';
 // Use the API_URL from config which handles both development and production
 const API_BASE = API_URL;
 
+// Log the API base URL for verification
+console.log('API Base URL:', API_BASE);
+
 export const fetchCamps = async () => {
     try {
-        const response = await fetch(`${API_BASE}/camps`);
+        const fullUrl = `${API_BASE}/camps`;
+        console.log('Fetching camps from:', fullUrl);
+        const response = await fetch(fullUrl);
         if (!response.ok) {
             throw new Error(`Failed to fetch camps: ${response.status} ${response.statusText}`);
         }

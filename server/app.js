@@ -23,8 +23,7 @@ app.use(express.json());
 
 // CORS middleware
 app.use(cors({
-    origin: 'https://camp-explorer-l03o.onrender.com',
-    credentials: true,
+    origin: '*',
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization']
   }));
