@@ -23,7 +23,8 @@ router.get('/user', auth, async (req, res) => {
     try {
         const reviews = await Review.find({ userId: req.user.id })
             .sort({ createdAt: -1 })
-            .populate('campId', 'name');
+            .populate('campId', 'name location description image')
+            .populate('userId', 'username');
         res.json(reviews);
     } catch (err) {
         console.error(err.message);

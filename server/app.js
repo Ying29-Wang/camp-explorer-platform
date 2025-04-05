@@ -19,11 +19,12 @@ const app = express();
 connectDB();
 
 // Middleware
+app.use(express.json());
 app.use(cors({
-    origin: '*', // Allow all origins
+    origin: 'http://localhost:5173',
+    credentials: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization'],
-    credentials: false // Disable credentials
+    allowedHeaders: ['Content-Type', 'Authorization']
 }));
 
 // Log requests for debugging
@@ -31,7 +32,6 @@ app.use((req, res, next) => {
     console.log(`${new Date().toISOString()} - ${req.method} ${req.url}`);
     next();
 });
-app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 // app.use(logger('dev'));
 // app.use(cookieParser());

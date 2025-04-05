@@ -3,6 +3,7 @@ import { useContext } from 'react';
 import { Navigate } from 'react-router-dom';
 import { AuthContext } from '../context/AuthContext';
 import { fetchUserReviews, deleteReview } from '../services/reviewService';
+import ReviewCard from '../components/features/reviews/ReviewCard';
 import Header from '../components/layout/Header';
 import './ProfilePage.css';
 
@@ -43,50 +44,29 @@ const ProfilePage = () => {
   if (!isLoggedIn) return <Navigate to="/login" />;
 
   return (
-    <>
+    <div className="profile-page">
       <Header />
-      <div className="profile">
-        <h1>Your Profile</h1>
-        
-        <div className="profile-section">
-          <h2>Your Information</h2>
-          <p>Username: {user?.username}</p>
-          <p>Email: {user?.email}</p>
-          <p>Role: {user?.role}</p>
-        </div>
-
-        <div className="profile-section">
-          <h2>Your Reviews</h2>
-          {loading ? (
-            <p>Loading reviews...</p>
-          ) : error ? (
-            <p className="error">{error}</p>
-          ) : reviews.length === 0 ? (
-            <p>You haven't written any reviews yet.</p>
-          ) : (
-            <div className="reviews-list">
-              {reviews.map(review => (
-                <div key={review._id} className="review-item">
-                  <div className="review-header">
-                    <h3>{review.camp?.name || 'Unknown Camp'}</h3>
-                    <span className="review-rating">Rating: {review.rating}/5</span>
-                  </div>
-                  <p className="review-text">{review.text}</p>
-                  <div className="review-actions">
-                    <button 
-                      onClick={() => handleDeleteReview(review._id)}
-                      className="delete-button"
-                    >
-                      Delete Review
-                    </button>
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
+      <div className="profile-content">
+        <h1>My Reviews</h1>
+        {loading ? (
+          <p>Loading reviews...</p>
+        ) : error ? (
+          <p className="error">{error}</p>
+        ) : reviews.length === 0 ? (
+          <p>You haven't written any reviews yet.</p>
+        ) : (
+          <div className="reviews-list">
+            {reviews.map(review => (
+              <ReviewCard 
+                key={review._id} 
+                review={review} 
+                onDelete={handleDeleteReview}
+              />
+            ))}
+          </div>
+        )}
       </div>
-    </>
+    </div>
   );
 };
 

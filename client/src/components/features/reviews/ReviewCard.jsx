@@ -1,8 +1,9 @@
 import React from 'react';
 import { format } from 'date-fns';
+import { Link } from 'react-router-dom';
 import './ReviewCard.css'; // We'll create this CSS file next
 
-const ReviewCard = ({ review }) => {
+const ReviewCard = ({ review, onDelete }) => {
   // Format rating stars
   const renderStars = (rating) => {
     return (
@@ -22,13 +23,11 @@ const ReviewCard = ({ review }) => {
   return (
     <div className="review-card">
       <div className="review-header">
-        <div className="review-user">
-          <span className="user-avatar">
-            {review.userId?.username?.charAt(0).toUpperCase() || 'U'}
-          </span>
-          <span className="user-name">
-            {review.userId?.username || 'Anonymous'}
-          </span>
+        <div className="review-camp">
+          <Link to={`/camps/${review.campId?._id}`}>
+            <h3>{review.campId?.name || 'Unknown Camp'}</h3>
+          </Link>
+          <p className="camp-location">{review.campId?.location || ''}</p>
         </div>
         <div className="review-meta">
           {renderStars(review.rating)}
@@ -40,6 +39,16 @@ const ReviewCard = ({ review }) => {
       <div className="review-content">
         <p>{review.reviewText}</p>
       </div>
+      {onDelete && (
+        <div className="review-actions">
+          <button 
+            onClick={() => onDelete(review._id)}
+            className="delete-button"
+          >
+            Delete Review
+          </button>
+        </div>
+      )}
     </div>
   );
 };

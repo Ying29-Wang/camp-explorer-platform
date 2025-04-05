@@ -48,13 +48,16 @@ const CampDetailsPage = () => {
 
     const handleReviewSubmit = async (reviewData) => {
         try {
+            const token = localStorage.getItem('token');
             const response = await fetch(`${API_URL}/reviews`, {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: { 
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
                 body: JSON.stringify({ 
                     ...reviewData, 
-                    campId: id,
-                    userId: 'currentUserId' // Replace with actual user ID from auth context
+                    campId: id
                 })
             });
             
