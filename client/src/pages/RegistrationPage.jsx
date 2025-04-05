@@ -97,6 +97,7 @@ const RegistrationPage = () => {
           <input
             type="text"
             name="username"
+            autoComplete="username"
             value={formData.username}
             onChange={handleChange}
             className={errors.username ? 'error-border' : ''}
@@ -109,6 +110,7 @@ const RegistrationPage = () => {
           <input
             type="email"
             name="email"
+            autoComplete="email"
             value={formData.email}
             onChange={handleChange}
             className={errors.email ? 'error-border' : ''}
@@ -121,6 +123,7 @@ const RegistrationPage = () => {
           <input
             type="password"
             name="password"
+            autoComplete="new-password"
             value={formData.password}
             onChange={handleChange}
             className={errors.password ? 'error-border' : ''}
