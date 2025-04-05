@@ -26,6 +26,9 @@ const Header = () => {
             {(user?.role === 'admin' || user?.role === 'camp_owner') && (
               <Link to="/manage-camps">Manage Camps</Link>
             )}
+            {user?.role === 'admin' && (
+              <Link to="/manage-users">Manage Users</Link>
+            )}
             <button 
               onClick={handleLogout}
               className="logout-button"
