@@ -181,37 +181,56 @@ const CampManagement = () => {
         setShowForm(true);
     };
 
-    if (loading) {
-        return (
-            <div className="camp-management">
-                <h2>Manage Your Camps</h2>
-                <div className="loading">Loading your camps...</div>
-            </div>
-        );
-    }
-
-    if (error) {
-        return (
-            <div className="camp-management">
-                <h2>Manage Your Camps</h2>
-                <div className="error-message">{error}</div>
-                <button onClick={loadCamps} className="retry-button">
-                    Try Again
-                </button>
-            </div>
-        );
-    }
-
     return (
         <div className="camp-management">
             <Header />
-            <div className="content">
-                <button onClick={() => setShowForm(true)} className="add-camp-button">
+            <div className="camp-management-content">
+                <h2>Manage Your Camps</h2>
+                
+                {error && (
+                    <div className="error-message">
+                        {error}
+                        <button onClick={loadCamps} className="retry-button">
+                            Try Again
+                        </button>
+                    </div>
+                )}
+
+                <button 
+                    onClick={() => setShowForm(true)} 
+                    className="add-camp-button"
+                >
                     Add New Camp
                 </button>
-                
+
+                {loading ? (
+                    <div className="loading-message">Loading your camps...</div>
+                ) : camps.length === 0 ? (
+                    <div className="no-camps-message">You haven't added any camps yet.</div>
+                ) : (
+                    <div className="camps-list">
+                        {camps.map(camp => (
+                            <div key={camp._id} className="camp-card">
+                                <h3>{camp.name}</h3>
+                                <p>{camp.description}</p>
+                                <p>Location: {camp.location}</p>
+                                <p>Price: ${camp.price}</p>
+                                <p>Age Range: {camp.ageRange.min}-{camp.ageRange.max}</p>
+                                <p>Category: {camp.category}</p>
+                                <p>Contact: {camp.contact}</p>
+                                <p>Email: {camp.email}</p>
+                                <p>Phone: {camp.phone}</p>
+                                <div className="camp-actions">
+                                    <button onClick={() => handleEdit(camp)}>Edit</button>
+                                    <button onClick={() => handleDelete(camp._id)}>Delete</button>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                )}
+
                 {showForm && (
-                    <div className="camp-form">
+                    <div className="camp-form-modal">
                         <h3>{editingCamp ? 'Edit Camp' : 'Add New Camp'}</h3>
                         <form onSubmit={handleSubmit}>
                             <div className="form-group">
@@ -415,30 +434,6 @@ const CampManagement = () => {
                         </form>
                     </div>
                 )}
-
-                <div className="camps-list">
-                    {camps.length === 0 ? (
-                        <p className="no-camps">You haven't created any camps yet.</p>
-                    ) : (
-                        camps.map(camp => (
-                            <div key={camp._id} className="camp-card">
-                                <h3>{camp.name}</h3>
-                                <p>{camp.description}</p>
-                                <p>Location: {camp.location}</p>
-                                <p>Price: ${camp.price}</p>
-                                <p>Age Range: {camp.ageRange.min}-{camp.ageRange.max}</p>
-                                <p>Category: {camp.category}</p>
-                                <p>Contact: {camp.contact}</p>
-                                <p>Email: {camp.email}</p>
-                                <p>Phone: {camp.phone}</p>
-                                <div className="camp-actions">
-                                    <button onClick={() => handleEdit(camp)}>Edit</button>
-                                    <button onClick={() => handleDelete(camp._id)}>Delete</button>
-                                </div>
-                            </div>
-                        ))
-                    )}
-                </div>
             </div>
         </div>
     );

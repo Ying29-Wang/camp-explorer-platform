@@ -41,10 +41,31 @@ const AppRoutes = () => {
                         <Route path="/search" element={<SearchResults />} />
                         <Route path="/login" element={<LoginPage />} />
                         <Route path="/register" element={<RegistrationPage />} />
-                        <Route path="/profile" element={<ProtectedRoute roles={['admin', 'user']}><ProfilePage /></ProtectedRoute>} />
+                        <Route 
+                            path="/profile" 
+                            element={
+                                <ProtectedRoute roles={['admin', 'user', 'camp_owner', 'parent']}>
+                                    <ProfilePage />
+                                </ProtectedRoute>
+                            } 
+                        />
                         <Route path="/camps/:id" element={<CampDetailsPage />} />
-                        <Route path="/manage-camps" element={<ProtectedRoute roles={['admin', 'camp_owner']}><CampManagement /></ProtectedRoute>} />
-                        <Route path="/manage-users" element={<ProtectedRoute roles={['admin']}><UserManagement /></ProtectedRoute>} />
+                        <Route 
+                            path="/manage-camps" 
+                            element={
+                                <ProtectedRoute roles={['admin', 'camp_owner']}>
+                                    <CampManagement />
+                                </ProtectedRoute>
+                            } 
+                        />
+                        <Route 
+                            path="/manage-users" 
+                            element={
+                                <ProtectedRoute roles={['admin']}>
+                                    <UserManagement />
+                                </ProtectedRoute>
+                            } 
+                        />
                     </Routes>
                 </SearchProvider>
             </AuthProvider>

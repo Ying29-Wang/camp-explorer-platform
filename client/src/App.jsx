@@ -7,7 +7,6 @@ import RecentlyViewed from './components/features/RecentlyViewed';
 import Footer from './components/common/Footer';
 import LoginPage from './pages/LoginPage';
 import RegistrationPage from './pages/RegistrationPage';
-import ProfilePage from './pages/ProfilePage';
 import SearchResults from './pages/SearchResults';
 import './App.css';
 import './components/common/LoadingSpinner.css';
@@ -65,14 +64,6 @@ function App() {
           <Route path="/login" element={<LoginPage />} />
           <Route path="/register" element={<RegistrationPage />} />
           <Route path="/search" element={<SearchResults />} />
-          <Route 
-            path="/profile" 
-            element={
-              <ProtectedRoute>
-                <ProfilePage />
-              </ProtectedRoute>
-            } 
-          />
         </Routes>
       </main>
       <Footer />
