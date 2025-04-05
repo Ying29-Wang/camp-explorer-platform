@@ -159,3 +159,22 @@ export const fetchCampsByQuickFilter = async (filters) => {
         throw error;
     }
 };
+
+// Function to get coordinates from location
+export const getCoordinatesFromLocation = async (location) => {
+    try {
+        const response = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(location)}`);
+        const data = await response.json();
+        
+        if (data && data.length > 0) {
+            return {
+                type: 'Point',
+                coordinates: [parseFloat(data[0].lon), parseFloat(data[0].lat)]
+            };
+        }
+        return null;
+    } catch (error) {
+        console.error('Error getting coordinates:', error);
+        return null;
+    }
+};
