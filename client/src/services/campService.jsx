@@ -3,21 +3,29 @@ import { API_URL } from '../config/api';
 
 // Use the API_URL from config which handles both development and production
 const API_BASE = API_URL;
+console.log('API_BASE URL:', API_BASE); // Log the base URL
 
 export const fetchCamps = async () => {
     try {
+        console.log('Fetching camps from:', `${API_BASE}/camps`); // Log the full URL
         const response = await fetch(`${API_BASE}/camps`);
+        console.log('Response status:', response.status); // Log the response status
+        
         if (!response.ok) {
             throw new Error(`Failed to fetch camps: ${response.status} ${response.statusText}`);
         }
         
         // Handle potential HTML responses
         const contentType = response.headers.get('content-type');
+        console.log('Content-Type:', contentType); // Log the content type
+        
         if (!contentType || !contentType.includes('application/json')) {
             throw new Error(`Invalid content type. Received: ${contentType || 'none'}`);
         }
 
-        return response.json();
+        const data = await response.json();
+        console.log('Received data:', data); // Log the received data
+        return data;
     } catch (error) {
         console.error('Error fetching camps:', error);
         throw error;

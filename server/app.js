@@ -21,7 +21,7 @@ connectDB();
 // Middleware
 app.use(express.json());
 app.use(cors({
-    origin: 'http://localhost:5173',
+    origin: process.env.CORS_ORIGIN || 'http://localhost:5173',
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization']
@@ -70,9 +70,13 @@ app.get('/api/dbcheck', async (req, res) => {
     }
 });
 
-// Set port from environment variable only
-const PORT = process.env.PORT;
+// Set port
+const PORT = process.env.PORT || 5001;
 app.set('port', PORT);
 
-// Export the app - server startup is handled by bin/www
+// Start server
+app.listen(PORT, () => {
+    console.log(`Server is running on port ${PORT}`);
+});
+
 module.exports = app;
