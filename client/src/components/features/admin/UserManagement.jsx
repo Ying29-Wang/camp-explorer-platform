@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../../context/AuthContext';
 import { fetchUsers, updateUser, deleteUser } from '../../../services/userService';
+import Header from '../../layout/Header';
 import './UserManagement.css';
 
 const UserManagement = () => {
@@ -83,79 +84,82 @@ const UserManagement = () => {
     if (error) return <div className="error">{error}</div>;
 
     return (
-        <div className="user-management">
-            <h2>User Management</h2>
-            
-            {editingUser && (
-                <form onSubmit={handleSubmit} className="user-form">
-                    <h3>Edit User</h3>
-                    <div className="form-group">
-                        <label>Username</label>
-                        <input
-                            type="text"
-                            name="username"
-                            value={formData.username}
-                            onChange={handleInputChange}
-                            required
-                        />
-                    </div>
-                    <div className="form-group">
-                        <label>Email</label>
-                        <input
-                            type="email"
-                            name="email"
-                            value={formData.email}
-                            onChange={handleInputChange}
-                            required
-                        />
-                    </div>
-                    <div className="form-group">
-                        <label>Role</label>
-                        <select
-                            name="role"
-                            value={formData.role}
-                            onChange={handleInputChange}
-                            required
-                        >
-                            <option value="parent">Parent</option>
-                            <option value="camp_owner">Camp Owner</option>
-                            <option value="admin">Admin</option>
-                        </select>
-                    </div>
-                    <div className="form-actions">
-                        <button type="submit">Save Changes</button>
-                        <button type="button" onClick={() => setEditingUser(null)}>Cancel</button>
-                    </div>
-                </form>
-            )}
+        <>
+            <Header />
+            <div className="user-management">
+                <h2>User Management</h2>
+                
+                {editingUser && (
+                    <form onSubmit={handleSubmit} className="user-form">
+                        <h3>Edit User</h3>
+                        <div className="form-group">
+                            <label>Username</label>
+                            <input
+                                type="text"
+                                name="username"
+                                value={formData.username}
+                                onChange={handleInputChange}
+                                required
+                            />
+                        </div>
+                        <div className="form-group">
+                            <label>Email</label>
+                            <input
+                                type="email"
+                                name="email"
+                                value={formData.email}
+                                onChange={handleInputChange}
+                                required
+                            />
+                        </div>
+                        <div className="form-group">
+                            <label>Role</label>
+                            <select
+                                name="role"
+                                value={formData.role}
+                                onChange={handleInputChange}
+                                required
+                            >
+                                <option value="parent">Parent</option>
+                                <option value="camp_owner">Camp Owner</option>
+                                <option value="admin">Admin</option>
+                            </select>
+                        </div>
+                        <div className="form-actions">
+                            <button type="submit">Save Changes</button>
+                            <button type="button" onClick={() => setEditingUser(null)}>Cancel</button>
+                        </div>
+                    </form>
+                )}
 
-            <div className="users-list">
-                <h3>All Users</h3>
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Username</th>
-                            <th>Email</th>
-                            <th>Role</th>
-                            <th>Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {users.map(user => (
-                            <tr key={user._id}>
-                                <td>{user.username}</td>
-                                <td>{user.email}</td>
-                                <td>{user.role}</td>
-                                <td>
-                                    <button onClick={() => handleEdit(user)}>Edit</button>
-                                    <button onClick={() => handleDelete(user._id)}>Delete</button>
-                                </td>
+                <div className="users-list">
+                    <h3>All Users</h3>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Username</th>
+                                <th>Email</th>
+                                <th>Role</th>
+                                <th>Actions</th>
                             </tr>
-                        ))}
-                    </tbody>
-                </table>
+                        </thead>
+                        <tbody>
+                            {users.map(user => (
+                                <tr key={user._id}>
+                                    <td>{user.username}</td>
+                                    <td>{user.email}</td>
+                                    <td>{user.role}</td>
+                                    <td>
+                                        <button onClick={() => handleEdit(user)}>Edit</button>
+                                        <button onClick={() => handleDelete(user._id)}>Delete</button>
+                                    </td>
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
+                </div>
             </div>
-        </div>
+        </>
     );
 };
 

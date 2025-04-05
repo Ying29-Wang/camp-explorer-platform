@@ -1,4 +1,5 @@
 const User = require('../models/user');
+const bcrypt = require('bcryptjs');
 
 const users = [
   {
@@ -60,8 +61,18 @@ const users = [
 
 const seedUsers = async () => {
     try {
+      // Hash passwords before inserting
+      const hashedUsers = await Promise.all(users.map(async (user) => {
+        const salt = await bcrypt.genSalt(10);
+        const hashedPassword = await bcrypt.hash(user.password, salt);
+        return {
+          ...user,
+          password: hashedPassword
+        };
+      }));
+
       // Insert users into database
-      const createdUsers = await User.insertMany(users);
+      const createdUsers = await User.insertMany(hashedUsers);
       console.log(`${createdUsers.length} users created`);
       
       // Return the created users for use in other seed files
