@@ -42,32 +42,30 @@ function App() {
   return (
     <div className="homepage">
       <Header />
-      <Routes>
-        <Route path="*" element={
-          <main>
-            <section className="hero">
-              <h1>Find the Perfect Camp</h1>
-              <form onSubmit={handleSearch} className="search-form">
-                <input
-                  id="search"
-                  name="search"
-                  type="text"
-                  placeholder="Search camps..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="search-input"
-                />
-                <button type="submit" className="search-button">Search</button>
-              </form>
-            </section>
-            <FeaturedCamps />
-            <RecentlyViewed camps={recentlyViewedCamps} />
-          </main>
-        } />
-        <Route path="/login" element={<LoginPage />} />
-        <Route path="/register" element={<RegistrationPage />} />
-        <Route path="/search" element={<SearchResults />} />
-      </Routes>
+      <main>
+        <section className="hero">
+          <h1>Find the Perfect Camp</h1>
+          <form onSubmit={handleSearch} className="search-form">
+            <input
+              id="search"
+              name="search"
+              type="text"
+              placeholder="Search camps..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="search-input"
+            />
+            <button type="submit" className="search-button">Search</button>
+          </form>
+        </section>
+        <FeaturedCamps />
+        <RecentlyViewed camps={recentlyViewedCamps} />
+        <Routes>
+          <Route path="/login" element={<LoginPage />} />
+          <Route path="/register" element={<RegistrationPage />} />
+          <Route path="/search" element={<SearchResults />} />
+        </Routes>
+      </main>
       <Footer />
     </div>
   );
