@@ -26,8 +26,9 @@ var http = require('http');
  * Get port from environment and store in Express.
  */
 
-var port = normalizePort(process.env.PORT);
-app.set('port', port);
+// Updated port to avoid conflicts with system processes
+let currentPort = normalizePort(process.env.PORT || '5001');
+app.set('port', currentPort);
 
 /**
  * Create HTTP server.
@@ -39,20 +40,19 @@ let server = http.createServer(app);
  * Listen on provided port, on all network interfaces.
  */
 
-server.listen(port);
-server.on('error', onError);
-server.on('listening', onListening);
+function startServer(port) {
+  server.listen(port);
+  server.on('error', onError);
+  server.on('listening', onListening);
+}
+
+startServer(currentPort);
 
 /**
  * Normalize a port into a number, string, or false.
  */
 
 function normalizePort(val) {
-  if (!val) {
-    console.error('PORT environment variable is not set');
-    process.exit(1);
-  }
-
   var port = parseInt(val, 10);
 
   if (isNaN(port)) {
@@ -77,9 +77,9 @@ function onError(error) {
     throw error;
   }
 
-  var bind = typeof port === 'string'
-    ? 'Pipe ' + port
-    : 'Port ' + port;
+  var bind = typeof currentPort === 'string'
+    ? 'Pipe ' + currentPort
+    : 'Port ' + currentPort;
 
   // handle specific listen errors with friendly messages
   switch (error.code) {
@@ -89,7 +89,13 @@ function onError(error) {
       break;
     case 'EADDRINUSE':
       console.error(bind + ' is already in use');
-      process.exit(1);
+      // Try a different port
+      currentPort = currentPort + 1;
+      console.log(`Port ${currentPort - 1} is in use, trying port ${currentPort} instead`);
+      app.set('port', currentPort);
+      server.close();
+      server = http.createServer(app);
+      startServer(currentPort);
       break;
     default:
       throw error;
