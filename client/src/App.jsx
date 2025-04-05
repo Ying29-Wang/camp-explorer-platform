@@ -61,9 +61,13 @@ function App() {
         <FeaturedCamps />
         <RecentlyViewed camps={recentlyViewedCamps} />
         <Routes>
-          <Route path="/login" element={<LoginPage />} />
-          <Route path="/register" element={<RegistrationPage />} />
-          <Route path="/search" element={<SearchResults />} />
+          <Route path="*" element={
+            <Routes>
+              <Route path="/login" element={<LoginPage />} />
+              <Route path="/register" element={<RegistrationPage />} />
+              <Route path="/search" element={<SearchResults />} />
+            </Routes>
+          } />
         </Routes>
       </main>
       <Footer />
