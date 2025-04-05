@@ -1,33 +1,171 @@
 .camp-management {
-    width: 80%;
-    margin: 0 auto;
-    padding: 2rem;
-    min-width: 800px; /* Ensure minimum width for good readability */
+    width: 100%;
+    max-width: 100%;
+    margin: 0;
+    padding: 0;
 }
 
-.camp-form {
-    background: #fff;
+.camp-management .content {
+    max-width: 1200px;
+    margin: 0 auto;
     padding: 2rem;
-    border-radius: 8px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.add-camp-button {
+    background-color: #4CAF50;
+    color: white;
+    padding: 0.5rem 1rem;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
     margin-bottom: 2rem;
 }
 
+.add-camp-button:hover {
+    background-color: #45a049;
+}
+
+.camp-form {
+    background-color: #f9f9f9;
+    padding: 2rem;
+    border-radius: 8px;
+    margin-bottom: 2rem;
+}
+
+.camp-form h3 {
+    margin-bottom: 1rem;
+}
+
+.camps-list {
+    display: flex;
+    flex-direction: row;
+    gap: 1rem;
+    width: 80%;
+    margin: 0 auto;
+    overflow-x: auto;
+    padding: 1rem;
+    scrollbar-width: thin;
+    scrollbar-color: #888 #f1f1f1;
+}
+
+.camps-list::-webkit-scrollbar {
+    height: 8px;
+}
+
+.camps-list::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 4px;
+}
+
+.camps-list::-webkit-scrollbar-thumb {
+    background: #888;
+    border-radius: 4px;
+}
+
+.camps-list::-webkit-scrollbar-thumb:hover {
+    background: #555;
+}
+
+.camp-card {
+    background-color: white;
+    border-radius: 8px;
+    padding: 1.5rem;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    min-width: 300px;
+    flex: 0 0 auto;
+}
+
+.camp-card h3 {
+    margin: 0;
+    color: #333;
+    font-size: 1.2rem;
+}
+
+.camp-card p {
+    margin: 0;
+    color: #666;
+    font-size: 0.9rem;
+}
+
+.camp-actions {
+    display: flex;
+    gap: 0.5rem;
+    margin-top: auto;
+}
+
+.camp-actions button {
+    padding: 0.5rem 1rem;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.9rem;
+}
+
+.camp-actions button:first-child {
+    background-color: #2196F3;
+    color: white;
+}
+
+.camp-actions button:last-child {
+    background-color: #f44336;
+    color: white;
+}
+
+.camp-actions button:hover {
+    opacity: 0.9;
+}
+
+.loading {
+    text-align: center;
+    padding: 2rem;
+    color: #666;
+}
+
+.error-message {
+    color: #f44336;
+    padding: 1rem;
+    background-color: #ffebee;
+    border-radius: 4px;
+    margin-bottom: 1rem;
+}
+
+.retry-button {
+    background-color: #2196F3;
+    color: white;
+    padding: 0.5rem 1rem;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.retry-button:hover {
+    opacity: 0.9;
+}
+
+.no-camps {
+    text-align: center;
+    color: #666;
+    padding: 2rem;
+}
+
 .form-group {
-    margin-bottom: 1.5rem;
+    margin-bottom: 1rem;
 }
 
 .form-group label {
     display: block;
     margin-bottom: 0.5rem;
-    font-weight: 600;
     color: #333;
 }
 
 .form-group input,
-.form-group textarea {
+.form-group textarea,
+.form-group select {
     width: 100%;
-    padding: 0.75rem;
+    padding: 0.5rem;
     border: 1px solid #ddd;
     border-radius: 4px;
     font-size: 1rem;
@@ -38,27 +176,42 @@
     resize: vertical;
 }
 
+.age-range-inputs {
+    display: flex;
+    gap: 1rem;
+}
+
+.age-range-inputs input {
+    flex: 1;
+}
+
+.form-actions {
+    display: flex;
+    gap: 1rem;
+    margin-top: 1rem;
+}
+
 .submit-btn {
     background-color: #4CAF50;
     color: white;
-    padding: 0.75rem 1.5rem;
+    padding: 0.5rem 1rem;
     border: none;
     border-radius: 4px;
     cursor: pointer;
-    font-size: 1rem;
-    font-weight: 600;
-    transition: background-color 0.3s;
 }
 
-.submit-btn:hover {
-    background-color: #45a049;
+.cancel-btn {
+    background-color: #f44336;
+    color: white;
+    padding: 0.5rem 1rem;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
 }
 
-.camps-list {
-    margin-top: 2rem;
-    display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
+.submit-btn:hover,
+.cancel-btn:hover {
+    opacity: 0.9;
 }
 
 .camp-item {
@@ -101,39 +254,6 @@
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-}
-
-.camp-actions {
-    display: flex;
-    gap: 0.5rem;
-    flex-shrink: 0; /* Prevents buttons from shrinking */
-}
-
-.camp-actions button {
-    padding: 0.4rem 0.8rem;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-    font-size: 0.85rem;
-    white-space: nowrap;
-}
-
-.camp-actions button:first-child {
-    background-color: #2196F3;
-    color: white;
-}
-
-.camp-actions button:first-child:hover {
-    background-color: #1976D2;
-}
-
-.camp-actions button:last-child {
-    background-color: #f44336;
-    color: white;
-}
-
-.camp-actions button:last-child:hover {
-    background-color: #d32f2f;
 }
 
 .error {

@@ -35,6 +35,26 @@ export const fetchCampById = async (id) => {
     return response.json();
 };
 
+export const fetchCampsByOwner = async () => {
+    const token = localStorage.getItem('token');
+    if (!token) {
+        throw new Error('No authentication token found');
+    }
+
+    const response = await fetch(`${API_BASE}/camps/owner`, {
+        headers: {
+            'Authorization': `Bearer ${token}`
+        }
+    });
+
+    if (!response.ok) {
+        const errorData = await response.json().catch(() => ({ message: 'Unknown error' }));
+        throw new Error(errorData.message || `Failed to fetch camps: ${response.status}`);
+    }
+
+    return response.json();
+};
+
 // Create new camp
 export const createCamp = async (campData) => {
     const token = localStorage.getItem('token');
@@ -137,5 +157,24 @@ export const fetchCampsByQuickFilter = async (filters) => {
     } catch (error) {
         console.error('Filter search error:', error);
         throw error;
+    }
+};
+
+// Function to get coordinates from location
+export const getCoordinatesFromLocation = async (location) => {
+    try {
+        const response = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(location)}`);
+        const data = await response.json();
+        
+        if (data && data.length > 0) {
+            return {
+                type: 'Point',
+                coordinates: [parseFloat(data[0].lon), parseFloat(data[0].lat)]
+            };
+        }
+        return null;
+    } catch (error) {
+        console.error('Error getting coordinates:', error);
+        return null;
     }
 };

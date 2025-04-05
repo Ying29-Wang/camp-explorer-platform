@@ -26,3 +26,30 @@ export const createReview = async (reviewData) => {
     }
     return response.json();
 };
+
+export const fetchUserReviews = async () => {
+    const token = localStorage.getItem('token');
+    const response = await fetch(`${API_BASE}/reviews/user`, {
+        headers: {
+            'Authorization': `Bearer ${token}`
+        }
+    });
+    if (!response.ok) {
+        throw new Error('Failed to fetch user reviews');
+    }
+    return response.json();
+};
+
+export const deleteReview = async (reviewId) => {
+    const token = localStorage.getItem('token');
+    const response = await fetch(`${API_BASE}/reviews/${reviewId}`, {
+        method: 'DELETE',
+        headers: {
+            'Authorization': `Bearer ${token}`
+        }
+    });
+    if (!response.ok) {
+        throw new Error('Failed to delete review');
+    }
+    return response.json();
+};

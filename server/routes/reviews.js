@@ -16,6 +16,22 @@ router.get('/', async (req, res) => {
     }
 }); 
 
+// @route   GET /api/reviews/user
+// @desc    Get all reviews for the current user
+// @access  Private
+router.get('/user', auth, async (req, res) => {
+    try {
+        const reviews = await Review.find({ userId: req.user.id })
+            .sort({ createdAt: -1 })
+            .populate('campId', 'name location description image')
+            .populate('userId', 'username');
+        res.json(reviews);
+    } catch (err) {
+        console.error(err.message);
+        res.status(500).json({ message: 'Server Error' });
+    }
+});
+
 // @route   GET /api/reviews/camp/:campId
 // @desc    Get all reviews for a specific camp
 // @access  Public

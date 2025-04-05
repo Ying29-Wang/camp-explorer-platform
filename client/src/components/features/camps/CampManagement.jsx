@@ -1,295 +1,444 @@
 import React, { useState, useEffect } from 'react';
+import { fetchCampsByOwner, createCamp, updateCamp, deleteCamp, getCoordinatesFromLocation } from '../../../services/campService';
 import { useAuth } from '../../../context/AuthContext';
-import { createCamp, updateCamp, deleteCamp, fetchCamps } from '../../../services/campService';
+import Header from '../../../components/layout/Header';
 import './CampManagement.css';
 
 const CampManagement = () => {
-    const { user } = useAuth();
     const [camps, setCamps] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [editingCamp, setEditingCamp] = useState(null);
+    const [showForm, setShowForm] = useState(false);
     const [formData, setFormData] = useState({
         name: '',
         description: '',
         location: '',
-        category: '',
         price: '',
-        website: '',
-        contact: '',
-        email: '',
-        phone: '',
+        ageRange: { min: '', max: '' },
+        category: '',
+        activities: '',
         startDate: '',
         endDate: '',
         capacity: '',
-        activities: []
+        image: '',
+        website: '',
+        contact: '',
+        email: '',
+        phone: ''
     });
+    const { user } = useAuth();
 
     useEffect(() => {
-        // Check if user has permission to access this page
-        if (!user || (user.role !== 'admin' && user.role !== 'camp_owner')) {
-            setError('You do not have permission to access this page');
-            setLoading(false);
-            return;
-        }
-        fetchCampsList();
-    }, [user]);
+        loadCamps();
+    }, []);
 
-    const fetchCampsList = async () => {
+    const loadCamps = async () => {
         try {
-            const data = await fetchCamps();
-            // Filter camps based on user role
-            const filteredCamps = user.role === 'admin' 
-                ? data 
-                : data.filter(camp => camp.createdBy === user.id);
-            setCamps(filteredCamps);
-            setLoading(false);
-        } catch {
-            setError('Failed to fetch camps');
+            setLoading(true);
+            setError(null);
+            const data = await fetchCampsByOwner();
+            setCamps(data);
+        } catch (err) {
+            console.error('Error loading camps:', err);
+            setError(err.message || 'Failed to load camps. Please try again later.');
+        } finally {
             setLoading(false);
         }
     };
 
     const handleInputChange = (e) => {
         const { name, value } = e.target;
-        setFormData(prev => ({
-            ...prev,
-            [name]: value
-        }));
+        if (name === 'minAge' || name === 'maxAge') {
+            setFormData(prev => ({
+                ...prev,
+                ageRange: {
+                    ...prev.ageRange,
+                    [name === 'minAge' ? 'min' : 'max']: value
+                }
+            }));
+        } else {
+            setFormData(prev => ({
+                ...prev,
+                [name]: value
+            }));
+        }
     };
 
     const handleSubmit = async (e) => {
         e.preventDefault();
         try {
-            if (editingCamp) {
-                await updateCamp(editingCamp._id, formData);
-            } else {
-                await createCamp(formData);
+            // Get coordinates from location
+            const coordinates = await getCoordinatesFromLocation(formData.location);
+            if (!coordinates) {
+                throw new Error('Could not find coordinates for the given location');
             }
+
+            // Convert activities string to array
+            const activitiesArray = formData.activities.split(',').map(activity => activity.trim());
+            
+            // Convert dates to proper format
+            const startDate = new Date(formData.startDate);
+            const endDate = new Date(formData.endDate);
+            
+            // Convert age range to numbers
+            const ageRange = {
+                min: parseInt(formData.ageRange.min),
+                max: parseInt(formData.ageRange.max)
+            };
+
+            // Convert price to number
+            const price = parseFloat(formData.price);
+            
+            // Convert capacity to number
+            const capacity = parseInt(formData.capacity);
+
+            // Prepare camp data with all required fields
+            const campData = {
+                name: formData.name,
+                description: formData.description,
+                location: formData.location,
+                coordinates: coordinates,
+                formattedAddress: formData.location,
+                ageRange: ageRange,
+                category: formData.category,
+                activities: activitiesArray,
+                price: price,
+                image: [formData.image],
+                website: formData.website,
+                contact: formData.contact,
+                email: formData.email,
+                phone: formData.phone,
+                startDate: startDate,
+                endDate: endDate,
+                capacity: capacity
+            };
+
+            console.log('Submitting camp data:', campData);
+
+            if (editingCamp) {
+                await updateCamp(editingCamp._id, campData);
+            } else {
+                await createCamp(campData);
+            }
+            
+            setShowForm(false);
             setEditingCamp(null);
             setFormData({
                 name: '',
                 description: '',
                 location: '',
-                category: '',
                 price: '',
-                website: '',
-                contact: '',
-                email: '',
-                phone: '',
+                ageRange: { min: '', max: '' },
+                category: '',
+                activities: '',
                 startDate: '',
                 endDate: '',
                 capacity: '',
-                activities: []
+                image: '',
+                website: '',
+                contact: '',
+                email: '',
+                phone: ''
             });
-            fetchCampsList();
-        } catch (error) {
-            setError(error.message || 'Failed to save camp');
+            await loadCamps();
+        } catch (err) {
+            console.error('Error saving camp:', err);
+            setError(err.message || 'Failed to save camp');
+        }
+    };
+
+    const handleDelete = async (id) => {
+        if (window.confirm('Are you sure you want to delete this camp?')) {
+            try {
+                await deleteCamp(id);
+                await loadCamps();
+            } catch (err) {
+                setError(err.message || 'Failed to delete camp');
+            }
         }
     };
 
     const handleEdit = (camp) => {
-        // Check if user has permission to edit this camp
-        if (user.role !== 'admin' && camp.createdBy !== user.id) {
-            setError('You do not have permission to edit this camp');
-            return;
-        }
         setEditingCamp(camp);
         setFormData({
             name: camp.name,
             description: camp.description,
             location: camp.location,
-            category: camp.category,
             price: camp.price,
-            website: camp.website,
-            contact: camp.contact,
-            email: camp.email,
-            phone: camp.phone,
-            startDate: camp.startDate,
-            endDate: camp.endDate,
+            ageRange: camp.ageRange,
+            category: camp.category,
+            activities: camp.activities.join(', '),
+            startDate: camp.startDate?.split('T')[0] || '',
+            endDate: camp.endDate?.split('T')[0] || '',
             capacity: camp.capacity,
-            activities: camp.activities
+            image: camp.image?.[0] || '',
+            website: camp.website || '',
+            contact: camp.contact || '',
+            email: camp.email || '',
+            phone: camp.phone || ''
         });
+        setShowForm(true);
     };
 
-    const handleDelete = async (campId) => {
-        // Check if user has permission to delete this camp
-        const camp = camps.find(c => c._id === campId);
-        if (user.role !== 'admin' && camp.createdBy !== user.id) {
-            setError('You do not have permission to delete this camp');
-            return;
-        }
+    if (loading) {
+        return (
+            <div className="camp-management">
+                <h2>Manage Your Camps</h2>
+                <div className="loading">Loading your camps...</div>
+            </div>
+        );
+    }
 
-        if (window.confirm('Are you sure you want to delete this camp?')) {
-            try {
-                await deleteCamp(campId);
-                fetchCampsList();
-            } catch (error) {
-                setError(error.message || 'Failed to delete camp');
-            }
-        }
-    };
-
-    if (loading) return <div>Loading...</div>;
-    if (error) return <div className="error">{error}</div>;
+    if (error) {
+        return (
+            <div className="camp-management">
+                <h2>Manage Your Camps</h2>
+                <div className="error-message">{error}</div>
+                <button onClick={loadCamps} className="retry-button">
+                    Try Again
+                </button>
+            </div>
+        );
+    }
 
     return (
         <div className="camp-management">
-            <h2>Camp Management</h2>
-            
-            <form onSubmit={handleSubmit} className="camp-form">
-                <div className="form-group">
-                    <label>Name</label>
-                    <input
-                        type="text"
-                        name="name"
-                        value={formData.name}
-                        onChange={handleInputChange}
-                        required
-                    />
-                </div>
-
-                <div className="form-group">
-                    <label>Description</label>
-                    <textarea
-                        name="description"
-                        value={formData.description}
-                        onChange={handleInputChange}
-                        required
-                    />
-                </div>
-
-                <div className="form-group">
-                    <label>Location</label>
-                    <input
-                        type="text"
-                        name="location"
-                        value={formData.location}
-                        onChange={handleInputChange}
-                        required
-                    />
-                </div>
-
-                <div className="form-group">
-                    <label>Category</label>
-                    <input
-                        type="text"
-                        name="category"
-                        value={formData.category}
-                        onChange={handleInputChange}
-                        required
-                    />
-                </div>
-
-                <div className="form-group">
-                    <label>Price</label>
-                    <input
-                        type="number"
-                        name="price"
-                        value={formData.price}
-                        onChange={handleInputChange}
-                        required
-                    />
-                </div>
-
-                <div className="form-group">
-                    <label>Website</label>
-                    <input
-                        type="url"
-                        name="website"
-                        value={formData.website}
-                        onChange={handleInputChange}
-                        required
-                    />
-                </div>
-
-                <div className="form-group">
-                    <label>Contact Person</label>
-                    <input
-                        type="text"
-                        name="contact"
-                        value={formData.contact}
-                        onChange={handleInputChange}
-                        required
-                    />
-                </div>
-
-                <div className="form-group">
-                    <label>Email</label>
-                    <input
-                        type="email"
-                        name="email"
-                        value={formData.email}
-                        onChange={handleInputChange}
-                        required
-                    />
-                </div>
-
-                <div className="form-group">
-                    <label>Phone</label>
-                    <input
-                        type="tel"
-                        name="phone"
-                        value={formData.phone}
-                        onChange={handleInputChange}
-                        required
-                    />
-                </div>
-
-                <div className="form-group">
-                    <label>Start Date</label>
-                    <input
-                        type="date"
-                        name="startDate"
-                        value={formData.startDate}
-                        onChange={handleInputChange}
-                        required
-                    />
-                </div>
-
-                <div className="form-group">
-                    <label>End Date</label>
-                    <input
-                        type="date"
-                        name="endDate"
-                        value={formData.endDate}
-                        onChange={handleInputChange}
-                        required
-                    />
-                </div>
-
-                <div className="form-group">
-                    <label>Capacity</label>
-                    <input
-                        type="number"
-                        name="capacity"
-                        value={formData.capacity}
-                        onChange={handleInputChange}
-                        required
-                    />
-                </div>
-
-                <button type="submit" className="submit-btn">
-                    {editingCamp ? 'Update Camp' : 'Create Camp'}
+            <Header />
+            <div className="content">
+                <button onClick={() => setShowForm(true)} className="add-camp-button">
+                    Add New Camp
                 </button>
-            </form>
-
-            <div className="camps-list">
-                <h3>{user.role === 'admin' ? 'All Camps' : 'Your Camps'}</h3>
-                {camps.map(camp => (
-                    <div key={camp._id} className="camp-item">
-                        <div className="camp-item-content">
-                            <div className="camp-item-info">
-                                <h4>{camp.name}</h4>
-                                <p>{camp.location} • {camp.category}</p>
+                
+                {showForm && (
+                    <div className="camp-form">
+                        <h3>{editingCamp ? 'Edit Camp' : 'Add New Camp'}</h3>
+                        <form onSubmit={handleSubmit}>
+                            <div className="form-group">
+                                <label>Camp Name</label>
+                                <input
+                                    type="text"
+                                    name="name"
+                                    value={formData.name}
+                                    onChange={handleInputChange}
+                                    required
+                                />
                             </div>
-                            <div className="camp-actions">
-                                <button onClick={() => handleEdit(camp)}>Edit</button>
-                                <button onClick={() => handleDelete(camp._id)}>Delete</button>
+                            <div className="form-group">
+                                <label>Description</label>
+                                <textarea
+                                    name="description"
+                                    value={formData.description}
+                                    onChange={handleInputChange}
+                                    required
+                                />
                             </div>
-                        </div>
+                            <div className="form-group">
+                                <label>Location</label>
+                                <input
+                                    type="text"
+                                    name="location"
+                                    value={formData.location}
+                                    onChange={handleInputChange}
+                                    required
+                                />
+                            </div>
+                            <div className="form-group">
+                                <label>Price</label>
+                                <input
+                                    type="number"
+                                    name="price"
+                                    value={formData.price}
+                                    onChange={handleInputChange}
+                                    required
+                                />
+                            </div>
+                            <div className="form-group">
+                                <label>Age Range</label>
+                                <div className="age-range-inputs">
+                                    <input
+                                        type="number"
+                                        name="minAge"
+                                        placeholder="Min Age"
+                                        value={formData.ageRange.min}
+                                        onChange={handleInputChange}
+                                        required
+                                    />
+                                    <input
+                                        type="number"
+                                        name="maxAge"
+                                        placeholder="Max Age"
+                                        value={formData.ageRange.max}
+                                        onChange={handleInputChange}
+                                        required
+                                    />
+                                </div>
+                            </div>
+                            <div className="form-group">
+                                <label>Category</label>
+                                <select
+                                    name="category"
+                                    value={formData.category}
+                                    onChange={handleInputChange}
+                                    required
+                                >
+                                    <option value="">Select a category</option>
+                                    <option value="Adventure">Adventure</option>
+                                    <option value="Sports">Sports</option>
+                                    <option value="Arts">Arts</option>
+                                    <option value="Science">Science</option>
+                                    <option value="Technology">Technology</option>
+                                </select>
+                            </div>
+                            <div className="form-group">
+                                <label>Activities (comma separated)</label>
+                                <input
+                                    type="text"
+                                    name="activities"
+                                    value={formData.activities}
+                                    onChange={handleInputChange}
+                                    required
+                                />
+                            </div>
+                            <div className="form-group">
+                                <label>Start Date</label>
+                                <input
+                                    type="date"
+                                    name="startDate"
+                                    value={formData.startDate}
+                                    onChange={handleInputChange}
+                                    required
+                                />
+                            </div>
+                            <div className="form-group">
+                                <label>End Date</label>
+                                <input
+                                    type="date"
+                                    name="endDate"
+                                    value={formData.endDate}
+                                    onChange={handleInputChange}
+                                    required
+                                />
+                            </div>
+                            <div className="form-group">
+                                <label>Capacity</label>
+                                <input
+                                    type="number"
+                                    name="capacity"
+                                    value={formData.capacity}
+                                    onChange={handleInputChange}
+                                    required
+                                />
+                            </div>
+                            <div className="form-group">
+                                <label>Image URL</label>
+                                <input
+                                    type="text"
+                                    name="image"
+                                    value={formData.image}
+                                    onChange={handleInputChange}
+                                    required
+                                />
+                            </div>
+                            <div className="form-group">
+                                <label>Website</label>
+                                <input
+                                    type="url"
+                                    name="website"
+                                    value={formData.website}
+                                    onChange={handleInputChange}
+                                    required
+                                />
+                            </div>
+                            <div className="form-group">
+                                <label>Contact Person</label>
+                                <input
+                                    type="text"
+                                    name="contact"
+                                    value={formData.contact}
+                                    onChange={handleInputChange}
+                                    required
+                                />
+                            </div>
+                            <div className="form-group">
+                                <label>Email</label>
+                                <input
+                                    type="email"
+                                    name="email"
+                                    value={formData.email}
+                                    onChange={handleInputChange}
+                                    required
+                                />
+                            </div>
+                            <div className="form-group">
+                                <label>Phone</label>
+                                <input
+                                    type="tel"
+                                    name="phone"
+                                    value={formData.phone}
+                                    onChange={handleInputChange}
+                                    required
+                                />
+                            </div>
+                            <div className="form-actions">
+                                <button type="submit" className="submit-btn">
+                                    {editingCamp ? 'Update Camp' : 'Add Camp'}
+                                </button>
+                                <button
+                                    type="button"
+                                    onClick={() => {
+                                        setShowForm(false);
+                                        setEditingCamp(null);
+                                        setFormData({
+                                            name: '',
+                                            description: '',
+                                            location: '',
+                                            price: '',
+                                            ageRange: { min: '', max: '' },
+                                            category: '',
+                                            activities: '',
+                                            startDate: '',
+                                            endDate: '',
+                                            capacity: '',
+                                            image: '',
+                                            website: '',
+                                            contact: '',
+                                            email: '',
+                                            phone: ''
+                                        });
+                                    }}
+                                    className="cancel-btn"
+                                >
+                                    Cancel
+                                </button>
+                            </div>
+                        </form>
                     </div>
-                ))}
+                )}
+
+                <div className="camps-list">
+                    {camps.length === 0 ? (
+                        <p className="no-camps">You haven't created any camps yet.</p>
+                    ) : (
+                        camps.map(camp => (
+                            <div key={camp._id} className="camp-card">
+                                <h3>{camp.name}</h3>
+                                <p>{camp.description}</p>
+                                <p>Location: {camp.location}</p>
+                                <p>Price: ${camp.price}</p>
+                                <p>Age Range: {camp.ageRange.min}-{camp.ageRange.max}</p>
+                                <p>Category: {camp.category}</p>
+                                <p>Contact: {camp.contact}</p>
+                                <p>Email: {camp.email}</p>
+                                <p>Phone: {camp.phone}</p>
+                                <div className="camp-actions">
+                                    <button onClick={() => handleEdit(camp)}>Edit</button>
+                                    <button onClick={() => handleDelete(camp._id)}>Delete</button>
+                                </div>
+                            </div>
+                        ))
+                    )}
+                </div>
             </div>
         </div>
     );
