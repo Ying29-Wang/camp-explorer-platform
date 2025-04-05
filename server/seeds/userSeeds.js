@@ -1,12 +1,15 @@
 const User = require('../models/user');
 const bcrypt = require('bcryptjs');
 
+const timestamp = Date.now();
+
 const users = [
   {
-    username: 'parent1',
-    email: 'parent1@example.com',
+    username: `seed_parent1_${timestamp}`,
+    email: `seed_parent1_${timestamp}@example.com`,
     password: 'password123',
     role: 'parent',
+    isSeedUser: true,
     children: [
       {
         firstName: 'Alex',
@@ -25,10 +28,11 @@ const users = [
     ]
   },
   {
-    username: 'parent2',
-    email: 'parent2@example.com',
+    username: `seed_parent2_${timestamp}`,
+    email: `seed_parent2_${timestamp}@example.com`,
     password: 'password123',
     role: 'parent',
+    isSeedUser: true,
     children: [
       {
         firstName: 'Noah',
@@ -40,22 +44,25 @@ const users = [
     ]
   },
   {
-    username: 'campowner1',
-    email: 'campowner1@example.com',
+    username: `seed_campowner1_${timestamp}`,
+    email: `seed_campowner1_${timestamp}@example.com`,
     password: 'password123',
-    role: 'camp_owner'
+    role: 'camp_owner',
+    isSeedUser: true
   },
   {
-    username: 'campowner2',
-    email: 'campowner2@example.com',
+    username: `seed_campowner2_${timestamp}`,
+    email: `seed_campowner2_${timestamp}@example.com`,
     password: 'password123',
-    role: 'camp_owner'
+    role: 'camp_owner',
+    isSeedUser: true
   },
   {
-    username: 'admin',
-    email: 'admin@example.com',
+    username: `seed_admin_${timestamp}`,
+    email: `seed_admin_${timestamp}@example.com`,
     password: 'password123',
-    role: 'admin'
+    role: 'admin',
+    isSeedUser: true
   }
 ];
 
@@ -71,15 +78,18 @@ const seedUsers = async () => {
         };
       }));
 
+      // Delete only seed users
+      await User.deleteMany({ isSeedUser: true });
+
       // Insert users into database
       const createdUsers = await User.insertMany(hashedUsers);
-      console.log(`${createdUsers.length} users created`);
+      console.log(`${createdUsers.length} seed users created`);
       
       // Return the created users for use in other seed files
       return createdUsers;
     } catch (error) {
       console.error('Error seeding users:', error);
-      throw error; // Re-throw to be caught by the main error handler
+      throw error;
     }
   };
 

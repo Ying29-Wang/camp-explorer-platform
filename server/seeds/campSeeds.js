@@ -28,7 +28,8 @@ const camps = [
     startDate: new Date('2023-06-15'),
     endDate: new Date('2023-06-30'),
     capacity: 60,
-    registered: 45
+    registered: 45,
+    isSeedCamp: true
   },
   {
     name: 'Tech Innovation Camp',
@@ -55,7 +56,8 @@ const camps = [
     startDate: new Date('2023-07-10'),
     endDate: new Date('2023-07-21'),
     capacity: 40,
-    registered: 35
+    registered: 35,
+    isSeedCamp: true
   },
   {
     name: 'Creative Arts Camp',
@@ -82,7 +84,8 @@ const camps = [
     startDate: new Date('2023-07-05'),
     endDate: new Date('2023-07-19'),
     capacity: 35,
-    registered: 28
+    registered: 28,
+    isSeedCamp: true
   },
   {
     name: 'Sports Elite Camp',
@@ -109,7 +112,8 @@ const camps = [
     startDate: new Date('2023-06-20'),
     endDate: new Date('2023-07-15'),
     capacity: 75,
-    registered: 65
+    registered: 65,
+    isSeedCamp: true
   },
   {
     name: 'Science Explorers Camp',
@@ -136,7 +140,8 @@ const camps = [
     startDate: new Date('2023-07-24'),
     endDate: new Date('2023-08-04'),
     capacity: 50,
-    registered: 40
+    registered: 40,
+    isSeedCamp: true
   }
 ];
 

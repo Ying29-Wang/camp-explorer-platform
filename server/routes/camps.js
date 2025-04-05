@@ -234,6 +234,35 @@ router.get('/homepage', async (req, res) => {
     }
 });
 
+// Test endpoint to check database connection
+router.get('/test', async (req, res) => {
+    try {
+        console.log('Testing database connection...');
+        const count = await Camp.countDocuments();
+        console.log('Number of camps in database:', count);
+        res.json({ message: 'Database connection successful', campCount: count });
+    } catch (err) {
+        console.error('Database test error:', err);
+        res.status(500).json({ message: 'Database connection failed', error: err.message });
+    }
+});
+
+// @route   GET /api/camps/owner
+// @desc    Get all camps owned by the current user
+// @access  Private
+router.get('/owner', auth, async (req, res) => {
+    try {
+        console.log('Received request for /api/camps/owner');
+        console.log('User ID:', req.user.id);
+        const camps = await Camp.find({ owner: req.user.id });
+        console.log('Found camps:', camps);
+        res.json(camps);
+    } catch (err) {
+        console.error('Error in /api/camps/owner:', err.message);
+        res.status(500).json({ message: 'Server Error' });
+    }
+});
+
 // @route   Get /api/camps/:id
 // @desc    Get a camp by ID
 // @access  Public
@@ -263,47 +292,25 @@ router.get('/:id', async (req, res) => {
 
 // @route   POST /api/camps
 // @desc    Create a new camp
-// @access  Private (Camp Owners and Admins only)
+// @access  Private
 router.post('/', auth, async (req, res) => {
     try {
-        // Check if user is authorized (camp owner or admin)
-        if(req.user.role !== 'camp_owner' && req.user.role !== 'admin') {
-            return res.status(403).json({ message: 'Access denied. Only camp owners and admins can create camps.' });
-        }
-
-        // Validate required fields
-        const requiredFields = ['name', 'description', 'location', 'category', 'price', 'website', 'contact', 'email', 'phone', 'startDate', 'endDate', 'capacity'];
-        const missingFields = requiredFields.filter(field => !req.body[field]);
-        
-        if (missingFields.length > 0) {
-            return res.status(400).json({ 
-                message: 'Missing required fields', 
-                fields: missingFields 
-            });
-        }
-
         const newCamp = new Camp({
             ...req.body,
-            createdBy: req.user.id // Associate the camp with the logged-in user
+            owner: req.user.id
         });
 
         const camp = await newCamp.save();
-        res.status(201).json(camp);
+        res.json(camp);
     } catch (err) {
-        console.error('Error creating camp:', err);
-        if (err.name === 'ValidationError') {
-            return res.status(400).json({ 
-                message: 'Validation Error', 
-                errors: Object.values(err.errors).map(e => e.message) 
-            });
-        }
-        res.status(500).json({ message: 'Server Error', error: err.message });
+        console.error(err.message);
+        res.status(500).json({ message: 'Server Error' });
     }
 });
 
 // @route   PUT /api/camps/:id
 // @desc    Update a camp
-// @access  Private (Camp Owners and Admins only)
+// @access  Private
 router.put('/:id', auth, async (req, res) => {
     try {
         const camp = await Camp.findById(req.params.id);
@@ -312,45 +319,26 @@ router.put('/:id', auth, async (req, res) => {
             return res.status(404).json({ message: 'Camp not found' });
         }
 
-        // Check if user is authorized to update the camp
-        if (camp.createdBy && camp.createdBy.toString() !== req.user.id && req.user.role !== 'admin') {
-            return res.status(403).json({ message: 'Access denied. Only the camp owner or admin can update this camp.' });
-        }
-
-        // Validate dates if provided
-        if (req.body.startDate && req.body.endDate) {
-            const startDate = new Date(req.body.startDate);
-            const endDate = new Date(req.body.endDate);
-            if (startDate >= endDate) {
-                return res.status(400).json({ message: 'Start date must be before end date' });
-            }
+        // Check if the user is the owner of the camp
+        if (camp.owner.toString() !== req.user.id && req.user.role !== 'admin') {
+            return res.status(403).json({ message: 'Access denied' });
         }
 
         const updatedCamp = await Camp.findByIdAndUpdate(
             req.params.id,
             { $set: req.body },
-            { new: true, runValidators: true }
+            { new: true }
         );
-
         res.json(updatedCamp);
     } catch (err) {
-        console.error('Error updating camp:', err);
-        if (err.name === 'ValidationError') {
-            return res.status(400).json({ 
-                message: 'Validation Error', 
-                errors: Object.values(err.errors).map(e => e.message) 
-            });
-        }
-        if (err.kind === 'ObjectId') {
-            return res.status(404).json({ message: 'Camp not found' });
-        }
-        res.status(500).json({ message: 'Server Error', error: err.message });
+        console.error(err.message);
+        res.status(500).json({ message: 'Server Error' });
     }
 });
 
 // @route   DELETE /api/camps/:id
 // @desc    Delete a camp
-// @access  Private (Camp Owners and Admins only)
+// @access  Private
 router.delete('/:id', auth, async (req, res) => {
     try {
         const camp = await Camp.findById(req.params.id);
@@ -359,23 +347,16 @@ router.delete('/:id', auth, async (req, res) => {
             return res.status(404).json({ message: 'Camp not found' });
         }
 
-        // Check if user is authorized to delete the camp
-        if (camp.createdBy && camp.createdBy.toString() !== req.user.id && req.user.role !== 'admin') {
-            return res.status(403).json({ message: 'Access denied. Only the camp owner or admin can delete this camp.' });
+        // Check if the user is the owner of the camp
+        if (camp.owner.toString() !== req.user.id && req.user.role !== 'admin') {
+            return res.status(403).json({ message: 'Access denied' });
         }
 
-        // Also delete associated reviews
-        await Review.deleteMany({ campId: req.params.id });
-        
         await camp.deleteOne();
-
-        res.json({ message: 'Camp and associated reviews deleted successfully' });
+        res.json({ message: 'Camp deleted' });
     } catch (err) {
-        console.error('Error deleting camp:', err);
-        if (err.kind === 'ObjectId') {
-            return res.status(404).json({ message: 'Camp not found' });
-        }
-        res.status(500).json({ message: 'Server Error', error: err.message });
+        console.error(err.message);
+        res.status(500).json({ message: 'Server Error' });
     }
 });
 
