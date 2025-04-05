@@ -17,9 +17,9 @@ router.post('/register', async (req, res) => {
             return res.status(400).json({ msg: 'Please provide all required fields' });
         }
 
-        // Validate role
-        if (role && !['parent', 'camp_owner', 'admin'].includes(role)) {
-            return res.status(400).json({ msg: 'Invalid role specified' });
+        // Validate role - only allow parent or camp_owner roles
+        if (role && !['parent', 'camp_owner'].includes(role)) {
+            return res.status(400).json({ msg: 'Invalid role specified. Only parent and camp owner roles are allowed.' });
         }
 
         // Check if user already exists

@@ -9,6 +9,7 @@ import RegistrationPage from './pages/RegistrationPage';
 import ProfilePage from './pages/ProfilePage';
 import CampDetailsPage from './pages/CampDetailsPage';
 import CampManagement from './components/features/camps/CampManagement';
+import UserManagement from './components/features/admin/UserManagement';
 import { useAuth } from './context/AuthContext';
 
 const ProtectedRoute = ({ children, roles }) => {
@@ -42,6 +43,14 @@ const AppRoutes = () => {
                             element={
                                 <ProtectedRoute roles={['admin', 'camp_owner']}>
                                     <CampManagement />
+                                </ProtectedRoute>
+                            } 
+                        />
+                        <Route 
+                            path="/manage-users" 
+                            element={
+                                <ProtectedRoute roles={['admin']}>
+                                    <UserManagement />
                                 </ProtectedRoute>
                             } 
                         />
