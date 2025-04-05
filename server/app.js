@@ -70,8 +70,8 @@ app.get('/api/dbcheck', async (req, res) => {
     }
 });
 
-// Set port
-const PORT = process.env.PORT || 5001;
+// Set port from environment variable only
+const PORT = process.env.PORT;
 app.set('port', PORT);
 
 // Start server
