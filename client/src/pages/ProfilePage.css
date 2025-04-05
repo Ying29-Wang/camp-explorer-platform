@@ -1,7 +1,11 @@
-.profile {
+.profile-page {
+  width: 100%;
+}
+
+.profile-content {
   max-width: 1200px;
-  margin: 0 auto;
-  padding: 2rem;
+  margin: 2rem auto;
+  padding: 0 2rem;
 }
 
 .profile-section {
@@ -87,4 +91,18 @@
 
 .logout-button:hover {
   background-color: #5a6268;
+}
+
+.user-info {
+  margin: 1rem 0;
+}
+
+.user-info p {
+  margin: 0.5rem 0;
+  color: #333;
+}
+
+.user-info strong {
+  color: #666;
+  margin-right: 0.5rem;
 } 

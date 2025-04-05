@@ -59,7 +59,16 @@ const ProfilePage = () => {
     <div className="profile-page">
       <Header />
       <div className="profile-content">
-        <h1>My Reviews</h1>
+        <h1>My Profile</h1>
+        <div className="profile-section">
+          <div className="user-info">
+            <p><strong>Username:</strong> {user.username}</p>
+            <p><strong>Email:</strong> {user.email}</p>
+            <p><strong>Phone:</strong> {user.phone || 'Not provided'}</p>
+          </div>
+        </div>
+
+        <h2>My Reviews</h2>
         {loading ? (
           <p>Loading reviews...</p>
         ) : error ? (
