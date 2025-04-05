@@ -2,7 +2,6 @@ import { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { fetchCampById } from '../services/campService';
 import { fetchReviewsByCampId } from '../services/reviewService';
-import { API_URL } from '../config/api.js';
 
 import Header from '../components/layout/Header';
 import Map from '../components/common/Map.jsx';
@@ -24,11 +23,14 @@ const CampDetailsPage = () => {
             try {
                 setLoading(true);
                 setError(null);
+                console.log('Fetching camp data for ID:', id);
                 
                 const [campData, reviewData] = await Promise.all([
                     fetchCampById(id),
                     fetchReviewsByCampId(id)
                 ]);
+                
+                console.log('Received camp data:', campData);
                 
                 if (!campData) {
                     throw new Error('Camp not found');
@@ -50,7 +52,7 @@ const CampDetailsPage = () => {
     const handleReviewSubmit = async (reviewData) => {
         try {
             const token = localStorage.getItem('token');
-            const response = await fetch(`${API_URL}/reviews`, {
+            const response = await fetch('/api/reviews', {
                 method: 'POST',
                 headers: { 
                     'Content-Type': 'application/json',

@@ -268,9 +268,24 @@ router.get('/owner', auth, async (req, res) => {
 // @access  Public
 router.get('/:id', async (req, res) => {
     try {
+        console.log('Fetching camp with ID:', req.params.id);
+        
+        // Check if MongoDB is connected
+        if (mongoose.connection.readyState !== 1) {
+            console.log('MongoDB not connected, returning sample data');
+            const sampleCamp = SAMPLE_CAMPS.find(camp => camp._id === req.params.id);
+            if (sampleCamp) {
+                console.log('Found sample camp:', sampleCamp);
+                return res.json(sampleCamp);
+            }
+            return res.status(404).json({ message: 'Camp not found' });
+        }
+        
         const camp = await Camp.findById(req.params.id);
+        console.log('Found camp:', camp);
         
         if (!camp) {
+            console.log('No camp found with ID:', req.params.id);
             return res.status(404).json({ message: 'Camp not found' });
         }
         
