@@ -295,16 +295,37 @@ router.get('/:id', async (req, res) => {
 // @access  Private
 router.post('/', auth, async (req, res) => {
     try {
+        console.log('Received camp creation request:', req.body);
+        
+        // Validate required fields
+        const requiredFields = ['name', 'description', 'location', 'price', 'ageRange', 'category', 'website', 'contact', 'email', 'phone', 'startDate', 'endDate', 'capacity'];
+        const missingFields = requiredFields.filter(field => !req.body[field]);
+        
+        if (missingFields.length > 0) {
+            console.log('Missing required fields:', missingFields);
+            return res.status(400).json({ 
+                message: 'Missing required fields', 
+                missingFields 
+            });
+        }
+
         const newCamp = new Camp({
             ...req.body,
             owner: req.user.id
         });
 
+        console.log('Attempting to save new camp:', newCamp);
         const camp = await newCamp.save();
+        console.log('Camp saved successfully:', camp);
+        
         res.json(camp);
     } catch (err) {
-        console.error(err.message);
-        res.status(500).json({ message: 'Server Error' });
+        console.error('Error creating camp:', err);
+        res.status(500).json({ 
+            message: 'Server Error',
+            error: err.message,
+            stack: process.env.NODE_ENV === 'development' ? err.stack : undefined
+        });
     }
 });
 
