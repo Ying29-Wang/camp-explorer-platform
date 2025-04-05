@@ -5,7 +5,6 @@ A comprehensive full-stack web application for discovering, managing, and review
 ## 🚀 Features
 
 ### Core Functionality
-
 - ✅ Browse and search camping locations
 - ✅ View detailed camp information
 - ✅ User authentication and authorization
@@ -14,16 +13,13 @@ A comprehensive full-stack web application for discovering, managing, and review
 - ✅ Responsive design for all devices
 
 ### API Operations
-
 - **Camps Management**
-
   - ✅ Create new camp listings
   - ✅ Read camp details and listings
   - ✅ Update camp information
   - ✅ Delete camp listings
 
 - **User Management**
-
   - ✅ User registration
   - ✅ User profiles
   - ✅ User role management
@@ -36,7 +32,6 @@ A comprehensive full-stack web application for discovering, managing, and review
   - ✅ Delete reviews
 
 ### Authentication & Security
-
 - ✅ Secure user registration
 - ✅ JWT-based authentication
 - ✅ Role-based access control
@@ -44,13 +39,11 @@ A comprehensive full-stack web application for discovering, managing, and review
 - ✅ Session management
 
 ### External Integrations
-
 - ✅ Google Maps API integration
 - ✅ Geocoding service for address conversion
 - ✅ Real-time location services
 
 ### Pages & UI Components
-
 - ✅ Homepage with featured camps
 - ✅ Search results with filters
 - ✅ Detailed camp view
@@ -60,7 +53,6 @@ A comprehensive full-stack web application for discovering, managing, and review
 - ✅ Admin control panel
 
 ### Data Handling
-
 - ✅ Form validation
 - ✅ Error handling
 - ✅ Loading states
@@ -70,7 +62,6 @@ A comprehensive full-stack web application for discovering, managing, and review
 ## Tech Stack
 
 ### Frontend
-
 - React.js
 - Vite
 - React Router
@@ -80,7 +71,6 @@ A comprehensive full-stack web application for discovering, managing, and review
 - Google Maps API
 
 ### Backend
-
 - Node.js
 - Express.js
 - MongoDB
@@ -99,14 +89,12 @@ A comprehensive full-stack web application for discovering, managing, and review
 ## Installation
 
 1. Clone the repository:
-
 ```bash
 git clone [your-repository-url]
 cd camp-explorer-platform
 ```
 
 2. Install dependencies:
-
 ```bash
 npm run install-all
 ```
@@ -130,7 +118,6 @@ npm run install-all
 ## Running the Application
 
 1. Start both frontend and backend servers:
-
 ```bash
 npm start
 ```
@@ -138,19 +125,16 @@ npm start
 Or run them separately:
 
 2. Start the backend server:
-
 ```bash
 npm run server
 ```
 
 3. Start the frontend development server:
-
 ```bash
 npm run client
 ```
 
 The application will be available at:
-
 - Frontend: http://localhost:5173
 - Backend API: http://localhost:5000
 
@@ -178,7 +162,6 @@ camp-explorer-platform/
 ## API Endpoints
 
 ### Camps
-
 - `GET /api/camps` - Get all camps
 - `GET /api/camps/:id` - Get camp by ID
 - `POST /api/camps` - Create new camp
@@ -186,7 +169,6 @@ camp-explorer-platform/
 - `DELETE /api/camps/:id` - Delete camp
 
 ### Users
-
 - `POST /api/auth/register` - Register new user
 - `POST /api/auth/login` - User login
 - `GET /api/auth/me` - Get current user
@@ -194,7 +176,6 @@ camp-explorer-platform/
 - `DELETE /api/users/:id` - Delete user
 
 ### Reviews
-
 - `GET /api/reviews` - Get all reviews
 - `GET /api/reviews/:id` - Get review by ID
 - `POST /api/reviews` - Create new review
@@ -226,4 +207,4 @@ This project is licensed under the ISC License.
 
 [Your Name] - [Your Email]
 
-Project Link: [https://github.com/yourusername/camp-explorer-platform](https://github.com/yourusername/camp-explorer-platform)
+Project Link: [https://github.com/yourusername/camp-explorer-platform](https://github.com/yourusername/camp-explorer-platform) 
