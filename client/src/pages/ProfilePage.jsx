@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useContext } from 'react';
 import { Navigate } from 'react-router-dom';
 import { AuthContext } from '../context/AuthContext';
-import { fetchUserReviews, deleteReview } from '../services/reviewService';
+import { fetchUserReviews, deleteReview, updateReview } from '../services/reviewService';
 import ReviewCard from '../components/features/reviews/ReviewCard';
 import Header from '../components/layout/Header';
 import './ProfilePage.css';
@@ -41,6 +41,18 @@ const ProfilePage = () => {
     }
   };
 
+  const handleEditReview = async (reviewId, reviewData) => {
+    try {
+      const updatedReview = await updateReview(reviewId, reviewData);
+      setReviews(reviews.map(review => 
+        review._id === reviewId ? updatedReview : review
+      ));
+    } catch (error) {
+      setError(error.message || 'Failed to update review');
+      throw error;
+    }
+  };
+
   if (!isLoggedIn) return <Navigate to="/login" />;
 
   return (
@@ -61,6 +73,7 @@ const ProfilePage = () => {
                 key={review._id} 
                 review={review} 
                 onDelete={handleDeleteReview}
+                onEdit={handleEditReview}
               />
             ))}
           </div>
