@@ -263,29 +263,20 @@ router.get('/owner', auth, async (req, res) => {
     }
 });
 
-// @route   Get /api/camps/:id
+// @route   GET /api/camps/:id
 // @desc    Get a camp by ID
 // @access  Public
 router.get('/:id', async (req, res) => {
     try {
         const camp = await Camp.findById(req.params.id);
+        
         if (!camp) {
             return res.status(404).json({ message: 'Camp not found' });
         }
-
-        // Get reviews for the camp
-        const reviews = await Review.find({ campId: req.params.id })
-            .populate('userId', 'username')
-            .sort({ createdAt: -1 });
-
-        res.json({ camp, reviews });
+        
+        res.json(camp);
     } catch (err) {
-        console.error(err.message);
-
-        if (err.kind === 'ObjectId') {
-            return res.status(404).json({ message: 'Camp not found' });
-        }
-
+        console.error('Error fetching camp:', err);
         res.status(500).json({ message: 'Server Error' });
     }
 });
