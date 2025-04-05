@@ -231,15 +231,12 @@ router.get('/camps', async (req, res) => {
             );
         }
 
-        return successResponse(res, {
-            count: camps.length,
-            camps
-        }, `${camps.length} camps retrieved successfully`);
-    } catch (err) {
-        console.error('Error fetching camps:', err);
+        return successResponse(res, camps, 'Camps retrieved successfully');
+    } catch (error) {
+        console.error('Error fetching camps:', error);
         return errorResponse(res, 500,
-            'Internal server error',
-            'An error occurred while fetching camps'
+            'Server error',
+            'Failed to fetch camps from the database'
         );
     }
 });

@@ -1,23 +1,32 @@
 // Import API URL configuration
 import { API_URL } from '../config/api';
 
-// When using Vite's proxy, you can use a relative URL instead
-const API_BASE = '/api'; // Using relative URL with Vite proxy
-// const API_BASE = API_URL; // Commenting out absolute URL
+// Use the API_URL from config which handles both development and production
+const API_BASE = API_URL;
+
+// Log the API base URL for verification
+console.log('API Base URL:', API_BASE);
 
 export const fetchCamps = async () => {
-    const response = await fetch(`${API_BASE}/camps`);
-    if (!response.ok) {
-        throw new Error(`Failed to fetch camps: ${response.status} ${response.statusText}`);
-    }
-    
-    // Handle potential HTML responses
-    const contentType = response.headers.get('content-type');
-    if (!contentType || !contentType.includes('application/json')) {
-        throw new Error(`Invalid content type. Received: ${contentType || 'none'}`);
-    }
+    try {
+        const fullUrl = `${API_BASE}/camps`;
+        console.log('Fetching camps from:', fullUrl);
+        const response = await fetch(fullUrl);
+        if (!response.ok) {
+            throw new Error(`Failed to fetch camps: ${response.status} ${response.statusText}`);
+        }
+        
+        // Handle potential HTML responses
+        const contentType = response.headers.get('content-type');
+        if (!contentType || !contentType.includes('application/json')) {
+            throw new Error(`Invalid content type. Received: ${contentType || 'none'}`);
+        }
 
-    return response.json();
+        return response.json();
+    } catch (error) {
+        console.error('Error fetching camps:', error);
+        throw error;
+    }
 };
 
 export const fetchCampById = async (id) => {
