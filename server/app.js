@@ -38,12 +38,15 @@ app.use(express.urlencoded({ extended: false }));
 // app.use(cookieParser());
 // app.use(express.static(path.join(__dirname, 'public')));
 
+// Get API prefix from environment variable, default to '/api'
+const API_PREFIX = process.env.API_PREFIX || '/api';
+
 // Routes
-app.use('/camps', require('./routes/camps'));
-app.use('/reviews', require('./routes/reviews'));
-app.use('/users', require('./routes/users'));
-app.use('/auth', require('./routes/auth'));
-app.use('/maps', require('./routes/maps'));
+app.use(`${API_PREFIX}/camps`, require('./routes/camps'));
+app.use(`${API_PREFIX}/reviews`, require('./routes/reviews'));
+app.use(`${API_PREFIX}/users`, require('./routes/users'));
+app.use(`${API_PREFIX}/auth`, require('./routes/auth'));
+app.use(`${API_PREFIX}/maps`, require('./routes/maps'));
 
 // Default route
 app.get('/', (req, res) => {
