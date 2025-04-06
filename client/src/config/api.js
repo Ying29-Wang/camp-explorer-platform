@@ -1,8 +1,16 @@
 // Centralized API URL configuration
 const isDevelopment = import.meta.env.MODE === 'development';
-const defaultApiUrl = isDevelopment ? 'http://localhost:5001/api' : 'https://camp-explorer-server.onrender.com/api';
 
-export const API_URL = import.meta.env.VITE_API_URL || defaultApiUrl;
+// Get API prefix from environment variable, default to '/api'
+const API_PREFIX = import.meta.env.VITE_API_PREFIX || '/api';
+
+// Base URL without prefix
+const baseUrl = isDevelopment 
+    ? 'http://localhost:5001' 
+    : 'https://camp-explorer-server.onrender.com';
+
+// Construct full API URL
+export const API_URL = `${baseUrl}${API_PREFIX}`;
 
 // Log the API URL in development for debugging
 if (isDevelopment) {
