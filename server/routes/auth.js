@@ -4,6 +4,11 @@ const jwt = require('jsonwebtoken');
 const auth = require('../middleware/auth');
 const User = require('../models/user');
 
+// Helper function to send JSON response
+const sendJsonResponse = (res, status, data) => {
+    res.set('Content-Type', 'application/json');
+    return res.status(status).json(data);
+};
 
 // @route   POST /api/auth/register
 // @desc    Register a new user
@@ -14,18 +19,18 @@ router.post('/register', async (req, res) => {
 
         // Validate required fields
         if (!username || !email || !password) {
-            return res.status(400).json({ msg: 'Please provide all required fields' });
+            return sendJsonResponse(res, 400, { msg: 'Please provide all required fields' });
         }
 
         // Validate role - only allow parent or camp_owner roles
         if (role && !['parent', 'camp_owner'].includes(role)) {
-            return res.status(400).json({ msg: 'Invalid role specified. Only parent and camp owner roles are allowed.' });
+            return sendJsonResponse(res, 400, { msg: 'Invalid role specified. Only parent and camp owner roles are allowed.' });
         }
 
         // Check if user already exists
         let user = await User.findOne({ $or: [{ email }, { username }] });
         if (user) {
-            return res.status(400).json({ 
+            return sendJsonResponse(res, 400, { 
                 msg: 'User already exists',
                 field: user.email === email ? 'email' : 'username'
             });
@@ -55,13 +60,16 @@ router.post('/register', async (req, res) => {
             process.env.JWT_SECRET,
             { expiresIn: '24h' },
             (err, token) => {
-                if (err) throw err;
-                res.json({ token });
+                if (err) {
+                    console.error('JWT signing error:', err);
+                    return sendJsonResponse(res, 500, { msg: 'Server error during token generation' });
+                }
+                sendJsonResponse(res, 200, { token });
             }
         );
     } catch (err) {
         console.error('Registration error:', err.message);
-        res.status(500).json({ msg: 'Server error during registration' });
+        sendJsonResponse(res, 500, { msg: 'Server error during registration' });
     }
 });
 
@@ -74,19 +82,19 @@ router.post('/login', async (req, res) => {
 
         // Validate required fields
         if (!email || !password) {
-            return res.status(400).json({ msg: 'Please provide both email and password' });
+            return sendJsonResponse(res, 400, { msg: 'Please provide both email and password' });
         }
 
         // Check if user exists
         const user = await User.findOne({ email });
         if (!user) {
-            return res.status(400).json({ msg: 'User not found' });
+            return sendJsonResponse(res, 400, { msg: 'User not found' });
         }
 
         // Check password
         const isMatch = await user.comparePassword(password);
         if (!isMatch) {
-            return res.status(400).json({ msg: 'Invalid password' });
+            return sendJsonResponse(res, 400, { msg: 'Invalid password' });
         }
 
         // Create a JWT payload
@@ -103,13 +111,16 @@ router.post('/login', async (req, res) => {
             process.env.JWT_SECRET,
             { expiresIn: '24h' },
             (err, token) => {
-                if (err) throw err;
-                res.json({ token });
+                if (err) {
+                    console.error('JWT signing error:', err);
+                    return sendJsonResponse(res, 500, { msg: 'Server error during token generation' });
+                }
+                sendJsonResponse(res, 200, { token });
             }
         );
     } catch (err) {
         console.error('Login error:', err.message);
-        res.status(500).json({ msg: 'Server error during login' });
+        sendJsonResponse(res, 500, { msg: 'Server error during login' });
     }
 });
 
@@ -120,12 +131,12 @@ router.get('/me', auth, async (req, res) => {
     try {
         const user = await User.findById(req.user.id).select('-password');
         if (!user) {
-            return res.status(404).json({ msg: 'User not found' });
+            return sendJsonResponse(res, 404, { msg: 'User not found' });
         }
-        res.json(user);
+        sendJsonResponse(res, 200, user);
     } catch (err) {
         console.error('Get user error:', err.message);
-        res.status(500).json({ msg: 'Server error while fetching user data' });
+        sendJsonResponse(res, 500, { msg: 'Server error while fetching user data' });
     }
 });
 
@@ -136,15 +147,15 @@ router.get('/users', auth, async (req, res) => {
     try {
         // Check if user is admin
         if (req.user.role !== 'admin') {
-            return res.status(403).json({ msg: 'Access denied. Admin only.' });
+            return sendJsonResponse(res, 403, { msg: 'Access denied. Admin only.' });
         }
 
         // Get all users, excluding passwords
         const users = await User.find().select('-password');
-        res.json(users);
+        sendJsonResponse(res, 200, users);
     } catch (err) {
         console.error('Get users error:', err.message);
-        res.status(500).json({ msg: 'Server error while fetching users' });
+        sendJsonResponse(res, 500, { msg: 'Server error while fetching users' });
     }
 });
 

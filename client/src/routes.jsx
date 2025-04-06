@@ -37,7 +37,7 @@ const AppRoutes = () => {
             <AuthProvider>
                 <SearchProvider>
                     <Routes>
-                        <Route path="/" element={<App />} />
+                        <Route path="*" element={<App />} />
                         <Route path="/search" element={<SearchResults />} />
                         <Route path="/login" element={<LoginPage />} />
                         <Route path="/register" element={<RegistrationPage />} />
