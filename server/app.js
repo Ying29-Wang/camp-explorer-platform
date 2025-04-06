@@ -39,11 +39,11 @@ app.use(express.urlencoded({ extended: false }));
 // app.use(express.static(path.join(__dirname, 'public')));
 
 // Routes
-app.use('/api/camps', require('./routes/camps'));
-app.use('/api/reviews', require('./routes/reviews'));
-app.use('/api/users', require('./routes/users'));
-app.use('/api/auth', require('./routes/auth'));
-app.use('/api/maps', require('./routes/maps'));
+app.use('/camps', require('./routes/camps'));
+app.use('/reviews', require('./routes/reviews'));
+app.use('/users', require('./routes/users'));
+app.use('/auth', require('./routes/auth'));
+app.use('/maps', require('./routes/maps'));
 
 // Default route
 app.get('/', (req, res) => {
