@@ -92,6 +92,7 @@ const Camp = require('../models/camp');
 const Review = require('../models/review');
 // This middleware is imported but should not be applied to GET routes
 const auth = require('../middleware/auth');
+const { validateCamp } = require('../middleware/validation');
 
 // @route   GET/POST /api/camps/search
 // @desc    Search camps with multiple criteria
@@ -301,7 +302,7 @@ router.get('/:id', async (req, res) => {
 // @route   POST /api/camps
 // @desc    Create a new camp
 // @access  Private
-router.post('/', auth, async (req, res) => {
+router.post('/', auth, validateCamp, async (req, res) => {
     try {
         // Validate required fields
         const requiredFields = ['name', 'description', 'location', 'price', 'ageRange', 'category', 'website', 'contact', 'email', 'phone', 'startDate', 'endDate', 'capacity'];
@@ -335,7 +336,7 @@ router.post('/', auth, async (req, res) => {
 // @route   PUT /api/camps/:id
 // @desc    Update a camp
 // @access  Private
-router.put('/:id', auth, async (req, res) => {
+router.put('/:id', auth, validateCamp, async (req, res) => {
     try {
         const camp = await Camp.findById(req.params.id);
 

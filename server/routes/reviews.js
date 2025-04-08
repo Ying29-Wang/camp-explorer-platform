@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const Review = require('../models/review');
+const { validateReview } = require('../middleware/validation');
 const auth = require('../middleware/auth');
 
 // @route   GET /api/reviews
@@ -58,7 +59,7 @@ router.get('/camp/:campId', async (req, res) => {
 // @route   POST /api/reviews
 // @desc    Create a new review
 // @access  Private
-router.post('/', auth, async (req, res) => {
+router.post('/', auth, validateReview, async (req, res) => {
     try {
         const newReview = new Review({
             userId: req.user.id,
@@ -80,7 +81,7 @@ router.post('/', auth, async (req, res) => {
 // @route  PUT /api/reviews/:id
 // @desc   Update a review
 // @access Private
-router.put('/:id', auth, async (req, res) => {
+router.put('/:id', auth, validateReview, async (req, res) => {
     try {
         const review = await Review.findById(req.params.id);
 
