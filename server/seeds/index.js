@@ -27,13 +27,20 @@ const seedDB = async () => {
         console.log('Clearing seed data...');
         await Camp.deleteMany({ isSeedCamp: true });
         await Review.deleteMany({ isSeedReview: true });
+        await User.deleteMany({ isSeedUser: true });
 
         // Seed new data
         console.log('Seeding users...');
         const seedUsersList = await seedUsers();
+        if (!seedUsersList || seedUsersList.length === 0) {
+            throw new Error('Failed to seed users');
+        }
 
         console.log('Seeding camps...');
         const camps = await seedCamps();
+        if (!camps || camps.length === 0) {
+            throw new Error('Failed to seed camps');
+        }
 
         console.log('Seeding reviews...');
         await seedReviews([...seedUsersList, ...registeredUsers], camps);
@@ -41,6 +48,7 @@ const seedDB = async () => {
         console.log('Database seeded successfully');
     } catch (error) {
         console.error('Error seeding database:', error);
+        throw error;
     } finally {
         // Close the database connection
         await mongoose.connection.close();
@@ -48,6 +56,12 @@ const seedDB = async () => {
     }
 };
 
-seedDB().then(() => {
-    process.exit();
-});
+seedDB()
+    .then(() => {
+        console.log('Seeding completed successfully');
+        process.exit(0);
+    })
+    .catch((error) => {
+        console.error('Seeding failed:', error);
+        process.exit(1);
+    });

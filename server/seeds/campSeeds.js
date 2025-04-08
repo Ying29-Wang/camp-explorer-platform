@@ -1,4 +1,5 @@
 const Camp = require('../models/camp');
+const User = require('../models/user');
 
 const CAMP_CATEGORIES = Camp.CATEGORIES;
 
@@ -159,13 +160,24 @@ const seedCamps = async () => {
   try {
     console.log('Starting to seed camps...');
     
+    // Get camp owners
+    const campOwners = await User.find({ role: 'camp_owner', isSeedUser: true });
+    
+    // Assign owners to camps if camp owners exist
+    const campsToInsert = campOwners.length >= 2 
+      ? camps.map((camp, index) => ({
+          ...camp,
+          owner: campOwners[index % campOwners.length]._id
+        }))
+      : camps;
+
     // Clear existing data
-    await Camp.deleteMany({});
+    await Camp.deleteMany({ isSeedCamp: true });
     console.log('Cleared existing camp data');
 
     // Insert camps into database
     console.log('Inserting camps with coordinates...');
-    const createdCamps = await Camp.insertMany(camps);
+    const createdCamps = await Camp.insertMany(campsToInsert);
     console.log(`${createdCamps.length} camps created`);
 
     // Verify the camps were created with coordinates
