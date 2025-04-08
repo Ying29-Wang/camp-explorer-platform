@@ -1,4 +1,5 @@
 const Camp = require('../models/camp');
+const User = require('../models/user');
 
 const CAMP_CATEGORIES = Camp.CATEGORIES;
 
@@ -29,6 +30,8 @@ const camps = [
     endDate: new Date('2023-06-30'),
     capacity: 60,
     registered: 45,
+    status: 'active',
+    viewCount: 0,
     isSeedCamp: true
   },
   {
@@ -57,6 +60,8 @@ const camps = [
     endDate: new Date('2023-07-21'),
     capacity: 40,
     registered: 35,
+    status: 'active',
+    viewCount: 0,
     isSeedCamp: true
   },
   {
@@ -85,6 +90,8 @@ const camps = [
     endDate: new Date('2023-07-19'),
     capacity: 35,
     registered: 28,
+    status: 'active',
+    viewCount: 0,
     isSeedCamp: true
   },
   {
@@ -113,6 +120,8 @@ const camps = [
     endDate: new Date('2023-07-15'),
     capacity: 75,
     registered: 65,
+    status: 'active',
+    viewCount: 0,
     isSeedCamp: true
   },
   {
@@ -141,6 +150,8 @@ const camps = [
     endDate: new Date('2023-08-04'),
     capacity: 50,
     registered: 40,
+    status: 'active',
+    viewCount: 0,
     isSeedCamp: true
   }
 ];
@@ -149,13 +160,24 @@ const seedCamps = async () => {
   try {
     console.log('Starting to seed camps...');
     
+    // Get camp owners
+    const campOwners = await User.find({ role: 'camp_owner', isSeedUser: true });
+    
+    // Assign owners to camps if camp owners exist
+    const campsToInsert = campOwners.length >= 2 
+      ? camps.map((camp, index) => ({
+          ...camp,
+          owner: campOwners[index % campOwners.length]._id
+        }))
+      : camps;
+
     // Clear existing data
-    await Camp.deleteMany({});
+    await Camp.deleteMany({ isSeedCamp: true });
     console.log('Cleared existing camp data');
 
     // Insert camps into database
     console.log('Inserting camps with coordinates...');
-    const createdCamps = await Camp.insertMany(camps);
+    const createdCamps = await Camp.insertMany(campsToInsert);
     console.log(`${createdCamps.length} camps created`);
 
     // Verify the camps were created with coordinates

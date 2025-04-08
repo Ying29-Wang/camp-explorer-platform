@@ -9,6 +9,8 @@ const users = [
     email: `seed_parent1_${timestamp}@example.com`,
     password: 'password123',
     role: 'parent',
+    status: 'active',
+    lastLogin: new Date(),
     isSeedUser: true,
     children: [
       {
@@ -32,6 +34,8 @@ const users = [
     email: `seed_parent2_${timestamp}@example.com`,
     password: 'password123',
     role: 'parent',
+    status: 'active',
+    lastLogin: new Date(),
     isSeedUser: true,
     children: [
       {
@@ -48,6 +52,8 @@ const users = [
     email: `seed_campowner1_${timestamp}@example.com`,
     password: 'password123',
     role: 'camp_owner',
+    status: 'active',
+    lastLogin: new Date(),
     isSeedUser: true
   },
   {
@@ -55,6 +61,8 @@ const users = [
     email: `seed_campowner2_${timestamp}@example.com`,
     password: 'password123',
     role: 'camp_owner',
+    status: 'active',
+    lastLogin: new Date(),
     isSeedUser: true
   },
   {
@@ -62,6 +70,8 @@ const users = [
     email: `seed_admin_${timestamp}@example.com`,
     password: 'password123',
     role: 'admin',
+    status: 'active',
+    lastLogin: new Date(),
     isSeedUser: true
   }
 ];
