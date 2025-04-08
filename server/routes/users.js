@@ -13,7 +13,8 @@ router.get('/', auth, async (req, res) => {
       return res.status(403).json({ message: 'Access denied' });
     }
 
-    const users = await User.find().select('-password');
+    const status = req.query.status || 'active';
+    const users = await User.find({ status }).select('-password');
     res.json(users);
   } catch (err) {
     console.error(err.message);
@@ -63,7 +64,9 @@ router.post('/', async (req, res) => {
       email,
       password,
       role,
-      children
+      children,
+      status: 'active',
+      lastLogin: new Date()
     });
 
     await user.save();
@@ -89,15 +92,73 @@ router.put('/:id', auth, async (req, res) => {
       return res.status(404).json({ message: 'User not found' });
     }
 
-    //Role change not allowed unless admin
+    // Role change not allowed unless admin
     if (req.body.role && req.user.role !== 'admin') {
-      // return res.status(403).json({ message: 'Access denied' });
       delete req.body.role;
+    }
+
+    // Don't allow updating lastLogin through this route
+    if (req.body.lastLogin) {
+      delete req.body.lastLogin;
     }
 
     const updatedUser = await User.findByIdAndUpdate(
       req.params.id,
       { $set: req.body },
+      { new: true }
+    ).select('-password');
+    res.json(updatedUser);
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).json({ message: 'Server Error' });
+  }
+});
+
+// @route PUT api/users/:id/status
+// @desc Update user status
+// @access Private
+router.put('/:id/status', auth, async (req, res) => {
+  try {
+    // Only admin can change user status
+    if (req.user.role !== 'admin') {
+      return res.status(403).json({ message: 'Access denied' });
+    }
+
+    const { status } = req.body;
+    if (!['active', 'inactive'].includes(status)) {
+      return res.status(400).json({ message: 'Invalid status' });
+    }
+
+    const user = await User.findById(req.params.id);
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    const updatedUser = await User.findByIdAndUpdate(
+      req.params.id,
+      { $set: { status } },
+      { new: true }
+    ).select('-password');
+    res.json(updatedUser);
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).json({ message: 'Server Error' });
+  }
+});
+
+// @route PUT api/users/:id/last-login
+// @desc Update user's last login time
+// @access Private
+router.put('/:id/last-login', auth, async (req, res) => {
+  try {
+    // Only the user themselves can update their last login
+    if (req.user.id !== req.params.id) {
+      return res.status(403).json({ message: 'Access denied' });
+    }
+
+    const updatedUser = await User.findByIdAndUpdate(
+      req.params.id,
+      { $set: { lastLogin: new Date() } },
       { new: true }
     ).select('-password');
     res.json(updatedUser);
@@ -131,7 +192,6 @@ router.delete('/:id', auth, async (req, res) => {
     }
     res.status(500).json({ message: 'Server Error' });
   }
-}
-);
+});
 
 module.exports = router;
