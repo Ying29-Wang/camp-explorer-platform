@@ -29,6 +29,8 @@ const camps = [
     endDate: new Date('2023-06-30'),
     capacity: 60,
     registered: 45,
+    status: 'active',
+    viewCount: 0,
     isSeedCamp: true
   },
   {
@@ -57,6 +59,8 @@ const camps = [
     endDate: new Date('2023-07-21'),
     capacity: 40,
     registered: 35,
+    status: 'active',
+    viewCount: 0,
     isSeedCamp: true
   },
   {
@@ -85,6 +89,8 @@ const camps = [
     endDate: new Date('2023-07-19'),
     capacity: 35,
     registered: 28,
+    status: 'active',
+    viewCount: 0,
     isSeedCamp: true
   },
   {
@@ -113,6 +119,8 @@ const camps = [
     endDate: new Date('2023-07-15'),
     capacity: 75,
     registered: 65,
+    status: 'active',
+    viewCount: 0,
     isSeedCamp: true
   },
   {
@@ -141,6 +149,8 @@ const camps = [
     endDate: new Date('2023-08-04'),
     capacity: 50,
     registered: 40,
+    status: 'active',
+    viewCount: 0,
     isSeedCamp: true
   }
 ];
