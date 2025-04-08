@@ -119,6 +119,16 @@ const CampSchema = new mongoose.Schema({
         type: Boolean,
         default: false
     },
+    // Essential status and tracking fields
+    status: {
+        type: String,
+        enum: ['active', 'inactive'],
+        default: 'active'
+    },
+    viewCount: {
+        type: Number,
+        default: 0
+    },
     createdAt: {
         type: Date,
         default: Date.now,
@@ -126,11 +136,22 @@ const CampSchema = new mongoose.Schema({
     createdBy: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'User',
-    },
+    }
 });
 
 // Add 2dsphere index for geospatial queries
 CampSchema.index({ coordinates: '2dsphere' });
+// Add index for status
+CampSchema.index({ status: 1 });
+
+// Static method to increment view count
+CampSchema.statics.incrementViewCount = async function(campId) {
+    return this.findByIdAndUpdate(
+        campId,
+        { $inc: { viewCount: 1 } },
+        { new: true }
+    );
+};
 
 CampSchema.statics.CATEGORIES = CAMP_CATEGORIES;
 
@@ -139,9 +160,9 @@ const Camp = mongoose.model('Camp', CampSchema);
 // Ensure index exists when model is initialized
 Camp.on('index', function(err) {
     if (err) {
-        console.error('Error creating geospatial index:', err);
+        console.error('Error creating indexes:', err);
     } else {
-        console.log('Geospatial index created successfully');
+        console.log('Indexes created successfully');
     }
 });
 
