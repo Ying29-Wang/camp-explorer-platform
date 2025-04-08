@@ -1,5 +1,6 @@
 const mongoose = require('mongoose');
 const { create } = require('./user');
+const Schema = mongoose.Schema;
 
 const CAMP_CATEGORIES = [
     'Adventure',
@@ -18,7 +19,7 @@ const CAMP_CATEGORIES = [
     'General'
   ];
 
-const CampSchema = new mongoose.Schema({
+const CampSchema = new Schema({
     name: {
         type: String,
         required: true,
@@ -154,6 +155,21 @@ CampSchema.statics.incrementViewCount = async function(campId) {
 };
 
 CampSchema.statics.CATEGORIES = CAMP_CATEGORIES;
+
+// Add pre-remove middleware for cascading deletes
+CampSchema.pre('remove', async function(next) {
+    try {
+        // Delete all reviews associated with this camp
+        await mongoose.model('Review').deleteMany({ campId: this._id });
+        
+        // Delete all recently viewed entries for this camp
+        await mongoose.model('RecentlyViewed').deleteMany({ campId: this._id });
+        
+        next();
+    } catch (error) {
+        next(error);
+    }
+});
 
 const Camp = mongoose.model('Camp', CampSchema);
 

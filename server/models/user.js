@@ -1,7 +1,8 @@
 const mongoose = require('mongoose');
 const bcrypt = require('bcryptjs');
+const Schema = mongoose.Schema;
 
-const UserSchema = new mongoose.Schema({
+const UserSchema = new Schema({
     username: {
         type: String,
         required: true,
@@ -76,5 +77,32 @@ UserSchema.methods.comparePassword = async function (candidatePassword) {
         throw new Error(error);
     }
 };
+
+// Add pre-remove middleware for cascading deletes
+UserSchema.pre('remove', async function(next) {
+    try {
+        // Delete all reviews by this user
+        await mongoose.model('Review').deleteMany({ userId: this._id });
+        
+        // Delete all recently viewed entries by this user
+        await mongoose.model('RecentlyViewed').deleteMany({ userId: this._id });
+        
+        // If user is a camp owner, handle their camps
+        if (this.role === 'camp_owner') {
+            // Option 1: Delete all their camps (with cascading)
+            await mongoose.model('Camp').deleteMany({ ownerId: this._id });
+            
+            // Option 2: If you want to transfer ownership instead of deleting:
+            // await mongoose.model('Camp').updateMany(
+            //     { ownerId: this._id },
+            //     { ownerId: null, status: 'inactive' }
+            // );
+        }
+        
+        next();
+    } catch (error) {
+        next(error);
+    }
+});
 
 module.exports = mongoose.model('User', UserSchema);
