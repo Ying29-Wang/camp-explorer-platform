@@ -167,7 +167,7 @@ CampSchema.query.nonDeleted = function() {
 };
 
 // Override the remove method to implement soft delete
-CampSchema.methods.remove = async function(deletedBy = null) {
+CampSchema.methods.softDelete = async function(deletedBy = null) {
     this.isDeleted = true;
     this.deletedAt = new Date();
     this.deletedBy = deletedBy;

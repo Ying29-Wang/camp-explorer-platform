@@ -197,21 +197,11 @@ router.post('/search', handleSearch);
 // @access  Public
 router.get('/', async (req, res) => {
     try {
-        const limit = req.query.limit ? parseInt(req.query.limit) : 0;
-        const status = req.query.status || 'active';
-        
-        const query = Camp.find({ status })
-            .sort({ viewCount: -1, createdAt: -1 });
-        
-        if (limit > 0) {
-            query.limit(limit);
-        }
-
-        const camps = await query;
+        const camps = await Camp.find().nonDeleted();
         res.json(camps);
-    } catch (err) {
-        console.error('Error fetching camps:', err);
-        res.status(500).json({ message: 'Server Error', error: err.message });
+    } catch (error) {
+        console.error('Error fetching camps:', error);
+        res.status(500).json({ message: 'Server error', error: error.message });
     }
 });
 
@@ -283,19 +273,16 @@ router.get('/owner', auth, async (req, res) => {
 // @access  Public
 router.get('/:id', async (req, res) => {
     try {
-        const camp = await Camp.findById(req.params.id);
+        const camp = await Camp.findById(req.params.id).nonDeleted();
         
         if (!camp) {
             return res.status(404).json({ message: 'Camp not found' });
         }
         
-        // Increment view count
-        await Camp.incrementViewCount(req.params.id);
-        
         res.json(camp);
-    } catch (err) {
-        console.error('Error fetching camp:', err);
-        res.status(500).json({ message: 'Server Error' });
+    } catch (error) {
+        console.error('Error fetching camp:', error);
+        res.status(500).json({ message: 'Server error', error: error.message });
     }
 });
 
@@ -368,25 +355,27 @@ router.put('/:id', auth, validateCamp, async (req, res) => {
 
 // @route   DELETE /api/camps/:id
 // @desc    Delete a camp
-// @access  Private
+// @access  Private/Camp Owner or Admin
 router.delete('/:id', auth, async (req, res) => {
     try {
         const camp = await Camp.findById(req.params.id);
-
+        
         if (!camp) {
             return res.status(404).json({ message: 'Camp not found' });
         }
 
-        // Check if the user is the owner of the camp or admin
-        if (camp.owner && camp.owner.toString() !== req.user.id && req.user.role !== 'admin') {
-            return res.status(403).json({ message: 'Access denied' });
+        // Check if user is camp owner or admin
+        if (camp.ownerId.toString() !== req.user.id && req.user.role !== 'admin') {
+            return res.status(403).json({ message: 'Not authorized to delete this camp' });
         }
 
-        await camp.deleteOne();
-        res.json({ message: 'Camp deleted' });
-    } catch (err) {
-        console.error(err.message);
-        res.status(500).json({ message: 'Server Error' });
+        // Perform soft delete
+        await camp.softDelete(req.user._id);
+        
+        res.json({ message: 'Camp soft deleted successfully' });
+    } catch (error) {
+        console.error('Error deleting camp:', error);
+        res.status(500).json({ message: 'Server error', error: error.message });
     }
 });
 

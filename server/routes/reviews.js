@@ -13,10 +13,10 @@ router.get('/', async (req, res) => {
         const reviews = await Review.find({ status }).sort({ createdAt: -1 });
         res.json(reviews);
     } catch (err) {
-        console.error(err.message);
-        res.status(500).json({ message: 'Server Error' });
+        console.error('Error fetching reviews:', err);
+        res.status(500).json({ message: 'Server error', error: err.message });
     }
-}); 
+});
 
 // @route   GET /api/reviews/user
 // @desc    Get all reviews for the current user
@@ -165,32 +165,29 @@ router.put('/:id/status', auth, async (req, res) => {
     }
 });
 
-// @route   DELETE /api/reviews/:id
 // @desc    Delete a review
-// @access  Private
+// @route   DELETE /api/reviews/:id
+// @access  Private/Review Owner or Admin
 router.delete('/:id', auth, async (req, res) => {
     try {
         const review = await Review.findById(req.params.id);
-
+        
         if (!review) {
             return res.status(404).json({ message: 'Review not found' });
         }
 
-        // Check if the user is the owner of the review
+        // Check if user is review owner or admin
         if (review.userId.toString() !== req.user.id && req.user.role !== 'admin') {
-            return res.status(403).json({ message: 'Access denied' });
+            return res.status(403).json({ message: 'Not authorized to delete this review' });
         }
 
-        await review.deleteOne();
-
-        res.json({ message: 'Review deleted' });
-    } catch (err) {
-        console.error(err.message);
-
-        if (err.kind === 'ObjectId') {
-            return res.status(404).json({ message: 'Review not found' });
-        }
-        res.status(500).json({ message: 'Server Error' });
+        // Perform soft delete
+        await review.softDelete(req.user._id);
+        
+        res.json({ message: 'Review soft deleted successfully' });
+    } catch (error) {
+        console.error('Error deleting review:', error);
+        res.status(500).json({ message: 'Server error', error: error.message });
     }
 });
 

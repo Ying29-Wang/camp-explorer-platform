@@ -97,7 +97,7 @@ UserSchema.query.nonDeleted = function() {
 };
 
 // Override the remove method to implement soft delete
-UserSchema.methods.remove = async function(deletedBy = null) {
+UserSchema.methods.softDelete = async function(deletedBy = null) {
     this.isDeleted = true;
     this.deletedAt = new Date();
     this.deletedBy = deletedBy;

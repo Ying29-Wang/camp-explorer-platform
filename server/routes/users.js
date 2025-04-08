@@ -5,46 +5,41 @@ const auth = require('../middleware/auth');
 
 // @route GET api/users
 // @desc Get all users
-// @access Private 
+// @access Private/Admin
 router.get('/', auth, async (req, res) => {
-  try {
-    // Check if the user is an admin
-    if (req.user.role !== 'admin') {
-      return res.status(403).json({ message: 'Access denied' });
-    }
+    try {
+        // Check if the user is an admin
+        if (req.user.role !== 'admin') {
+            return res.status(403).json({ message: 'Access denied' });
+        }
 
-    const status = req.query.status || 'active';
-    const users = await User.find({ status }).select('-password');
-    res.json(users);
-  } catch (err) {
-    console.error(err.message);
-    res.status(500).json({ message: 'Server Error' });
-  }
+        const users = await User.find().nonDeleted();
+        res.json(users);
+    } catch (error) {
+        console.error('Error fetching users:', error);
+        res.status(500).json({ message: 'Server error', error: error.message });
+    }
 });
 
 // @route GET api/users/:id
 // @desc Get user by id
 // @access Private
 router.get('/:id', auth, async (req, res) => {
-  try {
-    // Check if the user is an admin or the user themselves
-    if (req.user.role !== 'admin' && req.user.id !== req.params.id) {
-      return res.status(403).json({ message: 'Access denied' });
-    }
+    try {
+        // Check if the user is an admin or the user themselves
+        if (req.user.role !== 'admin' && req.user.id !== req.params.id) {
+            return res.status(403).json({ message: 'Access denied' });
+        }
 
-    const user = await User.findById(req.params.id).select('-password');
-    if (!user) {
-      return res.status(404).json({ message: 'User not found' });
+        const user = await User.findById(req.params.id).nonDeleted();
+        if (!user) {
+            return res.status(404).json({ message: 'User not found' });
+        }
+        res.json(user);
+    } catch (error) {
+        console.error('Error fetching user:', error);
+        res.status(500).json({ message: 'Server error', error: error.message });
     }
-    res.json(user);
-  } catch (err) {
-    console.error(err.message);
-
-    if (err.kind === 'ObjectId') {
-      return res.status(404).json({ message: 'User not found' });
-    }
-    res.status(500).json({ message: 'Server Error' });
-  }
 });
 
 // @route POST api/users
@@ -168,30 +163,28 @@ router.put('/:id/last-login', auth, async (req, res) => {
   }
 });
 
-// @route DELETE api/users/:id
 // @desc Delete a user
+// @route DELETE /api/users/:id
 // @access Private
 router.delete('/:id', auth, async (req, res) => {
-  try {
-    // Check if the user is deleting their own account or is an admin
-    if (req.user.id !== req.params.id && req.user.role !== 'admin') {
-      return res.status(403).json({ message: 'Access denied' });
-    }
-    
-    const user = await User.findById(req.params.id);
-    if (!user) {
-      return res.status(404).json({ message: 'User not found' });
-    }
+    try {
+        // Check if the user is deleting their own account or is an admin
+        if (req.user.id !== req.params.id && req.user.role !== 'admin') {
+            return res.status(403).json({ message: 'Access denied' });
+        }
 
-    await user.deleteOne();
-    res.json({ message: 'User removed' });
-  } catch (err) {
-    console.error(err.message);
-    if (err.kind === 'ObjectId') {
-      return res.status(404).json({ message: 'User not found' });
+        const user = await User.findById(req.params.id);
+        if (!user) {
+            return res.status(404).json({ message: 'User not found' });
+        }
+
+        // Perform soft delete
+        await user.softDelete(req.user._id);
+        res.json({ message: 'User soft deleted successfully' });
+    } catch (error) {
+        console.error('Error deleting user:', error);
+        res.status(500).json({ message: 'Server error', error: error.message });
     }
-    res.status(500).json({ message: 'Server Error' });
-  }
 });
 
 module.exports = router;
