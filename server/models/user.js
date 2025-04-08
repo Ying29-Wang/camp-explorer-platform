@@ -54,7 +54,20 @@ const UserSchema = new Schema({
         type: Date,
         default: Date.now,
     },
-});
+    isDeleted: {
+        type: Boolean,
+        default: false
+    },
+    deletedAt: {
+        type: Date,
+        default: null
+    },
+    deletedBy: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User',
+        default: null
+    }
+}, { timestamps: true });
 
 // Pre-save hook to hash passwords
 UserSchema.pre('save', async function (next) {
@@ -78,27 +91,38 @@ UserSchema.methods.comparePassword = async function (candidatePassword) {
     }
 };
 
-// Add pre-remove middleware for cascading deletes
+// Add query helper for non-deleted users
+UserSchema.query.nonDeleted = function() {
+    return this.where({ isDeleted: false });
+};
+
+// Override the remove method to implement soft delete
+UserSchema.methods.remove = async function(deletedBy = null) {
+    this.isDeleted = true;
+    this.deletedAt = new Date();
+    this.deletedBy = deletedBy;
+    return this.save();
+};
+
+// Modify the pre-remove middleware to handle soft delete
 UserSchema.pre('remove', async function(next) {
     try {
-        // Delete all reviews by this user
-        await mongoose.model('Review').deleteMany({ userId: this._id });
-        
-        // Delete all recently viewed entries by this user
-        await mongoose.model('RecentlyViewed').deleteMany({ userId: this._id });
-        
-        // If user is a camp owner, handle their camps
-        if (this.role === 'camp_owner') {
-            // Option 1: Delete all their camps (with cascading)
-            await mongoose.model('Camp').deleteMany({ ownerId: this._id });
+        // Only perform cascading deletes if this is a hard delete
+        if (!this.isDeleted) {
+            // Delete all reviews by this user
+            await mongoose.model('Review').deleteMany({ userId: this._id });
             
-            // Option 2: If you want to transfer ownership instead of deleting:
-            // await mongoose.model('Camp').updateMany(
-            //     { ownerId: this._id },
-            //     { ownerId: null, status: 'inactive' }
-            // );
+            // Delete all recently viewed entries by this user
+            await mongoose.model('RecentlyViewed').deleteMany({ userId: this._id });
+            
+            // If user is a camp owner, handle their camps
+            if (this.role === 'camp_owner') {
+                await mongoose.model('Camp').updateMany(
+                    { ownerId: this._id },
+                    { ownerId: null, status: 'inactive' }
+                );
+            }
         }
-        
         next();
     } catch (error) {
         next(error);

@@ -130,15 +130,20 @@ const CampSchema = new Schema({
         type: Number,
         default: 0
     },
-    createdAt: {
-        type: Date,
-        default: Date.now,
+    isDeleted: {
+        type: Boolean,
+        default: false
     },
-    createdBy: {
+    deletedAt: {
+        type: Date,
+        default: null
+    },
+    deletedBy: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'User',
+        default: null
     }
-});
+}, { timestamps: true });
 
 // Add 2dsphere index for geospatial queries
 CampSchema.index({ coordinates: '2dsphere' });
@@ -156,15 +161,30 @@ CampSchema.statics.incrementViewCount = async function(campId) {
 
 CampSchema.statics.CATEGORIES = CAMP_CATEGORIES;
 
-// Add pre-remove middleware for cascading deletes
+// Add query helper for non-deleted camps
+CampSchema.query.nonDeleted = function() {
+    return this.where({ isDeleted: false });
+};
+
+// Override the remove method to implement soft delete
+CampSchema.methods.remove = async function(deletedBy = null) {
+    this.isDeleted = true;
+    this.deletedAt = new Date();
+    this.deletedBy = deletedBy;
+    return this.save();
+};
+
+// Modify the pre-remove middleware to handle soft delete
 CampSchema.pre('remove', async function(next) {
     try {
-        // Delete all reviews associated with this camp
-        await mongoose.model('Review').deleteMany({ campId: this._id });
-        
-        // Delete all recently viewed entries for this camp
-        await mongoose.model('RecentlyViewed').deleteMany({ campId: this._id });
-        
+        // Only perform cascading deletes if this is a hard delete
+        if (!this.isDeleted) {
+            // Delete all reviews associated with this camp
+            await mongoose.model('Review').deleteMany({ campId: this._id });
+            
+            // Delete all recently viewed entries for this camp
+            await mongoose.model('RecentlyViewed').deleteMany({ campId: this._id });
+        }
         next();
     } catch (error) {
         next(error);
