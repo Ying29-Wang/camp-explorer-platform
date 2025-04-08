@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const Review = require('../models/review');
+const { validateReview } = require('../middleware/validation');
 const auth = require('../middleware/auth');
 
 // @route   GET /api/reviews
@@ -8,20 +9,25 @@ const auth = require('../middleware/auth');
 // @access  Public
 router.get('/', async (req, res) => {
     try {
-        const reviews = await Review.find().sort({ createdAt: -1 });
+        const status = req.query.status || 'active';
+        const reviews = await Review.find({ status }).sort({ createdAt: -1 });
         res.json(reviews);
     } catch (err) {
-        console.error(err.message);
-        res.status(500).json({ message: 'Server Error' });
+        console.error('Error fetching reviews:', err);
+        res.status(500).json({ message: 'Server error', error: err.message });
     }
-}); 
+});
 
 // @route   GET /api/reviews/user
 // @desc    Get all reviews for the current user
 // @access  Private
 router.get('/user', auth, async (req, res) => {
     try {
-        const reviews = await Review.find({ userId: req.user.id })
+        const status = req.query.status || 'active';
+        const reviews = await Review.find({ 
+            userId: req.user.id,
+            status 
+        })
             .sort({ createdAt: -1 })
             .populate('campId', 'name location description image')
             .populate('userId', 'username');
@@ -37,8 +43,12 @@ router.get('/user', auth, async (req, res) => {
 // @access  Public
 router.get('/camp/:campId', async (req, res) => {
     try {
-        const reviews = await Review.find({ campId: req.params.campId }).
-        sort({ createdAt: -1 });
+        const status = req.query.status || 'active';
+        const reviews = await Review.find({ 
+            campId: req.params.campId,
+            status 
+        })
+            .sort({ helpfulVotes: -1, createdAt: -1 });
         res.json(reviews);
     } catch (err) {
         console.error(err.message);
@@ -49,13 +59,15 @@ router.get('/camp/:campId', async (req, res) => {
 // @route   POST /api/reviews
 // @desc    Create a new review
 // @access  Private
-router.post('/', auth, async (req, res) => {
+router.post('/', auth, validateReview, async (req, res) => {
     try {
         const newReview = new Review({
-            userId: req.user.id, // Use the authenticated user's ID
+            userId: req.user.id,
             campId: req.body.campId,
             rating: req.body.rating,
-            reviewText: req.body.reviewText
+            reviewText: req.body.reviewText,
+            status: 'active',
+            helpfulVotes: 0
         });
 
         const review = await newReview.save();
@@ -69,7 +81,7 @@ router.post('/', auth, async (req, res) => {
 // @route  PUT /api/reviews/:id
 // @desc   Update a review
 // @access Private
-router.put('/:id', auth, async (req, res) => {
+router.put('/:id', auth, validateReview, async (req, res) => {
     try {
         const review = await Review.findById(req.params.id);
 
@@ -80,6 +92,11 @@ router.put('/:id', auth, async (req, res) => {
         // Check if the user is the owner of the review
         if (review.userId.toString() !== req.user.id && req.user.role !== 'admin') {
             return res.status(403).json({ message: 'Access denied' });
+        }
+
+        // Don't allow updating helpfulVotes through this route
+        if (req.body.helpfulVotes) {
+            delete req.body.helpfulVotes;
         }
 
         const updatedReview = await Review.findByIdAndUpdate(
@@ -94,32 +111,83 @@ router.put('/:id', auth, async (req, res) => {
     }
 });
 
-// @route   DELETE /api/reviews/:id
-// @desc    Delete a review
-// @access  Private
-router.delete('/:id', auth, async (req, res) => {
+// @route   PUT /api/reviews/:id/helpful
+// @desc    Increment helpful votes for a review
+// @access  Public
+router.put('/:id/helpful', async (req, res) => {
     try {
         const review = await Review.findById(req.params.id);
-
         if (!review) {
             return res.status(404).json({ message: 'Review not found' });
         }
 
-        // Check if the user is the owner of the review
+        const updatedReview = await Review.findByIdAndUpdate(
+            req.params.id,
+            { $inc: { helpfulVotes: 1 } },
+            { new: true }
+        );
+        res.json(updatedReview);
+    } catch (err) {
+        console.error(err.message);
+        res.status(500).json({ message: 'Server Error' });
+    }
+});
+
+// @route   PUT /api/reviews/:id/status
+// @desc    Update review status
+// @access  Private
+router.put('/:id/status', auth, async (req, res) => {
+    try {
+        const { status } = req.body;
+        if (!['active', 'inactive'].includes(status)) {
+            return res.status(400).json({ message: 'Invalid status' });
+        }
+
+        const review = await Review.findById(req.params.id);
+        if (!review) {
+            return res.status(404).json({ message: 'Review not found' });
+        }
+
+        // Check if the user is the owner of the review or admin
         if (review.userId.toString() !== req.user.id && req.user.role !== 'admin') {
             return res.status(403).json({ message: 'Access denied' });
         }
 
-        await review.deleteOne();
-
-        res.json({ message: 'Review deleted' });
+        const updatedReview = await Review.findByIdAndUpdate(
+            req.params.id,
+            { $set: { status } },
+            { new: true }
+        );
+        res.json(updatedReview);
     } catch (err) {
         console.error(err.message);
+        res.status(500).json({ message: 'Server Error' });
+    }
+});
 
-        if (err.kind === 'ObjectId') {
+// @desc    Delete a review
+// @route   DELETE /api/reviews/:id
+// @access  Private/Review Owner or Admin
+router.delete('/:id', auth, async (req, res) => {
+    try {
+        const review = await Review.findById(req.params.id);
+        
+        if (!review) {
             return res.status(404).json({ message: 'Review not found' });
         }
-        res.status(500).json({ message: 'Server Error' });
+
+        // Check if user is review owner or admin
+        if (review.userId.toString() !== req.user.id && req.user.role !== 'admin') {
+            return res.status(403).json({ message: 'Not authorized to delete this review' });
+        }
+
+        // Perform soft delete
+        await review.softDelete(req.user._id);
+        
+        res.json({ message: 'Review soft deleted successfully' });
+    } catch (error) {
+        console.error('Error deleting review:', error);
+        res.status(500).json({ message: 'Server error', error: error.message });
     }
 });
 

@@ -210,7 +210,7 @@ router.get('/camps/nearby', validateCoordinates, validateRadius, async (req, res
 });
 
 // @route   GET /api/maps/camps
-// @desc    Get all camps with coordinates
+// @desc    Get all camps
 // @access  Public
 router.get('/camps', async (req, res) => {
     try {
@@ -224,19 +224,16 @@ router.get('/camps', async (req, res) => {
 
         const camps = await Camp.find({}).lean();
 
-        if (!camps || camps.length === 0) {
-            return errorResponse(res, 404,
-                'No camps found',
-                'No camps are currently available in the database'
-            );
-        }
-
-        return successResponse(res, camps, 'Camps retrieved successfully');
-    } catch (error) {
-        console.error('Error fetching camps:', error);
+        // Return empty array if no camps found, but still return success
+        return successResponse(res, {
+            camps: camps || [],
+            count: camps ? camps.length : 0
+        }, 'Camps retrieved successfully');
+    } catch (err) {
+        console.error('Error fetching camps:', err);
         return errorResponse(res, 500,
-            'Server error',
-            'Failed to fetch camps from the database'
+            'Internal server error',
+            'An error occurred while fetching camps'
         );
     }
 });

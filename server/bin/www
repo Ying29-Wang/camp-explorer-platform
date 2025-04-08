@@ -12,8 +12,16 @@ try {
 // Debug log to help troubleshoot
 console.log('Environment check in bin/www - PORT:', process.env.PORT);
 console.log('Environment check in bin/www - NODE_ENV:', process.env.NODE_ENV);
-console.log('Environment check in bin/www - MONGO_URI exists:', !!process.env.MONGO_URI);
+console.log('Environment check in bin/www - MONGODB_URI exists:', !!process.env.MONGODB_URI);
 
+// Import and initialize database connection
+const connectDB = require('../db');
+connectDB().then(() => {
+  console.log('Database connection initialized');
+}).catch(err => {
+  console.error('Failed to initialize database connection:', err);
+  process.exit(1);
+});
 
 /**
  * Module dependencies.

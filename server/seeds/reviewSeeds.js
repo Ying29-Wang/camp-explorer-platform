@@ -36,6 +36,8 @@ const seedReviews = async (users, camps) => {
           campId: camp._id,
           rating: Math.floor(Math.random() * 3) + 3,
           reviewText: reviewText,
+          status: 'active',
+          helpfulVotes: Math.floor(Math.random() * 10), // Random helpful votes between 0-9
           isSeedReview: true
         });
       }
