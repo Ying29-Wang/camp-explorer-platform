@@ -216,7 +216,7 @@ Third-Party APIs
  OpenAI GPT API for generating camp descriptions, analyzing reviews, and creating
 personalized recommendations
 2. Non-AI API Options:
- Google Maps API for location visualization and distance calculations
+ OpenStreet Maps API for location visualization and distance calculations
  Weather API (OpenWeatherMap or Weather.gov) to show typical weather for camp
 dates/locations(future features)
 MongoDB Collections
