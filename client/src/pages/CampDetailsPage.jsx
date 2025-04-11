@@ -63,6 +63,21 @@ const CampDetailsPage = () => {
         fetchData();
     }, [id, isLoggedIn]);
 
+    // Track camp view
+    useEffect(() => {
+        const trackView = async () => {
+            if (isLoggedIn && camp) {
+                try {
+                    await axios.post('/api/recently-viewed', { campId: camp._id });
+                } catch (error) {
+                    console.error('Error tracking view:', error);
+                }
+            }
+        };
+
+        trackView();
+    }, [camp, isLoggedIn]);
+
     const handleBookmark = async () => {
         if (!isLoggedIn) {
             // Redirect to login or show login modal

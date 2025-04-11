@@ -1,42 +1,66 @@
-import React, { useContext } from 'react';
-import { AuthContext } from '../../context/AuthContext';
-import camp1 from '../../assets/camp1.jpg';
-import camp2 from '../../assets/camp2.jpg';
-import camp3 from '../../assets/camp3.jpg';
+import React, { useState, useEffect } from 'react';
+import { useAuth } from '../../context/AuthContext';
+import axios from 'axios';
+import { Link } from 'react-router-dom';
 import './RecentlyViewed.css';
 
-const RecentlyViewed = ({ camps }) => {
-  const { isLoggedIn } = useContext(AuthContext);
+const RecentlyViewed = () => {
+    const { isLoggedIn } = useAuth();
+    const [recentlyViewed, setRecentlyViewed] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
 
-  if (!isLoggedIn || !camps || camps.length === 0) return null;
+    useEffect(() => {
+        const fetchRecentlyViewed = async () => {
+            if (!isLoggedIn) return;
+            
+            try {
+                const response = await axios.get('/api/recently-viewed');
+                setRecentlyViewed(response.data);
+                setLoading(false);
+            } catch (error) {
+                setError('Failed to load recently viewed camps');
+                setLoading(false);
+            }
+        };
 
-  const recentlyViewedCamps = [
-    { id: 1, image: camp1, name: 'Camp 1' },
-    { id: 2, image: camp2, name: 'Camp 2' },
-    { id: 3, image: camp3, name: 'Camp 3' },
-  ];
+        fetchRecentlyViewed();
+    }, [isLoggedIn]);
 
-  return (
-    <section className="recently-viewed">
-      <h2>Recently Viewed</h2>
-      <div className="camp-list">
-        {recentlyViewedCamps.map((camp) => (
-          <div key={camp.id} className="camp-item">
-            <img 
-              src={camp.image} 
-              alt={`Camp ${camp.id}`} 
-              className="camp-image"
-              onError={(e) => {
-                console.error('Image failed to load:', camp.image);
-                e.target.src = [camp1, camp2, camp3][Math.floor(Math.random() * 3)];
-              }}
-            />
-            <p>{camp.name}</p>
-          </div>
-        ))}
-      </div>
-    </section>
-  );
+    if (!isLoggedIn) return null;
+
+    if (loading) {
+        return <div className="loading-spinner"></div>;
+    }
+
+    if (error) {
+        return <div className="error-message">{error}</div>;
+    }
+
+    return (
+        <section className="recently-viewed-section">
+            <h2>Recently Viewed Camps</h2>
+            {recentlyViewed.length === 0 ? (
+                <p>You haven't viewed any camps yet.</p>
+            ) : (
+                <div className="recently-viewed-grid">
+                    {recentlyViewed.map(item => (
+                        <div key={item._id} className="recently-viewed-card">
+                            <Link to={`/camp/${item.campId._id}`}>
+                                <img 
+                                    src={item.campId.image[0] || '/default-camp.jpg'} 
+                                    alt={item.campId.name}
+                                    className="recently-viewed-image"
+                                />
+                                <h3>{item.campId.name}</h3>
+                                <p>{item.campId.location}</p>
+                            </Link>
+                        </div>
+                    ))}
+                </div>
+            )}
+        </section>
+    );
 };
 
 export default RecentlyViewed;

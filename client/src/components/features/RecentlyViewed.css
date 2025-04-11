@@ -17,3 +17,75 @@
   width: 200px; /* Sets a fixed width for each camp item */
 }
 
+.recently-viewed-section {
+    padding: 2rem;
+    background-color: #f8f9fa;
+    border-radius: 8px;
+    margin: 2rem 0;
+}
+
+.recently-viewed-section h2 {
+    color: #333;
+    margin-bottom: 1.5rem;
+    font-size: 1.8rem;
+}
+
+.recently-viewed-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 1.5rem;
+    padding: 1rem 0;
+}
+
+.recently-viewed-card {
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+    transition: transform 0.2s;
+}
+
+.recently-viewed-card:hover {
+    transform: translateY(-5px);
+}
+
+.recently-viewed-image {
+    width: 100%;
+    height: 160px;
+    object-fit: cover;
+}
+
+.recently-viewed-card h3 {
+    padding: 1rem;
+    margin: 0;
+    font-size: 1.2rem;
+    color: #333;
+}
+
+.recently-viewed-card p {
+    padding: 0 1rem 1rem;
+    margin: 0;
+    color: #666;
+}
+
+.error-message {
+    color: #ff4444;
+    text-align: center;
+    padding: 1rem;
+}
+
+.loading-spinner {
+    border: 4px solid rgba(0, 0, 0, 0.1);
+    border-radius: 50%;
+    border-top: 4px solid #3498db;
+    width: 40px;
+    height: 40px;
+    animation: spin 1s linear infinite;
+    margin: 2rem auto;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
