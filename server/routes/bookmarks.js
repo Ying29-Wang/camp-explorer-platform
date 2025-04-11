@@ -39,14 +39,40 @@ router.get('/:campId', auth, async (req, res) => {
 // Get user's bookmarks
 router.get('/', auth, async (req, res) => {
     try {
+        console.log('Bookmarks route - User:', {
+            id: req.user._id || req.user.id,
+            role: req.user.role,
+            email: req.user.email
+        });
+
         const userId = req.user._id || req.user.id;
+        console.log('Using userId:', userId);
+
         const bookmarks = await Bookmark.find({ userId: userId })
             .populate('campId')
             .sort({ createdAt: -1 });
+
+        console.log('Found bookmarks:', {
+            count: bookmarks.length,
+            bookmarks: bookmarks.map(b => ({
+                id: b._id,
+                campId: b.campId?._id,
+                campName: b.campId?.name
+            }))
+        });
+
         res.json(bookmarks);
     } catch (error) {
-        console.error('Error fetching bookmarks:', error);
-        res.status(500).json({ error: 'Failed to fetch bookmarks' });
+        console.error('Error fetching bookmarks:', {
+            name: error.name,
+            message: error.message,
+            stack: error.stack,
+            user: req.user
+        });
+        res.status(500).json({ 
+            error: 'Failed to fetch bookmarks',
+            details: error.message
+        });
     }
 });
 

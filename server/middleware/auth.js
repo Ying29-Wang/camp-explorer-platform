@@ -29,12 +29,15 @@ module.exports = function(req, res, next) {
         // Verify token
         console.log('Verifying token with secret:', process.env.JWT_SECRET ? 'exists' : 'missing');
         const decoded = jwt.verify(token, process.env.JWT_SECRET);
-        console.log('Token decoded successfully:', decoded);
+        console.log('Token decoded successfully:', {
+            user: decoded.user,
+            role: decoded.user?.role,
+            id: decoded.user?.id || decoded.user?._id
+        });
         req.user = decoded.user;
         next();
     } catch (err) {
-        console.error('Token verification error:', err.message);
-        console.error('Error details:', {
+        console.error('Token verification error:', {
             name: err.name,
             message: err.message,
             stack: err.stack
