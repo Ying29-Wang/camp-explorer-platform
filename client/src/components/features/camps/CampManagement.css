@@ -201,3 +201,40 @@
     color: #666;
     font-style: italic;
 } 
+
+/* AI Enhance Button Styles */
+.description-group {
+    position: relative;
+  }
+  
+  .ai-generate-btn {
+    position: absolute;
+    right: 10px;
+    bottom: 10px;
+    background-color: #6e48aa;
+    color: white;
+    border: none;
+    padding: 5px 10px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.8rem;
+    transition: background-color 0.3s;
+  }
+  
+  .ai-generate-btn:hover {
+    background-color: #5d3a99;
+  }
+  
+  .ai-generate-btn:disabled {
+    background-color: #cccccc;
+    cursor: not-allowed;
+  }
+  
+  /* Responsive adjustments */
+  @media (max-width: 768px) {
+    .ai-generate-btn {
+      position: static;
+      margin-top: 5px;
+      width: 100%;
+    }
+  }
