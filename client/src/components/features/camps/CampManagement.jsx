@@ -27,6 +27,7 @@ const CampManagement = () => {
         email: '',
         phone: ''
     });
+    const [isGeneratingDescription, setIsGeneratingDescription] = useState(false);
     const { user } = useAuth();
 
     useEffect(() => {
@@ -44,6 +45,43 @@ const CampManagement = () => {
             setError(err.message || 'Failed to load camps. Please try again later.');
         } finally {
             setLoading(false);
+        }
+    };
+
+    const generateDescription = async () => {
+        if (!formData.name || !formData.activities || !formData.category) {
+            setError('Please fill in name, activities, and category first');
+            return;
+        }
+
+        setIsGeneratingDescription(true);
+        setError(null);
+
+        try {
+            const prompt = `Generate a compelling 150-word description for a ${formData.category} camp called "${formData.name}" offering ${formData.activities}. Use an enthusiastic tone:`;
+            
+            // Replace with your actual AI service call
+            const response = await fetch('/api/ai/generate-description', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${user.token}`
+                },
+                body: JSON.stringify({ prompt })
+            });
+
+            if (!response.ok) throw new Error('AI generation failed');
+
+            const data = await response.json();
+            setFormData(prev => ({
+                ...prev,
+                description: data.description || 'Could not generate description'
+            }));
+        } catch (err) {
+            console.error('AI generation error:', err);
+            setError(err.message || 'Failed to generate description');
+        } finally {
+            setIsGeneratingDescription(false);
         }
     };
 
@@ -224,12 +262,22 @@ const CampManagement = () => {
 
                                     <div className="form-group">
                                         <label>Description</label>
-                                        <textarea
-                                            name="description"
-                                            value={formData.description}
-                                            onChange={handleInputChange}
-                                            required
-                                        />
+                                        <div className="description-group">
+                                            <textarea
+                                                name="description"
+                                                value={formData.description}
+                                                onChange={handleInputChange}
+                                                required
+                                            />
+                                            <button
+                                                type="button"
+                                                onClick={generateDescription}
+                                                disabled={isGeneratingDescription}
+                                                className="ai-generate-btn"
+                                            >
+                                                {isGeneratingDescription ? 'Generating...' : 'AI Enhance'}
+                                            </button>
+                                        </div>
                                     </div>
 
                                     <div className="form-group">
@@ -461,4 +509,4 @@ const CampManagement = () => {
     );
 };
 
-export default CampManagement; 
+export default CampManagement;
