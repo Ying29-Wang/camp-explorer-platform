@@ -3,50 +3,48 @@ const cors = require('cors');
 const connectDB = require('./db');
 const path = require('path');
 const mongoose = require('mongoose');
-// var cookieParser = require('cookie-parser');
-// var logger = require('morgan');
 
 // Load environment variables with explicit path
 try {
     require('dotenv').config({ path: path.join(__dirname, '.env') });
-  } catch (error) {
+} catch (error) {
     console.log('No .env file found, using environment variables');
-  }
+}
 
 const app = express();
 
 // Connect to MongoDB
 connectDB();
 
-// Middleware
+// Basic middleware
 app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
 // CORS middleware
-app.use(cors({
-    origin: '*',
-    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization']
-}));
+app.use(cors());
 
-// Log requests for debugging
+// Request logging middleware
 app.use((req, res, next) => {
-    console.log(`${new Date().toISOString()} - ${req.method} ${req.url}`);
+    console.log('=== New Request ===');
+    console.log('Method:', req.method);
+    console.log('Path:', req.path);
+    console.log('Body:', req.body);
+    console.log('==================');
     next();
 });
-app.use(express.urlencoded({ extended: false }));
-// app.use(logger('dev'));
-// app.use(cookieParser());
-// app.use(express.static(path.join(__dirname, 'public')));
-
-// Get API prefix from environment variable, default to '/api'
-const API_PREFIX = process.env.API_PREFIX || '/api';
 
 // Routes
-app.use(`${API_PREFIX}/camps`, require('./routes/camps'));
-app.use(`${API_PREFIX}/reviews`, require('./routes/reviews'));
-app.use(`${API_PREFIX}/users`, require('./routes/users'));
-app.use(`${API_PREFIX}/auth`, require('./routes/auth'));
-app.use(`${API_PREFIX}/maps`, require('./routes/maps'));
+app.use('/api/auth', require('./routes/auth'));
+app.use('/api/camps', require('./routes/camps'));
+app.use('/api/reviews', require('./routes/reviews'));
+app.use('/api/users', require('./routes/users'));
+app.use('/api/maps', require('./routes/maps'));
+
+// Error handling middleware
+app.use((err, req, res, next) => {
+    console.error('Error:', err);
+    res.status(500).json({ error: err.message });
+});
 
 // Default route
 app.get('/', (req, res) => {

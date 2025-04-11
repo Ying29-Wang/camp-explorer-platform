@@ -1,8 +1,11 @@
 const express = require('express');
 const router = express.Router();
 const jwt = require('jsonwebtoken');
+const crypto = require('crypto');
 const auth = require('../middleware/auth');
+const { passwordResetLimiter } = require('../middleware/rateLimit');
 const User = require('../models/user');
+const nodemailer = require('nodemailer');
 
 // Helper function to send JSON response
 const sendJsonResponse = (res, status, data) => {
@@ -156,6 +159,52 @@ router.get('/users', auth, async (req, res) => {
     } catch (err) {
         console.error('Get users error:', err.message);
         sendJsonResponse(res, 500, { msg: 'Server error while fetching users' });
+    }
+});
+
+// Test route
+router.get('/test', (req, res) => {
+    res.json({ message: 'Auth route is working' });
+});
+
+// @route   POST /api/auth/forgot-password
+// @desc    Request password reset
+// @access  Public
+router.post('/forgot-password', (req, res) => {
+    console.log('Received request:', req.body);
+    res.json({ message: 'Received your request', body: req.body });
+});
+
+// @route   POST /api/auth/reset-password
+// @desc    Reset password
+// @access  Public
+router.post('/reset-password', async (req, res) => {
+    try {
+        const { token, password } = req.body;
+
+        if (!token || !password) {
+            return sendJsonResponse(res, 400, { msg: 'Token and new password are required' });
+        }
+
+        const user = await User.findOne({
+            resetPasswordToken: token,
+            resetPasswordExpires: { $gt: Date.now() }
+        });
+
+        if (!user) {
+            return sendJsonResponse(res, 400, { msg: 'Password reset token is invalid or has expired' });
+        }
+
+        // Update password
+        user.password = password;
+        user.resetPasswordToken = undefined;
+        user.resetPasswordExpires = undefined;
+        await user.save();
+
+        sendJsonResponse(res, 200, { msg: 'Password has been reset successfully' });
+    } catch (err) {
+        console.error('Reset password error:', err.message);
+        sendJsonResponse(res, 500, { msg: 'Server error during password reset' });
     }
 });
 
