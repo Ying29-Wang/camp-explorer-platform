@@ -14,6 +14,14 @@ console.log('Environment check in bin/www - PORT:', process.env.PORT);
 console.log('Environment check in bin/www - NODE_ENV:', process.env.NODE_ENV);
 console.log('Environment check in bin/www - MONGODB_URI exists:', !!process.env.MONGODB_URI);
 
+// Import and initialize database connection
+const connectDB = require('../db');
+connectDB().then(() => {
+  console.log('Database connection initialized');
+}).catch(err => {
+  console.error('Failed to initialize database connection:', err);
+  process.exit(1);
+});
 
 /**
  * Module dependencies.
@@ -111,5 +119,6 @@ function onListening() {
   var bind = typeof addr === 'string'
     ? 'pipe ' + addr
     : 'port ' + addr.port;
+  console.log('Server is listening on ' + bind);
   debug('Listening on ' + bind);
 }

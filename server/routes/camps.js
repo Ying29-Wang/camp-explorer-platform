@@ -5,6 +5,11 @@ const SAMPLE_CAMPS = [
     name: 'Adventure Wilderness Camp',
     description: 'An outdoor adventure camp focused on survival skills, hiking, and nature exploration.',
     location: 'Boulder, Colorado',
+    coordinates: {
+      type: 'Point',
+      coordinates: [-105.2705, 40.0150] // Boulder, CO coordinates
+    },
+    formattedAddress: 'Boulder, Boulder County, Colorado, United States',
     ageRange: {
       min: 8,
       max: 14
@@ -28,6 +33,11 @@ const SAMPLE_CAMPS = [
     name: 'Tech Innovation Camp',
     description: 'A coding and robotics camp where kids learn programming, robotics, and app development.',
     location: 'Austin, Texas',
+    coordinates: {
+      type: 'Point',
+      coordinates: [-97.7437, 30.2711] // Austin, TX coordinates
+    },
+    formattedAddress: 'Austin, Travis County, Texas, United States',
     ageRange: {
       min: 10,
       max: 16
@@ -51,6 +61,11 @@ const SAMPLE_CAMPS = [
     name: 'Creative Arts Camp',
     description: 'A camp focused on developing artistic abilities through painting, sculpture, and digital arts.',
     location: 'Portland, Oregon',
+    coordinates: {
+      type: 'Point',
+      coordinates: [-122.6765, 45.5155] // Portland, OR coordinates
+    },
+    formattedAddress: 'Portland, Multnomah County, Oregon, United States',
     ageRange: {
       min: 7,
       max: 15
@@ -77,6 +92,7 @@ const Camp = require('../models/camp');
 const Review = require('../models/review');
 // This middleware is imported but should not be applied to GET routes
 const auth = require('../middleware/auth');
+const { validateCamp } = require('../middleware/validation');
 
 // @route   GET/POST /api/camps/search
 // @desc    Search camps with multiple criteria
@@ -131,14 +147,19 @@ async function handleSearch(req, res) {
                 : params.activities.split(',');
             query.activities = { $in: activities };
         }
+
+        // Status filter
+        if (params.status) {
+            query.status = params.status;
+        } else {
+            // Default to active camps if no status specified
+            query.status = 'active';
+        }
         
         // Build sort options
         const sortOptions = {};
         if (params.sortBy) {
             sortOptions[params.sortBy] = params.sortOrder === 'desc' ? -1 : 1;
-        } else if (params.searchText) {
-            // If text search is used, sort by text score
-            sortOptions.score = { $meta: 'textScore' };
         }
         
         // Build pagination options
@@ -183,47 +204,42 @@ router.post('/search', handleSearch);
 // @route   GET /api/camps
 // @desc    Get all camps
 // @access  Public
-// No auth middleware for public routes
 router.get('/', async (req, res) => {
     try {
-        // Check if MongoDB is connected
-        if (mongoose.connection.readyState !== 1) {
-            console.log('MongoDB not connected, returning sample data');
-            return res.json(SAMPLE_CAMPS);
-        }
-
-        const limit = req.query.limit ? parseInt(req.query.limit) : 0;
-        const query = Camp.find().sort({ createdAt: -1 });
-        
-        // Apply limit if specified
-        if (limit > 0) {
-            query.limit(limit);
-        }
-        
-        const camps = await query;
-        
-        // Return sample data if no camps found
-        if (!camps || camps.length === 0) {
-            console.log('No camps found in database, returning sample data');
-            return res.json(SAMPLE_CAMPS);
-        }
-        
+        const camps = await Camp.find().nonDeleted();
         res.json(camps);
-    } catch (err) {
-        console.error('Error fetching camps:', err.message);
-        // Return sample data on error
-        console.log('Error in camps route, returning sample data');
-        res.json(SAMPLE_CAMPS);
+    } catch (error) {
+        console.error('Error fetching camps:', error);
+        res.status(500).json({ message: 'Server error', error: error.message });
     }
 });
 
+// @route   GET /api/camps/status/:status
+// @desc    Get camps by status
+// @access  Public
+router.get('/status/:status', async (req, res) => {
+    try {
+        const { status } = req.params;
+        const camps = await Camp.find({ status })
+            .sort({ viewCount: -1, createdAt: -1 });
+        res.json(camps);
+    } catch (err) {
+        console.error('Error fetching camps by status:', err);
+        res.status(500).json({ message: 'Server Error' });
+    }
+});
+
+// @route   GET /api/camps/homepage
+// @desc    Get camps for homepage
+// @access  Public
 router.get('/homepage', async (req, res) => {
     try {
-        const featuredCamps = await Camp.find()
-        .sort({ createdAt: -1 })
-        .limit(3);
+        const featuredCamps = await Camp.find({ status: 'active' })
+            .sort({ viewCount: -1, createdAt: -1 })
+            .limit(3);
 
         const categoryCounts = await Camp.aggregate([
+            { $match: { status: 'active' } },
             { $group: { _id: '$category', count: { $sum: 1 } } },
             { $sort: { count: -1 } }
         ]);
@@ -235,60 +251,88 @@ router.get('/homepage', async (req, res) => {
     }
 });
 
-// @route   Get /api/camps/:id
+// Test endpoint to check database connection
+router.get('/test', async (req, res) => {
+    try {
+        console.log('Testing database connection...');
+        const count = await Camp.countDocuments();
+        console.log('Number of camps in database:', count);
+        res.json({ message: 'Database connection successful', campCount: count });
+    } catch (err) {
+        console.error('Database test error:', err);
+        res.status(500).json({ message: 'Database connection failed', error: err.message });
+    }
+});
+
+// @route   GET /api/camps/owner
+// @desc    Get all camps owned by the current user
+// @access  Private
+router.get('/owner', auth, async (req, res) => {
+    try {
+        const camps = await Camp.find({ owner: req.user.id });
+        res.json(camps);
+    } catch (err) {
+        console.error('Error in /api/camps/owner:', err.message);
+        res.status(500).json({ message: 'Server Error' });
+    }
+});
+
+// @route   GET /api/camps/:id
 // @desc    Get a camp by ID
 // @access  Public
 router.get('/:id', async (req, res) => {
     try {
-        const camp = await Camp.findById(req.params.id);
+        const camp = await Camp.findById(req.params.id).nonDeleted();
+        
         if (!camp) {
             return res.status(404).json({ message: 'Camp not found' });
         }
-
-        // Get reviews for the camp
-        const reviews = await Review.find({ campId: req.params.id })
-            .populate('userId', 'username')
-            .sort({ createdAt: -1 });
-
-        res.json({ camp, reviews });
-    } catch (err) {
-        console.error(err.message);
-
-        if (err.kind === 'ObjectId') {
-            return res.status(404).json({ message: 'Camp not found' });
-        }
-
-        res.status(500).json({ message: 'Server Error' });
+        
+        res.json(camp);
+    } catch (error) {
+        console.error('Error fetching camp:', error);
+        res.status(500).json({ message: 'Server error', error: error.message });
     }
 });
 
 // @route   POST /api/camps
 // @desc    Create a new camp
 // @access  Private
-router.post('/', auth, async (req, res) => {
+router.post('/', auth, validateCamp, async (req, res) => {
     try {
-        // Check if user is a camp owner
-        if(req.user.role !== 'campOwner') {
-            return res.status(403).json({ message: 'Access denied' });
+        // Validate required fields
+        const requiredFields = ['name', 'description', 'location', 'price', 'ageRange', 'category', 'website', 'contact', 'email', 'phone', 'startDate', 'endDate', 'capacity'];
+        const missingFields = requiredFields.filter(field => !req.body[field]);
+        
+        if (missingFields.length > 0) {
+            return res.status(400).json({ 
+                message: 'Missing required fields', 
+                missingFields 
+            });
         }
 
         const newCamp = new Camp({
             ...req.body,
-            createdBy: req.user.id // Associate the camp with the logged-in user
+            owner: req.user.id,
+            status: 'active',
+            viewCount: 0
         });
 
         const camp = await newCamp.save();
         res.json(camp);
     } catch (err) {
-        console.error(err.message);
-        res.status(500).json({ message: 'Server Error' });
+        console.error('Error creating camp:', err);
+        res.status(500).json({ 
+            message: 'Server Error',
+            error: err.message
+        });
     }
 });
 
 // @route   PUT /api/camps/:id
 // @desc    Update a camp
-// @access  Public for now
-router.put('/:id', auth, async (req, res) => {
+// @access  Private
+router.put('/:id', auth, validateCamp, async (req, res) => {
     try {
         const camp = await Camp.findById(req.params.id);
 
@@ -296,9 +340,14 @@ router.put('/:id', auth, async (req, res) => {
             return res.status(404).json({ message: 'Camp not found' });
         }
 
-        // Check if user is authorized to update the camp
-        if (camp.createdBy && camp.createdBy.toString() !== req.user.id && req.user.role !== 'admin') {
+        // Check if the user is the owner of the camp or admin
+        if (camp.owner && camp.owner.toString() !== req.user.id && req.user.role !== 'admin') {
             return res.status(403).json({ message: 'Access denied' });
+        }
+
+        // Don't allow updating viewCount through this route
+        if (req.body.viewCount) {
+            delete req.body.viewCount;
         }
 
         const updatedCamp = await Camp.findByIdAndUpdate(
@@ -306,7 +355,6 @@ router.put('/:id', auth, async (req, res) => {
             { $set: req.body },
             { new: true }
         );
-
         res.json(updatedCamp);
     } catch (err) {
         console.error(err.message);
@@ -316,29 +364,58 @@ router.put('/:id', auth, async (req, res) => {
 
 // @route   DELETE /api/camps/:id
 // @desc    Delete a camp
-// @access  Public for now
+// @access  Private/Camp Owner or Admin
 router.delete('/:id', auth, async (req, res) => {
     try {
         const camp = await Camp.findById(req.params.id);
-
+        
         if (!camp) {
             return res.status(404).json({ message: 'Camp not found' });
         }
 
-        // Check if user is authorized to delete the camp
-        if (camp.createdBy && camp.createdBy.toString() !== req.user.id && req.user.role !== 'admin') {
+        // Check if user is camp owner or admin
+        if (camp.ownerId.toString() !== req.user.id && req.user.role !== 'admin') {
+            return res.status(403).json({ message: 'Not authorized to delete this camp' });
+        }
+
+        // Perform soft delete
+        await camp.softDelete(req.user._id);
+        
+        res.json({ message: 'Camp soft deleted successfully' });
+    } catch (error) {
+        console.error('Error deleting camp:', error);
+        res.status(500).json({ message: 'Server error', error: error.message });
+    }
+});
+
+// @route   PUT /api/camps/:id/status
+// @desc    Update camp status
+// @access  Private
+router.put('/:id/status', auth, async (req, res) => {
+    try {
+        const { status } = req.body;
+        if (!['active', 'inactive'].includes(status)) {
+            return res.status(400).json({ message: 'Invalid status' });
+        }
+
+        const camp = await Camp.findById(req.params.id);
+        if (!camp) {
+            return res.status(404).json({ message: 'Camp not found' });
+        }
+
+        // Check if the user is the owner of the camp or admin
+        if (camp.owner && camp.owner.toString() !== req.user.id && req.user.role !== 'admin') {
             return res.status(403).json({ message: 'Access denied' });
         }
 
-        await camp.deleteOne();
-
-        res.json({ message: 'Camp deleted' });
+        const updatedCamp = await Camp.findByIdAndUpdate(
+            req.params.id,
+            { $set: { status } },
+            { new: true }
+        );
+        res.json(updatedCamp);
     } catch (err) {
         console.error(err.message);
-
-        if (err.kind === 'ObjectId') {
-            return res.status(404).json({ message: 'Camp not found' });
-        }
         res.status(500).json({ message: 'Server Error' });
     }
 });

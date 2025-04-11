@@ -20,41 +20,36 @@ const reviewTexts = [
 ];
 
 const seedReviews = async (users, camps) => {
-  // Create reviews array
-  const reviews = [];
-  
-  // Only parent users should leave reviews
-  const parentUsers = users.filter(user => user.role === 'parent');
-  
-  // Generate reviews
-  camps.forEach(camp => {
-    // Each camp gets 3-8 reviews
-    const numReviews = getRandomInt(3, 8);
+  try {
+    const reviews = [];
     
-    for (let i = 0; i < numReviews; i++) {
-      // Randomly select a parent user
-      const randomUserIndex = getRandomInt(0, parentUsers.length - 1);
-      const user = parentUsers[randomUserIndex];
+    // Create reviews for each camp
+    camps.forEach(camp => {
+      // Create 3-5 reviews per camp
+      const numReviews = Math.floor(Math.random() * 3) + 3;
       
-      // Randomly select a review text
-      const randomReviewIndex = getRandomInt(0, reviewTexts.length - 1);
-      const reviewText = reviewTexts[randomReviewIndex];
-      
-      // Create review with rating between 3-5 (mostly positive reviews)
-      reviews.push({
-        userId: user._id,
-        campId: camp._id,
-        rating: getRandomInt(3, 5),
-        reviewText: reviewText
-      });
-    }
-  });
-  
-  // Insert reviews into database
-  const createdReviews = await Review.insertMany(reviews);
-  console.log(`${createdReviews.length} reviews created`);
-  
-  return createdReviews;
+      for (let i = 0; i < numReviews; i++) {
+        const user = users[Math.floor(Math.random() * users.length)];
+        const reviewText = reviewTexts[Math.floor(Math.random() * reviewTexts.length)];
+        reviews.push({
+          userId: user._id,
+          campId: camp._id,
+          rating: Math.floor(Math.random() * 3) + 3,
+          reviewText: reviewText,
+          status: 'active',
+          helpfulVotes: Math.floor(Math.random() * 10), // Random helpful votes between 0-9
+          isSeedReview: true
+        });
+      }
+    });
+
+    const createdReviews = await Review.insertMany(reviews);
+    console.log(`${createdReviews.length} reviews created`);
+    return createdReviews;
+  } catch (error) {
+    console.error('Error seeding reviews:', error);
+    throw error;
+  }
 };
 
 module.exports = seedReviews;

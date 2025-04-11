@@ -1,10 +1,10 @@
 import React, { useContext } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { AuthContext } from '../../context/AuthContext';
+import { useAuth } from '../../context/AuthContext';
 import './Header.css';
 
 const Header = () => {
-  const { isLoggedIn, logout } = useContext(AuthContext);
+  const { isLoggedIn, logout, user } = useAuth();
   const navigate = useNavigate();
 
   const handleLogout = () => {
@@ -23,6 +23,12 @@ const Header = () => {
         {isLoggedIn ? (
           <>
             <Link to="/profile">Profile</Link>
+            {(user?.role === 'admin' || user?.role === 'camp_owner') && (
+              <Link to="/manage-camps">Manage Camps</Link>
+            )}
+            {user?.role === 'admin' && (
+              <Link to="/manage-users">Manage Users</Link>
+            )}
             <button 
               onClick={handleLogout}
               className="logout-button"

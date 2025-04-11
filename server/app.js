@@ -3,45 +3,49 @@ const cors = require('cors');
 const connectDB = require('./db');
 const path = require('path');
 const mongoose = require('mongoose');
-// var cookieParser = require('cookie-parser');
-// var logger = require('morgan');
 
 // Load environment variables with explicit path
 try {
     require('dotenv').config({ path: path.join(__dirname, '.env') });
-  } catch (error) {
+} catch (error) {
     console.log('No .env file found, using environment variables');
-  }
+}
 
 const app = express();
 
 // Connect to MongoDB
 connectDB();
 
-// Middleware
-app.use(cors({
-    origin: ['http://localhost:5173', 'http://127.0.0.1:5173'], // Allow both localhost and 127.0.0.1 
-    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'], // Include OPTIONS for preflight requests
-    allowedHeaders: ['Content-Type', 'Authorization'],
-    credentials: true // Allow cookies if you need authentication
-}));
+// CORS middleware
+app.use(cors());
 
-// Log requests for debugging
+// Body parsing middleware
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+
+// Request logging middleware
 app.use((req, res, next) => {
-    console.log(`${new Date().toISOString()} - ${req.method} ${req.url}`);
+    console.log('=== New Request ===');
+    console.log('Method:', req.method);
+    console.log('Path:', req.path);
+    console.log('Body:', req.body);
+    console.log('==================');
     next();
 });
-app.use(express.json());
-app.use(express.urlencoded({ extended: false }));
-// app.use(logger('dev'));
-// app.use(cookieParser());
-// app.use(express.static(path.join(__dirname, 'public')));
 
 // Routes
 app.use('/api/camps', require('./routes/camps'));
 app.use('/api/reviews', require('./routes/reviews'));
 app.use('/api/users', require('./routes/users'));
 app.use('/api/auth', require('./routes/auth'));
+app.use('/api/maps', require('./routes/maps'));
+app.use('/api/payments', require('./routes/payments'));
+
+// Error handling middleware
+app.use((err, req, res, next) => {
+    console.error('Error:', err);
+    res.status(500).json({ error: err.message });
+});
 
 // Default route
 app.get('/', (req, res) => {
@@ -69,13 +73,9 @@ app.get('/api/dbcheck', async (req, res) => {
     }
 });
 
-// Set port
-const PORT = process.env.PORT || 5001;
+// Set port from environment variable only
+const PORT = process.env.PORT;
 app.set('port', PORT);
 
-// Start server
-app.listen(PORT, () => {
-    console.log(`Server is running on port ${PORT}`);
-});
-
+// Export the app - server startup is handled by bin/www
 module.exports = app;

@@ -1,0 +1,16 @@
+.map-container {
+  width: 100%;
+  margin: 20px 0;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.error-message {
+  color: #dc3545;
+  padding: 10px;
+  margin-bottom: 10px;
+  background-color: #f8d7da;
+  border-radius: 4px;
+  text-align: center;
+} 

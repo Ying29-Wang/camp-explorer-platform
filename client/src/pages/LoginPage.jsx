@@ -1,67 +1,121 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-// Use relative URL for API calls via the Vite proxy
-const API_BASE = '/api';
-import './LoginPage.css'; // Optional styling
+import Header from '../components/layout/Header';
+import './LoginPage.css';
 
 const LoginPage = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [error, setError] = useState('');
+  const [errors, setErrors] = useState({
+    email: '',
+    password: ''
+  });
+  const [submitError, setSubmitError] = useState('');
   const { login } = useAuth();
   const navigate = useNavigate();
 
+  const validateEmail = (email) => {
+    const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return re.test(email);
+  };
+
+  const validateForm = () => {
+    let isValid = true;
+    const newErrors = {
+      email: '',
+      password: ''
+    };
+
+    if (!email) {
+      newErrors.email = 'Email is required';
+      isValid = false;
+    } else if (!validateEmail(email)) {
+      newErrors.email = 'Please enter a valid email';
+      isValid = false;
+    }
+
+    if (!password) {
+      newErrors.password = 'Password is required';
+      isValid = false;
+    }
+
+    setErrors(newErrors);
+    return isValid;
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
-    try {
-      // Replace with actual API call
-      const response = await fetch(`${API_BASE}/auth/login`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password })
-      });
+    setSubmitError('');
 
-      if (response.ok) {
-        login(); // Update auth context
-        navigate('/profile'); // Redirect to profile
-      } else {
-        setError('Invalid credentials');
-      }
+    if (!validateForm()) return;
+
+    try {
+      await login(email, password);
+      navigate('/profile');
     } catch (err) {
-      setError('Login failed. Please try again.');
+      setSubmitError(err.message || 'Login failed. Please try again.');
     }
   };
 
   return (
-    <div className="login-container">
-      <h2>Login</h2>
-      {error && <div className="error-message">{error}</div>}
-      <form onSubmit={handleSubmit}>
-        <div className="form-group">
-          <label>Email</label>
-          <input
-            type="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            required
-          />
+    <>
+      <Header />
+      <div className="login-page">
+        <div className="login-container">
+          <h2>Login</h2>
+          {submitError && <div className="error-message">{submitError}</div>}
+          
+          <form onSubmit={handleSubmit}>
+            <div className="form-group">
+              <label htmlFor="email">Email</label>
+              <input
+                id="email"
+                name="email"
+                type="email"
+                autoComplete="email"
+                value={email}
+                onChange={(e) => {
+                  setEmail(e.target.value);
+                  if (errors.email) setErrors({...errors, email: ''});
+                }}
+                className={errors.email ? 'error-border' : ''}
+              />
+              {errors.email && <div className="field-error">{errors.email}</div>}
+            </div>
+
+            <div className="form-group">
+              <label htmlFor="password">Password</label>
+              <input
+                id="password"
+                name="password"
+                type="password"
+                autoComplete="current-password"
+                value={password}
+                onChange={(e) => {
+                  setPassword(e.target.value);
+                  if (errors.password) setErrors({...errors, password: ''});
+                }}
+                className={errors.password ? 'error-border' : ''}
+              />
+              {errors.password && <div className="field-error">{errors.password}</div>}
+            </div>
+
+            <button 
+              type="submit" 
+              className="submit-button"
+              disabled={!email || !password}
+            >
+              Login
+            </button>
+          </form>
+
+          <p className="register-link">
+            Don't have an account? <Link to="/register">Register here</Link>
+          </p>
         </div>
-        <div className="form-group">
-          <label>Password</label>
-          <input
-            type="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            required
-          />
-        </div>
-        <button type="submit">Login</button>
-      </form>
-      <p>
-        Don't have an account? <Link to="/register">Register here</Link>
-      </p>
-    </div>
+      </div>
+    </>
   );
 };
 
