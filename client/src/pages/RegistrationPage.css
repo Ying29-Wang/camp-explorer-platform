@@ -87,3 +87,44 @@
 .login-link a:hover {
   text-decoration: underline;
 }
+
+.payment-section {
+  margin-top: 2rem;
+  padding: 1.5rem;
+  background: #f8f9fa;
+  border-radius: 8px;
+}
+
+.stripe-card {
+  padding: 12px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  margin: 10px 0 20px;
+  background: white;
+}
+
+.payment-button {
+  width: 100%;
+  margin-top: 10px;
+}
+
+.payment-step {
+  text-align: center;
+}
+
+.success-message {
+  color: #28a745;
+  padding: 20px;
+}
+
+.back-button {
+  background: none;
+  border: none;
+  color: #0066cc;
+  cursor: pointer;
+  margin-top: 20px;
+}
+
+.error-border {
+  border-color: #dc3545 !important;
+}
