@@ -1,8 +1,11 @@
 const express = require('express');
 const router = express.Router();
 const jwt = require('jsonwebtoken');
+const crypto = require('crypto');
 const auth = require('../middleware/auth');
+const { passwordResetLimiter } = require('../middleware/rateLimit');
 const User = require('../models/user');
+const nodemailer = require('nodemailer');
 
 // Helper function to send JSON response
 const sendJsonResponse = (res, status, data) => {
@@ -156,6 +159,184 @@ router.get('/users', auth, async (req, res) => {
     } catch (err) {
         console.error('Get users error:', err.message);
         sendJsonResponse(res, 500, { msg: 'Server error while fetching users' });
+    }
+});
+
+// Test route
+router.get('/test', (req, res) => {
+    res.json({ message: 'Auth route is working' });
+});
+
+// Test email route
+router.post('/test-email', async (req, res) => {
+    try {
+        const transporter = nodemailer.createTransport({
+            service: 'gmail',
+            auth: {
+                user: process.env.EMAIL_USER,
+                pass: process.env.EMAIL_PASS
+            }
+        });
+
+        const mailOptions = {
+            from: process.env.EMAIL_FROM,
+            to: req.body.email || process.env.EMAIL_USER,
+            subject: 'Test Email from Camp Explorer',
+            text: 'This is a test email from the Camp Explorer application.'
+        };
+
+        await transporter.sendMail(mailOptions);
+        res.json({ success: true, message: 'Test email sent successfully' });
+    } catch (error) {
+        console.error('Email error:', error);
+        res.status(500).json({ success: false, message: 'Failed to send email', error: error.message });
+    }
+});
+
+// @route   POST /api/auth/forgot-password
+// @desc    Request password reset
+// @access  Public
+router.post('/forgot-password', passwordResetLimiter, async (req, res) => {
+    try {
+        const { email } = req.body;
+
+        if (!email) {
+            return res.status(400).json({ 
+                success: false,
+                message: 'Email is required'
+            });
+        }
+
+        // Find user by email
+        const user = await User.findOne({ email });
+        if (!user) {
+            // Return success even if user not found (security through obscurity)
+            return res.status(200).json({ 
+                success: true,
+                message: 'If an account exists, a password reset email has been sent'
+            });
+        }
+
+        // Generate reset token
+        const resetToken = crypto.randomBytes(20).toString('hex');
+        const resetExpires = Date.now() + 3600000; // 1 hour from now
+
+        // Save reset token to user
+        user.resetPasswordToken = resetToken;
+        user.resetPasswordExpires = resetExpires;
+        await user.save();
+
+        // Create reset URL
+        const resetUrl = `${process.env.FRONTEND_URL}/reset-password/${resetToken}`;
+
+        // Create email transporter
+        const transporter = nodemailer.createTransport({
+            service: 'gmail',
+            auth: {
+                user: process.env.EMAIL_USER,
+                pass: process.env.EMAIL_PASS
+            }
+        });
+
+        // Email options
+        const mailOptions = {
+            from: process.env.EMAIL_FROM,
+            to: user.email,
+            subject: 'Password Reset Request - Camp Explorer',
+            html: `
+                <h2>Password Reset Request</h2>
+                <p>You are receiving this because you (or someone else) have requested the reset of the password for your Camp Explorer account.</p>
+                <p>Please click on the following link, or paste this into your browser to complete the process:</p>
+                <p><a href="${resetUrl}">${resetUrl}</a></p>
+                <p>If you did not request this, please ignore this email and your password will remain unchanged.</p>
+                <p>This link will expire in 1 hour.</p>
+            `
+        };
+
+        // Send email
+        await transporter.sendMail(mailOptions);
+        console.log('Password reset email sent to:', user.email);
+
+        res.status(200).json({ 
+            success: true,
+            message: 'If an account exists, a password reset email has been sent'
+        });
+    } catch (error) {
+        console.error('Password reset error:', error);
+        res.status(500).json({ 
+            success: false,
+            message: 'Error processing password reset request',
+            error: error.message
+        });
+    }
+});
+
+// @route   POST /api/auth/reset-password
+// @desc    Reset password with token
+// @access  Public
+router.post('/reset-password', async (req, res) => {
+    try {
+        const { token, password } = req.body;
+
+        if (!token || !password) {
+            return res.status(400).json({
+                success: false,
+                message: 'Token and new password are required'
+            });
+        }
+
+        // Find user with valid reset token
+        const user = await User.findOne({
+            resetPasswordToken: token,
+            resetPasswordExpires: { $gt: Date.now() }
+        });
+
+        if (!user) {
+            return res.status(400).json({
+                success: false,
+                message: 'Password reset token is invalid or has expired'
+            });
+        }
+
+        // Update password and clear reset token
+        user.password = password;
+        user.resetPasswordToken = undefined;
+        user.resetPasswordExpires = undefined;
+        await user.save();
+
+        // Send confirmation email
+        const transporter = nodemailer.createTransport({
+            service: 'gmail',
+            auth: {
+                user: process.env.EMAIL_USER,
+                pass: process.env.EMAIL_PASS
+            }
+        });
+
+        const mailOptions = {
+            from: process.env.EMAIL_FROM,
+            to: user.email,
+            subject: 'Password Reset Confirmation - Camp Explorer',
+            html: `
+                <h2>Password Reset Successful</h2>
+                <p>Your password has been successfully reset.</p>
+                <p>If you did not make this change, please contact us immediately.</p>
+            `
+        };
+
+        await transporter.sendMail(mailOptions);
+
+        res.status(200).json({
+            success: true,
+            message: 'Password has been reset successfully'
+        });
+    } catch (error) {
+        console.error('Password reset completion error:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Error resetting password',
+            error: error.message
+        });
     }
 });
 
