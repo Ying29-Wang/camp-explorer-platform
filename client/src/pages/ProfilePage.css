@@ -2,6 +2,12 @@
   width: 100%;
 }
 
+.profile-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 2rem 2rem 2rem 4rem;
+}
+
 .profile-content {
   max-width: 1200px;
   margin: 2rem auto;

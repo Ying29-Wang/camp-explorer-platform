@@ -1,7 +1,7 @@
 const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 
-const RecentlyViewedSchema = new Schema({
+const BookmarkSchema = new Schema({
     userId: {
         type: Schema.Types.ObjectId,
         ref: 'User',
@@ -12,13 +12,13 @@ const RecentlyViewedSchema = new Schema({
         ref: 'Camp',
         required: true
     },
-    viewedAt: {
+    createdAt: {
         type: Date,
         default: Date.now
     }
 }, { timestamps: true });
 
-// Create a compound index to ensure unique entries
-RecentlyViewedSchema.index({ userId: 1, campId: 1 }, { unique: true });
+// Create a compound index to ensure unique bookmarks
+BookmarkSchema.index({ userId: 1, campId: 1 }, { unique: true });
 
-module.exports = mongoose.model('recentlyViewed', RecentlyViewedSchema);
+module.exports = mongoose.model('bookmark', BookmarkSchema); 

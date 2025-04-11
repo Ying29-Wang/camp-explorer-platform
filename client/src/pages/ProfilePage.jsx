@@ -1,95 +1,118 @@
-import { useState, useEffect } from 'react';
-import { useContext } from 'react';
-import { Navigate } from 'react-router-dom';
-import { AuthContext } from '../context/AuthContext';
-import { fetchUserReviews, deleteReview, updateReview } from '../services/reviewService';
-import ReviewCard from '../components/features/reviews/ReviewCard';
+import React, { useState, useEffect } from 'react';
+import { useAuth } from '../context/AuthContext';
+import api from '../services/api';
 import Header from '../components/layout/Header';
 import './ProfilePage.css';
 
 const ProfilePage = () => {
-  const { isLoggedIn, user } = useContext(AuthContext);
-  const [reviews, setReviews] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+    const { user } = useAuth();
+    const [bookmarks, setBookmarks] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
 
-  useEffect(() => {
-    if (isLoggedIn) {
-      loadUserReviews();
+    useEffect(() => {
+        console.log('ProfilePage mounted, user:', user);
+        if (user) {
+            fetchBookmarks();
+        }
+    }, [user]);
+
+    const fetchBookmarks = async () => {
+        try {
+            console.log('Fetching bookmarks...');
+            setLoading(true);
+            setError(null);
+            const response = await api.get('/bookmarks');
+            console.log('Bookmarks response:', response.data);
+            setBookmarks(response.data);
+        } catch (err) {
+            console.error('Error fetching bookmarks:', err);
+            setError('Failed to load bookmarks. Please try again later.');
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const handleRemoveBookmark = async (campId) => {
+        try {
+            console.log('Removing bookmark for camp:', campId);
+            await api.delete(`/bookmarks/${campId}`);
+            setBookmarks(bookmarks.filter(bookmark => bookmark.campId._id !== campId));
+        } catch (err) {
+            console.error('Error removing bookmark:', err);
+            setError('Failed to remove bookmark. Please try again.');
+        }
+    };
+
+    if (!user) {
+        console.log('No user found, showing login prompt');
+        return (
+            <>
+                <Header />
+                <div className="profile-container">
+                    <div className="profile-header">
+                        <h1>Profile</h1>
+                        <p>Please log in to view your profile.</p>
+                        <a href="/login" className="login-link">Log In</a>
+                    </div>
+                </div>
+            </>
+        );
     }
-  }, [isLoggedIn]);
 
-  const loadUserReviews = async () => {
-    try {
-      const data = await fetchUserReviews();
-      setReviews(data);
-      setLoading(false);
-    } catch (error) {
-      setError(error.message || 'Failed to load reviews');
-      setLoading(false);
-    }
-  };
+    console.log('Rendering profile for user:', user);
+    return (
+        <>
+            <Header />
+            <div className="profile-container">
+                <div className="profile-header">
+                    <h1>My Profile</h1>
+                    <div className="user-info">
+                        <p><strong>Name:</strong> {user.name}</p>
+                        <p><strong>Email:</strong> {user.email}</p>
+                        <p><strong>Role:</strong> {user.role}</p>
+                    </div>
+                </div>
 
-  const handleDeleteReview = async (reviewId) => {
-    if (window.confirm('Are you sure you want to delete this review?')) {
-      try {
-        await deleteReview(reviewId);
-        setReviews(reviews.filter(review => review._id !== reviewId));
-      } catch (error) {
-        setError(error.message || 'Failed to delete review');
-      }
-    }
-  };
-
-  const handleEditReview = async (reviewId, reviewData) => {
-    try {
-      const updatedReview = await updateReview(reviewId, reviewData);
-      setReviews(reviews.map(review => 
-        review._id === reviewId ? updatedReview : review
-      ));
-    } catch (error) {
-      setError(error.message || 'Failed to update review');
-      throw error;
-    }
-  };
-
-  if (!isLoggedIn) return <Navigate to="/login" />;
-
-  return (
-    <div className="profile-page">
-      <Header />
-      <div className="profile-content">
-        <h1>My Profile</h1>
-        <div className="profile-section">
-          <div className="user-info">
-            <p><strong>Username:</strong> {user.username}</p>
-            <p><strong>Email:</strong> {user.email}</p>
-            <p><strong>Phone:</strong> {user.phone || 'Not provided'}</p>
-          </div>
-        </div>
-
-        <h2>My Reviews</h2>
-        {loading ? (
-          <p>Loading reviews...</p>
-        ) : error ? (
-          <p className="error">{error}</p>
-        ) : reviews.length === 0 ? (
-          <p>You haven't written any reviews yet.</p>
-        ) : (
-          <div className="reviews-list">
-            {reviews.map(review => (
-              <ReviewCard 
-                key={review._id} 
-                review={review} 
-                onDelete={handleDeleteReview}
-                onEdit={handleEditReview}
-              />
-            ))}
-          </div>
-        )}
-      </div>
-    </div>
-  );
+                <div className="bookmarks-section">
+                    <h2>My Bookmarks</h2>
+                    {error && (
+                        <div className="error-message">
+                            {error}
+                            <button onClick={fetchBookmarks} className="retry-button">
+                                Retry
+                            </button>
+                        </div>
+                    )}
+                    {loading ? (
+                        <div className="loading-spinner" />
+                    ) : bookmarks.length > 0 ? (
+                        <div className="bookmarks-grid">
+                            {bookmarks.map((bookmark) => (
+                                <div key={bookmark._id} className="bookmark-card">
+                                    <img
+                                        src={bookmark.campId.images?.[0] || '/placeholder-image.jpg'}
+                                        alt={bookmark.campId.name}
+                                        className="bookmark-image"
+                                    />
+                                    <h3>{bookmark.campId.name}</h3>
+                                    <p>{bookmark.campId.description}</p>
+                                    <button
+                                        onClick={() => handleRemoveBookmark(bookmark.campId._id)}
+                                        className="remove-bookmark-btn"
+                                    >
+                                        Remove Bookmark
+                                    </button>
+                                </div>
+                            ))}
+                        </div>
+                    ) : (
+                        <p>You haven't bookmarked any camps yet.</p>
+                    )}
+                </div>
+            </div>
+        </>
+    );
 };
 
 export default ProfilePage;

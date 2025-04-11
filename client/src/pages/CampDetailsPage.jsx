@@ -2,6 +2,8 @@ import { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { fetchCampById } from '../services/campService';
 import { fetchReviewsByCampId } from '../services/reviewService';
+import { useAuth } from '../context/AuthContext';
+import api from '../services/api';
 
 import Header from '../components/layout/Header';
 import Map from '../components/common/Map.jsx';
@@ -13,10 +15,12 @@ import './CampDetailsPage.css';
 
 const CampDetailsPage = () => {
     const { id } = useParams();
+    const { isLoggedIn, user } = useAuth();
     const [camp, setCamp] = useState(null);
     const [reviews, setReviews] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
+    const [isBookmarked, setIsBookmarked] = useState(false);
 
     useEffect(() => {
         const fetchData = async () => {
@@ -38,6 +42,17 @@ const CampDetailsPage = () => {
 
                 setCamp(campData);
                 setReviews(reviewData || []);
+
+                // Check if camp is bookmarked
+                if (isLoggedIn) {
+                    try {
+                        const response = await api.get(`/bookmarks/${campData._id}`);
+                        setIsBookmarked(response.data.isBookmarked);
+                    } catch (error) {
+                        console.error('Error checking bookmark status:', error);
+                        setIsBookmarked(false);
+                    }
+                }
             } catch (err) {
                 console.error('Fetch error:', err);
                 setError(err.message || 'Failed to load camp details');
@@ -47,7 +62,62 @@ const CampDetailsPage = () => {
         };
 
         fetchData();
-    }, [id]);
+    }, [id, isLoggedIn]);
+
+    // Track camp view
+    useEffect(() => {
+        const trackView = async () => {
+            if (!isLoggedIn || !camp || !user) {
+                console.log('Not tracking view - isLoggedIn:', isLoggedIn, 'has camp:', !!camp, 'has user:', !!user);
+                return;
+            }
+
+            try {
+                console.log('Tracking view - User:', user._id, 'Camp ID:', camp._id);
+                
+                const response = await api.post('/recently-viewed', { 
+                    campId: camp._id
+                });
+                
+                if (response.data) {
+                    console.log('Successfully tracked view:', response.data);
+                } else {
+                    console.warn('View tracking response missing data');
+                }
+            } catch (error) {
+                console.error('Error tracking view:', error);
+                console.error('Error details:', {
+                    status: error.response?.status,
+                    data: error.response?.data,
+                    message: error.message
+                });
+            }
+        };
+
+        if (camp && isLoggedIn) {
+            trackView();
+        }
+    }, [camp, isLoggedIn, user]);
+
+    const handleBookmark = async () => {
+        if (!isLoggedIn) {
+            window.location.href = '/login';
+            return;
+        }
+
+        try {
+            if (isBookmarked) {
+                await api.delete(`/bookmarks/${camp._id}`);
+                setIsBookmarked(false);
+            } else {
+                await api.post('/bookmarks', { campId: camp._id });
+                setIsBookmarked(true);
+            }
+        } catch (error) {
+            console.error('Error toggling bookmark:', error);
+            setError(error.response?.data?.message || 'Failed to update bookmark');
+        }
+    };
 
     const handleReviewSubmit = async (reviewData) => {
         try {
@@ -99,6 +169,14 @@ const CampDetailsPage = () => {
                     <p className="camp-location">
                         <i className="fas fa-map-marker-alt"></i> {camp.location}
                     </p>
+                    {isLoggedIn && (
+                        <button 
+                            onClick={handleBookmark}
+                            className={`bookmark-btn ${isBookmarked ? 'bookmarked' : ''}`}
+                        >
+                            {isBookmarked ? 'Remove Bookmark' : 'Add Bookmark'}
+                        </button>
+                    )}
                 </div>
 
                 <div className="camp-content">
