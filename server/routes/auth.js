@@ -129,6 +129,41 @@ router.post('/login', async (req, res) => {
     }
 });
 
+// @route   PUT /api/auth/change-password
+// @desc    Change user password
+// @access  Private
+router.put('/change-password', auth, async (req, res) => {
+    try {
+        const { currentPassword, newPassword } = req.body;
+
+        // Validate required fields
+        if (!currentPassword || !newPassword) {
+            return sendJsonResponse(res, 400, { msg: 'Please provide both current and new password' });
+        }
+
+        // Find user
+        const user = await User.findById(req.user.id);
+        if (!user) {
+            return sendJsonResponse(res, 404, { msg: 'User not found' });
+        }
+
+        // Verify current password
+        const isMatch = await user.comparePassword(currentPassword);
+        if (!isMatch) {
+            return sendJsonResponse(res, 400, { msg: 'Current password is incorrect' });
+        }
+
+        // Update password
+        user.password = newPassword;
+        await user.save();
+
+        sendJsonResponse(res, 200, { msg: 'Password changed successfully' });
+    } catch (err) {
+        console.error('Password change error:', err.message);
+        sendJsonResponse(res, 500, { msg: 'Server error during password change' });
+    }
+});
+
 // @route   GET /api/auth/me
 // @desc    Get logged in user
 // @access  Private
