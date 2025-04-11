@@ -38,6 +38,7 @@ app.use('/api/maps', require('./routes/maps'));
 app.use('/api/payments', require('./routes/payments'));
 app.use('/api/bookmarks', require('./routes/bookmarks'));
 app.use('/api/recently-viewed', require('./routes/recentlyViewed'));
+app.use('/api/ai', require('./routes/ai'));
 
 // Error handling middleware
 app.use((err, req, res, next) => {

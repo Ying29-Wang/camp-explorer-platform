@@ -31,6 +31,10 @@ const UserSchema = new Schema({
         type: Date,
         default: Date.now
     },
+    isSeedUser: {
+        type: Boolean,
+        default: false
+    },
     resetPasswordToken: {
         type: String,
         default: null
