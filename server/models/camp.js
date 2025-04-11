@@ -23,14 +23,17 @@ const CampSchema = new Schema({
     name: {
         type: String,
         required: true,
+        text: true
     },
     description: {
         type: String,
         required: true,
+        text: true
     },
     location: {
         type: String,
         required: true,
+        text: true
     },
     coordinates: {
         type: {
@@ -159,6 +162,14 @@ CampSchema.statics.incrementViewCount = async function(campId) {
     );
 };
 
+// Create text index for search
+CampSchema.index({ 
+    name: 'text', 
+    description: 'text', 
+    location: 'text',
+    activities: 'text'
+});
+
 CampSchema.statics.CATEGORIES = CAMP_CATEGORIES;
 
 // Add query helper for non-deleted camps
@@ -192,14 +203,5 @@ CampSchema.pre('remove', async function(next) {
 });
 
 const Camp = mongoose.model('Camp', CampSchema);
-
-// Ensure index exists when model is initialized
-Camp.on('index', function(err) {
-    if (err) {
-        console.error('Error creating indexes:', err);
-    } else {
-        console.log('Indexes created successfully');
-    }
-});
 
 module.exports = Camp;
