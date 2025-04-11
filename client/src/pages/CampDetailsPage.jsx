@@ -2,6 +2,8 @@ import { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { fetchCampById } from '../services/campService';
 import { fetchReviewsByCampId } from '../services/reviewService';
+import { useAuth } from '../context/AuthContext';
+import axios from 'axios';
 
 import Header from '../components/layout/Header';
 import Map from '../components/common/Map.jsx';
@@ -13,10 +15,12 @@ import './CampDetailsPage.css';
 
 const CampDetailsPage = () => {
     const { id } = useParams();
+    const { isLoggedIn } = useAuth();
     const [camp, setCamp] = useState(null);
     const [reviews, setReviews] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
+    const [isBookmarked, setIsBookmarked] = useState(false);
 
     useEffect(() => {
         const fetchData = async () => {
@@ -38,6 +42,16 @@ const CampDetailsPage = () => {
 
                 setCamp(campData);
                 setReviews(reviewData || []);
+
+                // Check if camp is bookmarked
+                if (isLoggedIn) {
+                    try {
+                        const response = await axios.get(`/api/bookmarks/${id}`);
+                        setIsBookmarked(response.data.isBookmarked);
+                    } catch (error) {
+                        console.error('Error checking bookmark status:', error);
+                    }
+                }
             } catch (err) {
                 console.error('Fetch error:', err);
                 setError(err.message || 'Failed to load camp details');
@@ -47,7 +61,28 @@ const CampDetailsPage = () => {
         };
 
         fetchData();
-    }, [id]);
+    }, [id, isLoggedIn]);
+
+    const handleBookmark = async () => {
+        if (!isLoggedIn) {
+            // Redirect to login or show login modal
+            window.location.href = '/login';
+            return;
+        }
+
+        try {
+            if (isBookmarked) {
+                await axios.delete(`/api/bookmarks/${id}`);
+                setIsBookmarked(false);
+            } else {
+                await axios.post('/api/bookmarks', { campId: id });
+                setIsBookmarked(true);
+            }
+        } catch (error) {
+            console.error('Error toggling bookmark:', error);
+            setError('Failed to update bookmark');
+        }
+    };
 
     const handleReviewSubmit = async (reviewData) => {
         try {
@@ -99,6 +134,14 @@ const CampDetailsPage = () => {
                     <p className="camp-location">
                         <i className="fas fa-map-marker-alt"></i> {camp.location}
                     </p>
+                    {isLoggedIn && (
+                        <button 
+                            onClick={handleBookmark}
+                            className={`bookmark-btn ${isBookmarked ? 'bookmarked' : ''}`}
+                        >
+                            {isBookmarked ? 'Remove Bookmark' : 'Add Bookmark'}
+                        </button>
+                    )}
                 </div>
 
                 <div className="camp-content">
