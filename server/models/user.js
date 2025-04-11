@@ -43,6 +43,43 @@ const UserSchema = new Schema({
         type: Date,
         default: null
     },
+    profilePicture: {
+        type: String,
+        default: null
+    },
+    notifications: {
+        type: {
+            email: { type: Boolean, default: true },
+            push: { type: Boolean, default: true },
+            sms: { type: Boolean, default: false }
+        },
+        default: {
+            email: true,
+            push: true,
+            sms: false
+        }
+    },
+    emailPreferences: {
+        type: {
+            marketing: { type: Boolean, default: false },
+            updates: { type: Boolean, default: true },
+            newsletters: { type: Boolean, default: false }
+        },
+        default: {
+            marketing: false,
+            updates: true,
+            newsletters: false
+        }
+    },
+    language: {
+        type: String,
+        enum: ['en', 'fr'],
+        default: 'en'
+    },
+    timezone: {
+        type: String,
+        default: 'America/Toronto'
+    },
     // Embedded children array
     children: [{
         firstName: {

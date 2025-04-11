@@ -109,6 +109,118 @@ router.put('/:id', auth, async (req, res) => {
   }
 });
 
+// @route PUT api/users/:id/basic-info
+// @desc Update user's basic information
+// @access Private
+router.put('/:id/basic-info', auth, async (req, res) => {
+    try {
+        // Check if the user is an admin or the user themselves
+        if (req.user.role !== 'admin' && req.user.id !== req.params.id) {
+            return res.status(403).json({ message: 'Access denied' });
+        }
+
+        const user = await User.findById(req.params.id);
+        if (!user) {
+            return res.status(404).json({ message: 'User not found' });
+        }
+
+        // Only allow updating specific fields
+        const allowedUpdates = ['username', 'email'];
+        const updates = Object.keys(req.body)
+            .filter(key => allowedUpdates.includes(key))
+            .reduce((obj, key) => {
+                obj[key] = req.body[key];
+                return obj;
+            }, {});
+
+        // Check if email is being changed and if it's already taken
+        if (updates.email && updates.email !== user.email) {
+            const existingUser = await User.findOne({ email: updates.email });
+            if (existingUser) {
+                return res.status(400).json({ message: 'Email already in use' });
+            }
+        }
+
+        const updatedUser = await User.findByIdAndUpdate(
+            req.params.id,
+            { $set: updates },
+            { new: true }
+        ).select('-password');
+        res.json(updatedUser);
+    } catch (err) {
+        console.error(err.message);
+        res.status(500).json({ message: 'Server Error' });
+    }
+});
+
+// @route PUT api/users/:id/preferences
+// @desc Update user's preferences
+// @access Private
+router.put('/:id/preferences', auth, async (req, res) => {
+    try {
+        // Check if the user is an admin or the user themselves
+        if (req.user.role !== 'admin' && req.user.id !== req.params.id) {
+            return res.status(403).json({ message: 'Access denied' });
+        }
+
+        const user = await User.findById(req.params.id);
+        if (!user) {
+            return res.status(404).json({ message: 'User not found' });
+        }
+
+        // Only allow updating preferences
+        const allowedUpdates = ['notifications', 'emailPreferences', 'language', 'timezone'];
+        const updates = Object.keys(req.body)
+            .filter(key => allowedUpdates.includes(key))
+            .reduce((obj, key) => {
+                obj[key] = req.body[key];
+                return obj;
+            }, {});
+
+        const updatedUser = await User.findByIdAndUpdate(
+            req.params.id,
+            { $set: updates },
+            { new: true }
+        ).select('-password');
+        res.json(updatedUser);
+    } catch (err) {
+        console.error(err.message);
+        res.status(500).json({ message: 'Server Error' });
+    }
+});
+
+// @route PUT api/users/:id/profile-picture
+// @desc Update user's profile picture
+// @access Private
+router.put('/:id/profile-picture', auth, async (req, res) => {
+    try {
+        // Check if the user is an admin or the user themselves
+        if (req.user.role !== 'admin' && req.user.id !== req.params.id) {
+            return res.status(403).json({ message: 'Access denied' });
+        }
+
+        const user = await User.findById(req.params.id);
+        if (!user) {
+            return res.status(404).json({ message: 'User not found' });
+        }
+
+        const { profilePicture } = req.body;
+        if (!profilePicture) {
+            return res.status(400).json({ message: 'Profile picture is required' });
+        }
+
+        const updatedUser = await User.findByIdAndUpdate(
+            req.params.id,
+            { $set: { profilePicture } },
+            { new: true }
+        ).select('-password');
+        res.json(updatedUser);
+    } catch (err) {
+        console.error(err.message);
+        res.status(500).json({ message: 'Server Error' });
+    }
+});
+
 // @route PUT api/users/:id/status
 // @desc Update user status
 // @access Private
@@ -161,6 +273,116 @@ router.put('/:id/last-login', auth, async (req, res) => {
     console.error(err.message);
     res.status(500).json({ message: 'Server Error' });
   }
+});
+
+// @route POST api/users/:id/children
+// @desc Add a new child to user
+// @access Private
+router.post('/:id/children', auth, async (req, res) => {
+    try {
+        // Check if the user is an admin or the user themselves
+        if (req.user.role !== 'admin' && req.user.id !== req.params.id) {
+            return res.status(403).json({ message: 'Access denied' });
+        }
+
+        const user = await User.findById(req.params.id);
+        if (!user) {
+            return res.status(404).json({ message: 'User not found' });
+        }
+
+        const { firstName, lastName, dateOfBirth, interests } = req.body;
+
+        // Validate required fields
+        if (!firstName || !lastName || !dateOfBirth) {
+            return res.status(400).json({ message: 'First name, last name, and date of birth are required' });
+        }
+
+        // Add new child to the children array
+        user.children.push({
+            firstName,
+            lastName,
+            dateOfBirth,
+            interests: interests || []
+        });
+
+        await user.save();
+        res.json(user.children[user.children.length - 1]);
+    } catch (err) {
+        console.error(err.message);
+        res.status(500).json({ message: 'Server Error' });
+    }
+});
+
+// @route PUT api/users/:id/children/:childId
+// @desc Update a child's information
+// @access Private
+router.put('/:id/children/:childId', auth, async (req, res) => {
+    try {
+        // Check if the user is an admin or the user themselves
+        if (req.user.role !== 'admin' && req.user.id !== req.params.id) {
+            return res.status(403).json({ message: 'Access denied' });
+        }
+
+        const user = await User.findById(req.params.id);
+        if (!user) {
+            return res.status(404).json({ message: 'User not found' });
+        }
+
+        const childIndex = user.children.findIndex(
+            child => child._id.toString() === req.params.childId
+        );
+
+        if (childIndex === -1) {
+            return res.status(404).json({ message: 'Child not found' });
+        }
+
+        const { firstName, lastName, dateOfBirth, interests } = req.body;
+
+        // Update child information
+        if (firstName) user.children[childIndex].firstName = firstName;
+        if (lastName) user.children[childIndex].lastName = lastName;
+        if (dateOfBirth) user.children[childIndex].dateOfBirth = dateOfBirth;
+        if (interests) user.children[childIndex].interests = interests;
+
+        await user.save();
+        res.json(user.children[childIndex]);
+    } catch (err) {
+        console.error(err.message);
+        res.status(500).json({ message: 'Server Error' });
+    }
+});
+
+// @route DELETE api/users/:id/children/:childId
+// @desc Remove a child from user
+// @access Private
+router.delete('/:id/children/:childId', auth, async (req, res) => {
+    try {
+        // Check if the user is an admin or the user themselves
+        if (req.user.role !== 'admin' && req.user.id !== req.params.id) {
+            return res.status(403).json({ message: 'Access denied' });
+        }
+
+        const user = await User.findById(req.params.id);
+        if (!user) {
+            return res.status(404).json({ message: 'User not found' });
+        }
+
+        const childIndex = user.children.findIndex(
+            child => child._id.toString() === req.params.childId
+        );
+
+        if (childIndex === -1) {
+            return res.status(404).json({ message: 'Child not found' });
+        }
+
+        // Remove the child from the array
+        user.children.splice(childIndex, 1);
+        await user.save();
+        res.json({ message: 'Child removed successfully' });
+    } catch (err) {
+        console.error(err.message);
+        res.status(500).json({ message: 'Server Error' });
+    }
 });
 
 // @desc Delete a user
