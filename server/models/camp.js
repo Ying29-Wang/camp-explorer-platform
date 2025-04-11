@@ -204,13 +204,4 @@ CampSchema.pre('remove', async function(next) {
 
 const Camp = mongoose.model('Camp', CampSchema);
 
-// Ensure index exists when model is initialized
-Camp.on('index', function(err) {
-    if (err) {
-        console.error('Error creating indexes:', err);
-    } else {
-        console.log('Indexes created successfully');
-    }
-});
-
 module.exports = Camp;

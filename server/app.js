@@ -1,6 +1,5 @@
 const express = require('express');
 const cors = require('cors');
-const connectDB = require('./db');
 const path = require('path');
 const mongoose = require('mongoose');
 
@@ -12,9 +11,6 @@ try {
 }
 
 const app = express();
-
-// Connect to MongoDB
-connectDB();
 
 // CORS middleware
 app.use(cors());
