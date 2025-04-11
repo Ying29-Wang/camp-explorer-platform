@@ -21,8 +21,11 @@ router.get('/:campId', auth, async (req, res) => {
             return res.status(404).json({ error: 'Camp not found' });
         }
 
+        // Get the correct user ID
+        const userId = req.user._id || req.user.id;
+
         const bookmark = await Bookmark.findOne({
-            userId: req.user._id,
+            userId: userId,
             campId: campId
         });
 
@@ -36,12 +39,14 @@ router.get('/:campId', auth, async (req, res) => {
 // Get user's bookmarks
 router.get('/', auth, async (req, res) => {
     try {
-        const bookmarks = await Bookmark.find({ userId: req.user._id })
+        const userId = req.user._id || req.user.id;
+        const bookmarks = await Bookmark.find({ userId: userId })
             .populate('campId')
             .sort({ createdAt: -1 });
         res.json(bookmarks);
     } catch (error) {
-        res.status(500).json({ message: error.message });
+        console.error('Error fetching bookmarks:', error);
+        res.status(500).json({ error: 'Failed to fetch bookmarks' });
     }
 });
 
@@ -61,9 +66,12 @@ router.post('/', auth, async (req, res) => {
             return res.status(404).json({ error: 'Camp not found' });
         }
 
+        // Get the correct user ID
+        const userId = req.user._id || req.user.id;
+
         // Check if already bookmarked
         const existingBookmark = await Bookmark.findOne({
-            userId: req.user._id,
+            userId: userId,
             campId: campId
         });
 
@@ -72,31 +80,43 @@ router.post('/', auth, async (req, res) => {
         }
 
         const bookmark = new Bookmark({
-            userId: req.user._id,
+            userId: userId,
             campId: campId
         });
 
         await bookmark.save();
         res.status(201).json(bookmark);
     } catch (error) {
-        console.error('Error adding bookmark:', error);
-        res.status(500).json({ error: 'Failed to add bookmark' });
+        console.error('Error adding bookmark:', {
+            name: error.name,
+            message: error.message,
+            code: error.code,
+            stack: error.stack,
+            validationErrors: error.errors
+        });
+        res.status(500).json({ 
+            error: 'Failed to add bookmark',
+            details: error.message,
+            validationErrors: error.errors
+        });
     }
 });
 
 // Remove a bookmark
 router.delete('/:campId', auth, async (req, res) => {
     try {
+        const userId = req.user._id || req.user.id;
         const bookmark = await Bookmark.findOneAndDelete({
-            userId: req.user._id,
+            userId: userId,
             campId: req.params.campId
         });
         if (!bookmark) {
-            return res.status(404).json({ message: 'Bookmark not found' });
+            return res.status(404).json({ error: 'Bookmark not found' });
         }
         res.json({ message: 'Bookmark removed successfully' });
     } catch (error) {
-        res.status(500).json({ message: error.message });
+        console.error('Error removing bookmark:', error);
+        res.status(500).json({ error: 'Failed to remove bookmark' });
     }
 });
 

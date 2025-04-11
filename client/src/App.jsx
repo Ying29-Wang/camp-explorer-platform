@@ -4,14 +4,12 @@ import { useAuth } from './context/AuthContext';
 import Header from './components/layout/Header';
 import FeaturedCamps from './components/features/FeaturedCamps';
 import RecentlyViewed from './components/features/RecentlyViewed';
-import Bookmarks from './components/features/Bookmarks';
 import Footer from './components/common/Footer';
 import LoginPage from './pages/LoginPage';
 import RegistrationPage from './pages/RegistrationPage';
 import SearchResults from './pages/SearchResults';
 import './App.css';
 import './components/common/LoadingSpinner.css';
-import './components/features/Bookmarks.css';
 
 // Protected Route component
 const ProtectedRoute = ({ children }) => {
@@ -62,7 +60,6 @@ function App() {
         </section>
         <FeaturedCamps />
         <RecentlyViewed camps={recentlyViewedCamps} />
-        <Bookmarks />
         <Routes>
           <Route path="/login" element={<LoginPage />} />
           <Route path="/register" element={<RegistrationPage />} />

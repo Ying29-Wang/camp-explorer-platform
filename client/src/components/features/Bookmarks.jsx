@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext';
-import axios from 'axios';
+import api from '../../services/api';
 import { Link } from 'react-router-dom';
+import './Bookmarks.css';
 
 const Bookmarks = () => {
     const { isLoggedIn } = useAuth();
@@ -11,14 +12,30 @@ const Bookmarks = () => {
 
     useEffect(() => {
         const fetchBookmarks = async () => {
-            if (!isLoggedIn) return;
+            if (!isLoggedIn) {
+                setLoading(false);
+                return;
+            }
             
             try {
-                const response = await axios.get('/api/bookmarks');
+                console.log('Fetching bookmarks...');
+                const response = await api.get('/bookmarks');
+                console.log('Bookmarks response:', response.data);
+                
+                if (!response.data || !Array.isArray(response.data)) {
+                    throw new Error('Invalid response format');
+                }
+                
                 setBookmarks(response.data);
-                setLoading(false);
             } catch (err) {
-                setError('Failed to load bookmarks');
+                console.error('Error fetching bookmarks:', err);
+                console.error('Error details:', {
+                    status: err.response?.status,
+                    data: err.response?.data,
+                    message: err.message
+                });
+                setError(err.response?.data?.error || 'Failed to load bookmarks');
+            } finally {
                 setLoading(false);
             }
         };
@@ -28,10 +45,17 @@ const Bookmarks = () => {
 
     const handleRemoveBookmark = async (campId) => {
         try {
-            await axios.delete(`/api/bookmarks/${campId}`);
+            console.log('Removing bookmark for camp:', campId);
+            await api.delete(`/bookmarks/${campId}`);
             setBookmarks(bookmarks.filter(bookmark => bookmark.campId._id !== campId));
         } catch (err) {
-            setError('Failed to remove bookmark');
+            console.error('Error removing bookmark:', err);
+            console.error('Error details:', {
+                status: err.response?.status,
+                data: err.response?.data,
+                message: err.message
+            });
+            setError(err.response?.data?.error || 'Failed to remove bookmark');
         }
     };
 
@@ -42,7 +66,14 @@ const Bookmarks = () => {
     }
 
     if (error) {
-        return <div className="error-message">{error}</div>;
+        return (
+            <div className="error-message">
+                <p>{error}</p>
+                <button onClick={() => window.location.reload()} className="retry-button">
+                    Retry
+                </button>
+            </div>
+        );
     }
 
     return (
@@ -56,7 +87,7 @@ const Bookmarks = () => {
                         <div key={bookmark._id} className="bookmark-card">
                             <Link to={`/camp/${bookmark.campId._id}`}>
                                 <img 
-                                    src={bookmark.campId.image[0] || '/default-camp.jpg'} 
+                                    src={bookmark.campId.images?.[0] || '/default-camp.jpg'} 
                                     alt={bookmark.campId.name}
                                     className="bookmark-image"
                                 />
