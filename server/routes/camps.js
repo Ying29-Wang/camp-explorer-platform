@@ -89,6 +89,11 @@ async function handleSearch(req, res) {
         // Build query
         const query = {};
         
+        // Text search
+        if (params.searchText) {
+            query.$text = { $search: params.searchText };
+        }
+        
         // Category filter
         if (params.category) {
             query.category = params.category;
@@ -131,6 +136,9 @@ async function handleSearch(req, res) {
         const sortOptions = {};
         if (params.sortBy) {
             sortOptions[params.sortBy] = params.sortOrder === 'desc' ? -1 : 1;
+        } else if (params.searchText) {
+            // If text search is used, sort by text score
+            sortOptions.score = { $meta: 'textScore' };
         }
         
         // Build pagination options
@@ -138,8 +146,9 @@ async function handleSearch(req, res) {
         const limit = parseInt(params.limit) || 10;
         const skip = (page - 1) * limit;
         
-        // Execute query
-        const camps = await Camp.find(query)
+        // Execute query with text search score if text search is used
+        const findOptions = params.searchText ? { score: { $meta: 'textScore' } } : {};
+        const camps = await Camp.find(query, findOptions)
             .sort(sortOptions)
             .skip(skip)
             .limit(limit);
@@ -148,16 +157,22 @@ async function handleSearch(req, res) {
         const total = await Camp.countDocuments(query);
         
         res.json({
+            success: true,
             camps,
             pagination: {
                 total,
                 page,
-                pages: Math.ceil(total / limit)
+                pages: Math.ceil(total / limit),
+                limit
             }
         });
     } catch (err) {
         console.error('Search error:', err);
-        res.status(500).json({ message: 'Server Error' });
+        res.status(500).json({ 
+            success: false,
+            message: 'Server Error',
+            error: err.message 
+        });
     }
 }
 

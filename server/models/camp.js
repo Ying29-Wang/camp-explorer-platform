@@ -22,14 +22,17 @@ const CampSchema = new mongoose.Schema({
     name: {
         type: String,
         required: true,
+        text: true
     },
     description: {
         type: String,
         required: true,
+        text: true
     },
     location: {
         type: String,
         required: true,
+        text: true
     },
     ageRange: {
         min: {
@@ -103,6 +106,14 @@ const CampSchema = new mongoose.Schema({
         type: mongoose.Schema.Types.ObjectId,
         ref: 'User',
     },
+});
+
+// Create text index for search
+CampSchema.index({ 
+    name: 'text', 
+    description: 'text', 
+    location: 'text',
+    activities: 'text'
 });
 
 CampSchema.statics.CATEGORIES = CAMP_CATEGORIES;
