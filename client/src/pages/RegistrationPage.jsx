@@ -6,7 +6,7 @@ import { Elements, CardElement, useStripe, useElements } from '@stripe/react-str
 import Header from '../components/layout/Header';
 import './RegistrationPage.css';
 
-const stripePromise = loadStripe(process.env.REACT_APP_STRIPE_PUB_KEY);
+const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUB_KEY);
 
 const PaymentForm = ({ camp, onSuccess, onError }) => {
   const stripe = useStripe();

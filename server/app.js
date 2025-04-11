@@ -16,12 +16,12 @@ const app = express();
 // Connect to MongoDB
 connectDB();
 
-// Basic middleware
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
-
 // CORS middleware
 app.use(cors());
+
+// Body parsing middleware
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
 // Request logging middleware
 app.use((req, res, next) => {
@@ -34,11 +34,12 @@ app.use((req, res, next) => {
 });
 
 // Routes
-app.use('/api/auth', require('./routes/auth'));
 app.use('/api/camps', require('./routes/camps'));
 app.use('/api/reviews', require('./routes/reviews'));
 app.use('/api/users', require('./routes/users'));
+app.use('/api/auth', require('./routes/auth'));
 app.use('/api/maps', require('./routes/maps'));
+app.use('/api/payments', require('./routes/payments'));
 
 // Error handling middleware
 app.use((err, req, res, next) => {
