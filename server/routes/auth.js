@@ -196,7 +196,7 @@ router.post('/test-email', async (req, res) => {
 // @route   POST /api/auth/forgot-password
 // @desc    Request password reset
 // @access  Public
-router.post('/forgot-password', async (req, res) => {
+router.post('/forgot-password', passwordResetLimiter, async (req, res) => {
     try {
         const { email } = req.body;
 
@@ -272,35 +272,71 @@ router.post('/forgot-password', async (req, res) => {
 });
 
 // @route   POST /api/auth/reset-password
-// @desc    Reset password
+// @desc    Reset password with token
 // @access  Public
 router.post('/reset-password', async (req, res) => {
     try {
         const { token, password } = req.body;
 
         if (!token || !password) {
-            return sendJsonResponse(res, 400, { msg: 'Token and new password are required' });
+            return res.status(400).json({
+                success: false,
+                message: 'Token and new password are required'
+            });
         }
 
+        // Find user with valid reset token
         const user = await User.findOne({
             resetPasswordToken: token,
             resetPasswordExpires: { $gt: Date.now() }
         });
 
         if (!user) {
-            return sendJsonResponse(res, 400, { msg: 'Password reset token is invalid or has expired' });
+            return res.status(400).json({
+                success: false,
+                message: 'Password reset token is invalid or has expired'
+            });
         }
 
-        // Update password
+        // Update password and clear reset token
         user.password = password;
         user.resetPasswordToken = undefined;
         user.resetPasswordExpires = undefined;
         await user.save();
 
-        sendJsonResponse(res, 200, { msg: 'Password has been reset successfully' });
-    } catch (err) {
-        console.error('Reset password error:', err.message);
-        sendJsonResponse(res, 500, { msg: 'Server error during password reset' });
+        // Send confirmation email
+        const transporter = nodemailer.createTransport({
+            service: 'gmail',
+            auth: {
+                user: process.env.EMAIL_USER,
+                pass: process.env.EMAIL_PASS
+            }
+        });
+
+        const mailOptions = {
+            from: process.env.EMAIL_FROM,
+            to: user.email,
+            subject: 'Password Reset Confirmation - Camp Explorer',
+            html: `
+                <h2>Password Reset Successful</h2>
+                <p>Your password has been successfully reset.</p>
+                <p>If you did not make this change, please contact us immediately.</p>
+            `
+        };
+
+        await transporter.sendMail(mailOptions);
+
+        res.status(200).json({
+            success: true,
+            message: 'Password has been reset successfully'
+        });
+    } catch (error) {
+        console.error('Password reset completion error:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Error resetting password',
+            error: error.message
+        });
     }
 });
 
