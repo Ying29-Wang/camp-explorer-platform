@@ -3,7 +3,7 @@ import { useParams } from 'react-router-dom';
 import { fetchCampById } from '../services/campService';
 import { fetchReviewsByCampId } from '../services/reviewService';
 import { useAuth } from '../context/AuthContext';
-import axios from 'axios';
+import api from '../services/api';
 
 import Header from '../components/layout/Header';
 import Map from '../components/common/Map.jsx';
@@ -15,7 +15,7 @@ import './CampDetailsPage.css';
 
 const CampDetailsPage = () => {
     const { id } = useParams();
-    const { isLoggedIn } = useAuth();
+    const { isLoggedIn, user } = useAuth();
     const [camp, setCamp] = useState(null);
     const [reviews, setReviews] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -46,10 +46,11 @@ const CampDetailsPage = () => {
                 // Check if camp is bookmarked
                 if (isLoggedIn) {
                     try {
-                        const response = await axios.get(`/api/bookmarks/${id}`);
+                        const response = await api.get(`/bookmarks/${campData._id}`);
                         setIsBookmarked(response.data.isBookmarked);
                     } catch (error) {
                         console.error('Error checking bookmark status:', error);
+                        setIsBookmarked(false);
                     }
                 }
             } catch (err) {
@@ -66,36 +67,55 @@ const CampDetailsPage = () => {
     // Track camp view
     useEffect(() => {
         const trackView = async () => {
-            if (isLoggedIn && camp) {
-                try {
-                    await axios.post('/api/recently-viewed', { campId: camp._id });
-                } catch (error) {
-                    console.error('Error tracking view:', error);
+            if (!isLoggedIn || !camp || !user) {
+                console.log('Not tracking view - isLoggedIn:', isLoggedIn, 'has camp:', !!camp, 'has user:', !!user);
+                return;
+            }
+
+            try {
+                console.log('Tracking view - User:', user._id, 'Camp ID:', camp._id);
+                
+                const response = await api.post('/recently-viewed', { 
+                    campId: camp._id
+                });
+                
+                if (response.data) {
+                    console.log('Successfully tracked view:', response.data);
+                } else {
+                    console.warn('View tracking response missing data');
                 }
+            } catch (error) {
+                console.error('Error tracking view:', error);
+                console.error('Error details:', {
+                    status: error.response?.status,
+                    data: error.response?.data,
+                    message: error.message
+                });
             }
         };
 
-        trackView();
-    }, [camp, isLoggedIn]);
+        if (camp && isLoggedIn) {
+            trackView();
+        }
+    }, [camp, isLoggedIn, user]);
 
     const handleBookmark = async () => {
         if (!isLoggedIn) {
-            // Redirect to login or show login modal
             window.location.href = '/login';
             return;
         }
 
         try {
             if (isBookmarked) {
-                await axios.delete(`/api/bookmarks/${id}`);
+                await api.delete(`/bookmarks/${camp._id}`);
                 setIsBookmarked(false);
             } else {
-                await axios.post('/api/bookmarks', { campId: id });
+                await api.post('/bookmarks', { campId: camp._id });
                 setIsBookmarked(true);
             }
         } catch (error) {
             console.error('Error toggling bookmark:', error);
-            setError('Failed to update bookmark');
+            setError(error.response?.data?.message || 'Failed to update bookmark');
         }
     };
 

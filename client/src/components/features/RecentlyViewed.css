@@ -74,6 +74,25 @@
     padding: 1rem;
 }
 
+.error-message p {
+    margin-bottom: 1rem;
+}
+
+.retry-button {
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 1rem;
+    transition: background-color 0.3s;
+}
+
+.retry-button:hover {
+    background-color: #45a049;
+}
+
 .loading-spinner {
     border: 4px solid rgba(0, 0, 0, 0.1);
     border-radius: 50%;

@@ -3,12 +3,12 @@ const Schema = mongoose.Schema;
 
 const BookmarkSchema = new Schema({
     userId: {
-        type: mongoose.Schema.Types.ObjectId,
+        type: Schema.Types.ObjectId,
         ref: 'User',
         required: true
     },
     campId: {
-        type: mongoose.Schema.Types.ObjectId,
+        type: Schema.Types.ObjectId,
         ref: 'Camp',
         required: true
     },
@@ -21,4 +21,4 @@ const BookmarkSchema = new Schema({
 // Create a compound index to ensure unique bookmarks
 BookmarkSchema.index({ userId: 1, campId: 1 }, { unique: true });
 
-module.exports = mongoose.model('Bookmark', BookmarkSchema); 
+module.exports = mongoose.model('bookmark', BookmarkSchema); 
