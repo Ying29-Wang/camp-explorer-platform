@@ -8,6 +8,7 @@ export const AuthProvider = ({ children }) => {
     const [isLoggedIn, setIsLoggedIn] = useState(false);
     const [user, setUser] = useState(null);
     const [isLoading, setIsLoading] = useState(true);
+    const [recentlyViewed, setRecentlyViewed] = useState([]);
     const navigate = useNavigate();
 
     const validateToken = async (token) => {
@@ -30,6 +31,52 @@ export const AuthProvider = ({ children }) => {
         }
     };
 
+    const fetchRecentlyViewed = async (userId) => {
+        try {
+            const response = await fetch(`${API_URL}/recently-viewed`, {
+                headers: {
+                    'Authorization': `Bearer ${localStorage.getItem('token')}`
+                }
+            });
+            
+            if (!response.ok) {
+                throw new Error('Failed to fetch recently viewed');
+            }
+            
+            const data = await response.json();
+            setRecentlyViewed(data);
+        } catch (error) {
+            console.error('Error fetching recently viewed:', error);
+            setRecentlyViewed([]);
+        }
+    };
+
+    const addToRecentlyViewed = async (camp) => {
+        if (!isLoggedIn || !user) return;
+        
+        try {
+            // Update backend
+            await fetch(`${API_URL}/recently-viewed`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${localStorage.getItem('token')}`
+                },
+                body: JSON.stringify({ campId: camp._id })
+            });
+            
+            // Update local state
+            setRecentlyViewed(prev => {
+                const existingIndex = prev.findIndex(item => item._id === camp._id);
+                return existingIndex >= 0 
+                    ? [camp, ...prev.filter(item => item._id !== camp._id)].slice(0, 5)
+                    : [camp, ...prev].slice(0, 5);
+            });
+        } catch (error) {
+            console.error('Error updating recently viewed:', error);
+        }
+    };
+
     useEffect(() => {
         const checkAuth = async () => {
             try {
@@ -44,8 +91,12 @@ export const AuthProvider = ({ children }) => {
                 }
 
                 // Set initial state from stored data
-                setUser(JSON.parse(storedUser));
+                const parsedUser = JSON.parse(storedUser);
+                setUser(parsedUser);
                 setIsLoggedIn(true);
+                
+                // Fetch recently viewed if logged in
+                await fetchRecentlyViewed(parsedUser._id);
                 setIsLoading(false);
 
                 // Validate token in the background
@@ -61,6 +112,7 @@ export const AuthProvider = ({ children }) => {
                     localStorage.removeItem('user');
                     setIsLoggedIn(false);
                     setUser(null);
+                    setRecentlyViewed([]);
                     navigate('/login');
                 }
             } catch (error) {
@@ -69,6 +121,7 @@ export const AuthProvider = ({ children }) => {
                 localStorage.removeItem('user');
                 setIsLoggedIn(false);
                 setUser(null);
+                setRecentlyViewed([]);
                 setIsLoading(false);
             }
         };
@@ -96,6 +149,10 @@ export const AuthProvider = ({ children }) => {
 
             const userData = await validateToken(token);
             localStorage.setItem('user', JSON.stringify(userData));
+            
+            // Fetch recently viewed after login
+            await fetchRecentlyViewed(userData._id);
+            
             setIsLoggedIn(true);
             setUser(userData);
             navigate('/');
@@ -139,11 +196,21 @@ export const AuthProvider = ({ children }) => {
         localStorage.removeItem('user');
         setIsLoggedIn(false);
         setUser(null);
+        setRecentlyViewed([]);
         navigate('/');
     };
 
     return (
-        <AuthContext.Provider value={{ isLoggedIn, user, login, register, logout, isLoading }}>
+        <AuthContext.Provider value={{ 
+            isLoggedIn, 
+            user, 
+            login, 
+            register, 
+            logout, 
+            isLoading,
+            recentlyViewed,
+            addToRecentlyViewed
+        }}>
             {children}
         </AuthContext.Provider>
     );
@@ -155,4 +222,4 @@ export const useAuth = () => {
         throw new Error('useAuth must be used within an AuthProvider');
     }
     return context;
-}; 
+};

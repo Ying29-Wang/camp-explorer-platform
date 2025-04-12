@@ -1,110 +1,174 @@
+/* src/components/features/recentlyReviewed.css */
 .recently-viewed {
-  margin: 2rem 0; /* Adds spacing around the recently viewed section */
-  width: 100%; /* Ensures the section takes the full width of the screen */
-}
-
-.camp-list {
-  display: flex; /* Displays camp items in a row */
-  gap: 1rem; /* Adds spacing between camp items */
-  justify-content: center; /* Centers the camp items horizontally */
-  flex-wrap: wrap; /* Allows camp items to wrap to the next line if needed */
-}
-
-.camp-item {
-  border: 1px solid #ccc; /* Adds a border around each camp item */
-  padding: 1rem; /* Adds padding inside each camp item */
-  border-radius: 8px; /* Rounds the corners of each camp item */
-  width: 200px; /* Sets a fixed width for each camp item */
-}
-
-.recently-viewed-section {
-    padding: 2rem;
-    background-color: #f8f9fa;
-    border-radius: 8px;
     margin: 2rem 0;
-}
-
-.recently-viewed-section h2 {
-    color: #333;
-    margin-bottom: 1.5rem;
-    font-size: 1.8rem;
-}
-
-.recently-viewed-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-    gap: 1.5rem;
-    padding: 1rem 0;
-}
-
-.recently-viewed-card {
-    background: white;
-    border-radius: 8px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-    overflow: hidden;
-    transition: transform 0.2s;
-}
-
-.recently-viewed-card:hover {
-    transform: translateY(-5px);
-}
-
-.recently-viewed-image {
     width: 100%;
-    height: 160px;
-    object-fit: cover;
-}
-
-.recently-viewed-card h3 {
-    padding: 1rem;
-    margin: 0;
-    font-size: 1.2rem;
-    color: #333;
-}
-
-.recently-viewed-card p {
-    padding: 0 1rem 1rem;
-    margin: 0;
-    color: #666;
-}
-
-.error-message {
-    color: #ff4444;
-    text-align: center;
-    padding: 1rem;
-}
-
-.error-message p {
-    margin-bottom: 1rem;
-}
-
-.retry-button {
-    background-color: #4CAF50;
-    color: white;
-    border: none;
-    padding: 10px 20px;
-    border-radius: 4px;
-    cursor: pointer;
-    font-size: 1rem;
-    transition: background-color 0.3s;
-}
-
-.retry-button:hover {
-    background-color: #45a049;
-}
-
-.loading-spinner {
-    border: 4px solid rgba(0, 0, 0, 0.1);
-    border-radius: 50%;
-    border-top: 4px solid #3498db;
-    width: 40px;
-    height: 40px;
-    animation: spin 1s linear infinite;
-    margin: 2rem auto;
-}
-
-@keyframes spin {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
-}
-
+  }
+  
+  .recently-viewed-section {
+      padding: 2rem;
+      background-color: #f8f9fa;
+      border-radius: 8px;
+      margin: 2rem 0;
+      border: 1px solid #e0e0e0;
+  }
+  
+  .recently-viewed-section h2 {
+      color: #2c3e50;
+      margin-bottom: 1.5rem;
+      font-size: 1.8rem;
+      text-align: center;
+  }
+  
+  .camp-list {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+    flex-wrap: wrap;
+    padding: 0.5rem;
+  }
+  
+  .recently-viewed-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+      gap: 1.5rem;
+      padding: 1rem 0;
+  }
+  
+  .camp-item,
+  .recently-viewed-card {
+      border: 1px solid #e0e0e0;
+      padding: 1rem;
+      border-radius: 8px;
+      width: 100%;
+      background: white;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+      transition: all 0.3s ease;
+  }
+  
+  .recently-viewed-card {
+      padding: 0;
+      overflow: hidden;
+  }
+  
+  .camp-item:hover,
+  .recently-viewed-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.12);
+      border-color: #3498db;
+  }
+  
+  .recently-viewed-image {
+      width: 100%;
+      height: 160px;
+      object-fit: cover;
+      border-bottom: 1px solid #eee;
+  }
+  
+  .recently-viewed-card h3 {
+      padding: 1rem 1rem 0.5rem;
+      margin: 0;
+      font-size: 1.2rem;
+      color: #2c3e50;
+      font-weight: 600;
+  }
+  
+  .recently-viewed-card p {
+      padding: 0 1rem 1rem;
+      margin: 0;
+      color: #7f8c8d;
+      font-size: 0.95rem;
+      line-height: 1.4;
+  }
+  
+  /* Loading and Error States */
+  .loading-spinner {
+      border: 4px solid rgba(52, 152, 219, 0.1);
+      border-radius: 50%;
+      border-top: 4px solid #3498db;
+      width: 40px;
+      height: 40px;
+      animation: spin 1s linear infinite;
+      margin: 2rem auto;
+  }
+  
+  .error-message {
+      color: #e74c3c;
+      text-align: center;
+      padding: 1.5rem;
+      background-color: #fdedec;
+      border-radius: 8px;
+      margin: 1rem 0;
+  }
+  
+  .error-message p {
+      margin-bottom: 1rem;
+      font-size: 1rem;
+  }
+  
+  .retry-button {
+      background-color: #3498db;
+      color: white;
+      border: none;
+      padding: 0.6rem 1.2rem;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 0.95rem;
+      transition: all 0.3s ease;
+  }
+  
+  .retry-button:hover {
+      background-color: #2980b9;
+      transform: translateY(-1px);
+  }
+  
+  /* Accessibility Focus States */
+  .recently-viewed-card:focus-within {
+      outline: 2px solid #3498db;
+      outline-offset: 2px;
+  }
+  
+  /* Animation */
+  @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+  }
+  
+  /* Responsive Adjustments */
+  @media (max-width: 768px) {
+      .recently-viewed-section {
+          padding: 1.5rem;
+          margin: 1.5rem 0;
+      }
+      
+      .recently-viewed-section h2 {
+          font-size: 1.5rem;
+      }
+      
+      .recently-viewed-grid {
+          grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+          gap: 1rem;
+      }
+      
+      .camp-item,
+      .recently-viewed-card {
+          width: 100%;
+      }
+  }
+  
+  @media (max-width: 480px) {
+      .recently-viewed-section {
+          padding: 1rem;
+      }
+      
+      .recently-viewed-grid {
+          grid-template-columns: 1fr;
+      }
+      
+      .recently-viewed-card h3 {
+          font-size: 1.1rem;
+      }
+      
+      .error-message {
+          padding: 1rem;
+      }
+  }
