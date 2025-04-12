@@ -1,24 +1,30 @@
+/* Global Reset & Base Layout */
 html, body {
   margin: 0;
   padding: 0;
-  height: 100%; /* Ensure the body takes up the full height of the screen */
-  width: 100%; /* Ensure the body takes up the full width of the screen */
+  height: 100%;
+  width: 100%;
 }
 
 #root {
-  height: 100%; /* Ensure the root div takes up the full height */
-  width: 100%; /* Ensure the root div takes up the full width */
+  height: 100%;
+  width: 100%;
   display: flex;
   flex-direction: column;
 }
 
+/* Main Container */
 .homepage {
   flex: 1;
   display: flex;
   flex-direction: column;
   min-height: 100vh;
+  padding: 1rem;
+  max-width: 1200px;
+  margin: 0 auto;
 }
 
+/* Hero Section */
 .hero {
   text-align: center;
   padding: 4rem 2rem;
@@ -31,6 +37,7 @@ html, body {
   color: #333;
 }
 
+/* Search Form */
 .search-form {
   max-width: 600px;
   margin: 0 auto;
@@ -67,6 +74,7 @@ html, body {
   background-color: #0056b3;
 }
 
+/* Main Content Area */
 main {
   flex: 1;
   padding: 1rem;
