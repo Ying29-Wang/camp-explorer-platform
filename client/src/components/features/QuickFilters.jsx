@@ -1,6 +1,6 @@
 // src/components/features/QuickFilters.jsx
 import React from 'react';
-import { useSearch } from '../context/SearchContext';
+import { useSearch } from '../../context/SearchContext';
 import './QuickFilters.css';
 
 const QuickFilters = () => {
