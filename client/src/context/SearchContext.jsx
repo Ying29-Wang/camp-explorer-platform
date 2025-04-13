@@ -1,12 +1,32 @@
-import React, { createContext, useState, useContext } from 'react';
+import React, { createContext, useState, useContext, useCallback } from 'react';
 
 const SearchContext = createContext();
 
 export const SearchProvider = ({ children }) => {
     const [searchResults, setSearchResults] = useState([]);
     const [searchQuery, setSearchQuery] = useState('');
-    const [activeFilters, setActiveFilters] = useState({});
+    const [filters, setFilters] = useState({
+        location: '',
+        ageRange: '',
+        category: '',
+        searchText: '',
+        minAge: '',
+        maxAge: '',
+        minPrice: '',
+        maxPrice: '',
+        startDate: '',
+        endDate: '',
+        sortBy: '',
+        sortOrder: 'asc'
+    });
     const [isSearching, setIsSearching] = useState(false);
+
+    const updateFilters = useCallback((newFilters) => {
+        setFilters(prevFilters => ({
+            ...prevFilters,
+            ...newFilters
+        }));
+    }, []);
 
     const executeSearch = async (searchFunction) => {
         setIsSearching(true);
@@ -21,17 +41,20 @@ export const SearchProvider = ({ children }) => {
         }
     };
 
+    const value = {
+        searchResults,
+        setSearchResults,
+        searchQuery,
+        setSearchQuery,
+        filters,
+        setFilters: updateFilters,
+        isSearching,
+        setIsSearching,
+        executeSearch
+    };
+
     return (
-        <SearchContext.Provider value={{
-            searchResults,
-            setSearchResults,
-            searchQuery,
-            setSearchQuery,
-            activeFilters,
-            setActiveFilters,
-            isSearching,
-            executeSearch
-        }}>
+        <SearchContext.Provider value={value}>
             {children}
         </SearchContext.Provider>
     );

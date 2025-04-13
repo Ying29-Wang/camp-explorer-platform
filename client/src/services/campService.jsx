@@ -140,7 +140,8 @@ export const searchCamps = async (searchParams) => {
         if (!response.ok) {
             throw new Error(`Failed to search camps: ${response.status} ${response.statusText}`);
         }
-        return response.json();
+        const data = await response.json();
+        return data.camps || []; // Return the camps array from the response
     } catch (error) {
         console.error('Search error:', error);
         throw error;

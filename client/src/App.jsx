@@ -1,6 +1,7 @@
 import { Routes, Route, Navigate } from 'react-router-dom';
 import { useState } from 'react';
 import { useAuth } from './context/AuthContext';
+import { SearchProvider } from './context/SearchContext';
 import Header from './components/layout/Header';
 import Footer from './components/common/Footer';
 import LoginPage from './pages/LoginPage';
@@ -38,25 +39,27 @@ function App() {
   };
 
   return (
-    <div className="app-container">
-      <Header />
-      <main className="main-content">
-        <Routes>
-          <Route path="/" element={
-            <HomePage 
-              searchQuery={searchQuery}
-              onSearchChange={(e) => setSearchQuery(e.target.value)}
-              onSearchSubmit={handleSearch}
-            />
-          } />
-          <Route path="/login" element={<LoginPage />} />
-          <Route path="/register" element={<RegistrationPage />} />
-          <Route path="/search" element={<SearchResults />} />
-          {/* Add other routes as needed */}
-        </Routes>
-      </main>
-      <Footer />
-    </div>
+    <SearchProvider>
+      <div className="app-container">
+        <Header />
+        <main className="main-content">
+          <Routes>
+            <Route path="/" element={
+              <HomePage 
+                searchQuery={searchQuery}
+                onSearchChange={(e) => setSearchQuery(e.target.value)}
+                onSearchSubmit={handleSearch}
+              />
+            } />
+            <Route path="/login" element={<LoginPage />} />
+            <Route path="/register" element={<RegistrationPage />} />
+            <Route path="/search" element={<SearchResults />} />
+            {/* Add other routes as needed */}
+          </Routes>
+        </main>
+        <Footer />
+      </div>
+    </SearchProvider>
   );
 }
 
