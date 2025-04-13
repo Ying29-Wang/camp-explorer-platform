@@ -9,11 +9,16 @@ const ProfilePage = () => {
     const [bookmarks, setBookmarks] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
+    const [isEditing, setIsEditing] = useState({
+        personalInfo: false,
+        children: false
+    });
+    const [children, setChildren] = useState([
+        { name: '', age: '' },
+        { name: '', age: '' }
+    ]);
 
     useEffect(() => {
-        console.log('ProfilePage mounted, user:', user);
-        console.log('User role:', user?.role);
-        console.log('User ID:', user?.id || user?._id);
         if (user) {
             fetchBookmarks();
         }
@@ -21,21 +26,11 @@ const ProfilePage = () => {
 
     const fetchBookmarks = async () => {
         try {
-            console.log('Fetching bookmarks...');
-            console.log('Auth token:', localStorage.getItem('token'));
             setLoading(true);
             setError(null);
             const response = await api.get('/bookmarks');
-            console.log('Bookmarks response:', response.data);
-            console.log('Number of bookmarks:', response.data.length);
             setBookmarks(response.data);
         } catch (err) {
-            console.error('Error fetching bookmarks:', err);
-            console.error('Error details:', {
-                message: err.message,
-                response: err.response?.data,
-                status: err.response?.status
-            });
             setError('Failed to load bookmarks. Please try again later.');
         } finally {
             setLoading(false);
@@ -44,22 +39,14 @@ const ProfilePage = () => {
 
     const handleRemoveBookmark = async (campId) => {
         try {
-            console.log('Removing bookmark for camp:', campId);
             await api.delete(`/bookmarks/${campId}`);
             setBookmarks(bookmarks.filter(bookmark => bookmark.campId._id !== campId));
         } catch (err) {
-            console.error('Error removing bookmark:', err);
-            console.error('Error details:', {
-                message: err.message,
-                response: err.response?.data,
-                status: err.response?.status
-            });
             setError('Failed to remove bookmark. Please try again.');
         }
     };
 
     if (!user) {
-        console.log('No user found, showing login prompt');
         return (
             <>
                 <Header />
@@ -74,56 +61,111 @@ const ProfilePage = () => {
         );
     }
 
-    console.log('Rendering profile for user:', user);
-    console.log('Current bookmarks state:', bookmarks);
     return (
         <>
             <Header />
-            <div className="profile-container">
-                <div className="profile-header">
-                    <h1>My Profile</h1>
-                    <div className="user-info">
-                        <p><strong>Name:</strong> {user.name}</p>
-                        <p><strong>Email:</strong> {user.email}</p>
-                        <p><strong>Role:</strong> {user.role}</p>
-                    </div>
-                </div>
-
-                <div className="bookmarks-section">
-                    <h2>My Bookmarks</h2>
-                    {error && (
-                        <div className="error-message">
-                            {error}
-                            <button onClick={fetchBookmarks} className="retry-button">
-                                Retry
-                            </button>
+            <div className="profile-page">
+                <div className="profile-container">
+                    <div className="profile-content">
+                        <div className="profile-header-section">
+                            <h2 className="profile-name">{user.name}</h2>
                         </div>
-                    )}
-                    {loading ? (
-                        <div className="loading-spinner" />
-                    ) : bookmarks.length > 0 ? (
-                        <div className="bookmarks-grid">
-                            {bookmarks.map((bookmark) => (
-                                <div key={bookmark._id} className="bookmark-card">
-                                    <img
-                                        src={bookmark.campId?.images?.[0] || '/placeholder-image.jpg'}
-                                        alt={bookmark.campId?.name || 'Camp image'}
-                                        className="bookmark-image"
-                                    />
-                                    <h3>{bookmark.campId?.name || 'Unknown Camp'}</h3>
-                                    <p>{bookmark.campId?.description || 'No description available'}</p>
-                                    <button
-                                        onClick={() => handleRemoveBookmark(bookmark.campId?._id)}
-                                        className="remove-bookmark-btn"
+
+                        <div className="profile-main">
+                            <div className="profile-section">
+                                <div className="section-header">
+                                    <h3>Personal Info</h3>
+                                    <button 
+                                        className="edit-button"
+                                        onClick={() => setIsEditing({...isEditing, personalInfo: !isEditing.personalInfo})}
                                     >
-                                        Remove Bookmark
+                                        {isEditing.personalInfo ? 'Save' : 'Edit'}
                                     </button>
                                 </div>
-                            ))}
+                                <div className="info-grid">
+                                    <div className="info-item">
+                                        <label>Email:</label>
+                                        <span>{user.email}</span>
+                                    </div>
+                                    <div className="info-item">
+                                        <label>Phone:</label>
+                                        <span>{user.phone || 'Not provided'}</span>
+                                    </div>
+                                    <div className="info-item">
+                                        <label>Location:</label>
+                                        <span>{user.location || 'Not provided'}</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div className="profile-section">
+                                <div className="section-header">
+                                    <h3>Children</h3>
+                                    <button 
+                                        className="edit-button"
+                                        onClick={() => setIsEditing({...isEditing, children: !isEditing.children})}
+                                    >
+                                        Add Child
+                                    </button>
+                                </div>
+                                <div className="children-list">
+                                    {children.map((child, index) => (
+                                        <div key={index} className="child-item">
+                                            <span>{child.name || 'Child name'}</span>
+                                            <button className="edit-button small">Edit</button>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
                         </div>
-                    ) : (
-                        <p>You haven't bookmarked any camps yet.</p>
-                    )}
+
+                        <div className="bookmarks-section">
+                            <h2>My Bookmarked Camps</h2>
+                            {error && (
+                                <div className="error-message">
+                                    {error}
+                                    <button onClick={fetchBookmarks} className="retry-button">
+                                        Retry
+                                    </button>
+                                </div>
+                            )}
+                            {loading ? (
+                                <div className="loading-spinner" />
+                            ) : bookmarks.length > 0 ? (
+                                <div className="bookmarks-grid">
+                                    {bookmarks.map((bookmark) => (
+                                        <div key={bookmark._id} className="bookmark-card">
+                                            <img
+                                                src={bookmark.campId?.images?.[0] || '/placeholder-image.jpg'}
+                                                alt={bookmark.campId?.name || 'Camp image'}
+                                                className="bookmark-image"
+                                            />
+                                            <div className="bookmark-content">
+                                                <h3>{bookmark.campId?.name || 'Unknown Camp'}</h3>
+                                                <p>{bookmark.campId?.description || 'No description available'}</p>
+                                                <div className="bookmark-actions">
+                                                    <button
+                                                        onClick={() => window.location.href = `/camps/${bookmark.campId?._id}`}
+                                                        className="view-button"
+                                                    >
+                                                        View Details
+                                                    </button>
+                                                    <button
+                                                        onClick={() => handleRemoveBookmark(bookmark.campId?._id)}
+                                                        className="remove-button"
+                                                    >
+                                                        Remove
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            ) : (
+                                <p>You haven't bookmarked any camps yet.</p>
+                            )}
+                        </div>
+                    </div>
                 </div>
             </div>
         </>
