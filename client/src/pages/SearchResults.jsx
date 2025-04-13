@@ -4,6 +4,7 @@ import { useSearch } from '../context/SearchContext';
 import CampCard from '../components/features/camps/CampCard';
 import FilterSidebar from '../components/features/search/FilterSidebar';
 import Pagination from '../components/common/Pagination';
+import Header from '../components/layout/Header';
 import './SearchResults.css';
 
 const SearchResults = () => {
@@ -20,6 +21,7 @@ const SearchResults = () => {
   if (isSearching) {
     return (
       <div className="search-results-page">
+        <Header />
         <div className="loading">Searching...</div>
       </div>
     );
@@ -27,6 +29,7 @@ const SearchResults = () => {
 
   return (
     <div className="search-results-page">
+      <Header />
       <div className="search-header">
         <h2>Search Results</h2>
         <div className="results-count">{totalResults} camps found</div>
