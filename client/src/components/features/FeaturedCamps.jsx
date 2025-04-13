@@ -1,13 +1,13 @@
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { fetchCamps } from '../../services/campService';
+import { useSearch } from '../../context/SearchContext';
 import camp1 from '../../assets/camp1.jpg';
 import camp2 from '../../assets/camp2.jpg';
 import camp3 from '../../assets/camp3.jpg';
 import './FeaturedCamps.css';
 
 const FeaturedCamps = () => {
-  const [featuredCamps, setFeaturedCamps] = useState([]);
+  const { searchResults, setSearchResults, searchCamps } = useSearch();
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
 
@@ -21,11 +21,10 @@ const FeaturedCamps = () => {
   useEffect(() => {
     const getCamps = async () => {
       try {
-        const data = await fetchCamps();
-        console.log('Backend data:', data);
-        if (data && data.length > 0) {
+        const results = await searchCamps({});
+        if (results && results.length > 0) {
           // display 6 camps
-          let processedData = data.slice(0, 6).map((camp, index) => ({
+          let processedData = results.slice(0, 6).map((camp, index) => ({
             ...camp,
             _id: camp._id || index + 1,
             image: camp.image || [camp1, camp2, camp3][index % 3],
@@ -45,8 +44,7 @@ const FeaturedCamps = () => {
             processedData = [...processedData, ...additionalCamps];
           }
 
-          console.log('Processed data:', processedData);
-          setFeaturedCamps(processedData);
+          setSearchResults(processedData);
           setError(false);
         } else {
           console.log('No data received from backend');
@@ -63,7 +61,7 @@ const FeaturedCamps = () => {
   }, []);
 
   // Only use complete fallbackCamps when loading fails or no data is available
-  const campsToDisplay = error ? fallbackCamps : featuredCamps;
+  const campsToDisplay = error ? fallbackCamps : searchResults;
   console.log('Camps to display:', campsToDisplay);
 
   if (loading) {
