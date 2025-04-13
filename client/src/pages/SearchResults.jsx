@@ -7,7 +7,7 @@ import Pagination from '../components/common/Pagination';
 import './SearchResults.css';
 
 const SearchResults = () => {
-  const { searchResults, filters, setFilters, totalResults } = useSearch();
+  const { searchResults, filters, setFilters, isSearching } = useSearch();
   const [currentPage, setCurrentPage] = useState(1);
   const resultsPerPage = 8;
 
@@ -15,6 +15,15 @@ const SearchResults = () => {
   const indexOfLastResult = currentPage * resultsPerPage;
   const indexOfFirstResult = indexOfLastResult - resultsPerPage;
   const currentResults = searchResults.slice(indexOfFirstResult, indexOfLastResult);
+  const totalResults = searchResults.length;
+
+  if (isSearching) {
+    return (
+      <div className="search-results-page">
+        <div className="loading">Searching...</div>
+      </div>
+    );
+  }
 
   return (
     <div className="search-results-page">
@@ -35,7 +44,7 @@ const SearchResults = () => {
               <CampCard 
                 key={camp._id}
                 camp={camp}
-                variant="search" // Different styling for search results
+                variant="search"
               />
             ))
           ) : (
@@ -46,7 +55,7 @@ const SearchResults = () => {
         </div>
       </div>
 
-      {searchResults.length > 0 && (
+      {totalResults > resultsPerPage && (
         <Pagination
           currentPage={currentPage}
           totalResults={totalResults}

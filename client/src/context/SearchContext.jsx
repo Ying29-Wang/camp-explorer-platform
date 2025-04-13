@@ -1,12 +1,23 @@
-import React, { createContext, useState, useContext } from 'react';
+import React, { createContext, useState, useContext, useCallback } from 'react';
 
 const SearchContext = createContext();
 
 export const SearchProvider = ({ children }) => {
     const [searchResults, setSearchResults] = useState([]);
     const [searchQuery, setSearchQuery] = useState('');
-    const [activeFilters, setActiveFilters] = useState({});
+    const [filters, setFilters] = useState({
+        location: '',
+        ageRange: '',
+        category: ''
+    });
     const [isSearching, setIsSearching] = useState(false);
+
+    const updateFilters = useCallback((newFilters) => {
+        setFilters(prevFilters => ({
+            ...prevFilters,
+            ...newFilters
+        }));
+    }, []);
 
     const executeSearch = async (searchFunction) => {
         setIsSearching(true);
@@ -27,8 +38,8 @@ export const SearchProvider = ({ children }) => {
             setSearchResults,
             searchQuery,
             setSearchQuery,
-            activeFilters,
-            setActiveFilters,
+            filters,
+            setFilters: updateFilters,
             isSearching,
             executeSearch
         }}>

@@ -1,9 +1,20 @@
 .filter-sidebar {
     width: 250px;
     padding: 1.5rem;
-    background: #f8f9fa;
+    background: white;
     border-radius: 8px;
     margin-right: 2rem;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    position: sticky;
+    top: 2rem;
+  }
+  
+  .filter-sidebar h3 {
+    margin: 0 0 1.5rem;
+    color: #2c3e50;
+    font-size: 1.2rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 2px solid #f0f0f0;
   }
   
   .filter-group {
@@ -20,9 +31,18 @@
   .filter-group input,
   .filter-group select {
     width: 100%;
-    padding: 0.5rem;
+    padding: 0.75rem;
     border: 1px solid #ddd;
     border-radius: 4px;
+    background: #f8f9fa;
+    transition: border-color 0.2s;
+  }
+  
+  .filter-group input:focus,
+  .filter-group select:focus {
+    outline: none;
+    border-color: #3498db;
+    background: white;
   }
   
   @media (max-width: 768px) {
@@ -30,5 +50,6 @@
       width: 100%;
       margin-right: 0;
       margin-bottom: 1.5rem;
+      position: static;
     }
   }
