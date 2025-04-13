@@ -8,7 +8,16 @@ export const SearchProvider = ({ children }) => {
     const [filters, setFilters] = useState({
         location: '',
         ageRange: '',
-        category: ''
+        category: '',
+        searchText: '',
+        minAge: '',
+        maxAge: '',
+        minPrice: '',
+        maxPrice: '',
+        startDate: '',
+        endDate: '',
+        sortBy: '',
+        sortOrder: 'asc'
     });
     const [isSearching, setIsSearching] = useState(false);
 
@@ -32,17 +41,20 @@ export const SearchProvider = ({ children }) => {
         }
     };
 
+    const value = {
+        searchResults,
+        setSearchResults,
+        searchQuery,
+        setSearchQuery,
+        filters,
+        setFilters: updateFilters,
+        isSearching,
+        setIsSearching,
+        executeSearch
+    };
+
     return (
-        <SearchContext.Provider value={{
-            searchResults,
-            setSearchResults,
-            searchQuery,
-            setSearchQuery,
-            filters,
-            setFilters: updateFilters,
-            isSearching,
-            executeSearch
-        }}>
+        <SearchContext.Provider value={value}>
             {children}
         </SearchContext.Provider>
     );
