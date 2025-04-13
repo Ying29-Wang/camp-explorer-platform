@@ -280,58 +280,112 @@ const ProfilePage = () => {
                                 </div>
                             </div>
 
-                            <div className="profile-section">
-                                <div className="section-header">
-                                    <h3>Children</h3>
-                                    <button 
-                                        className="edit-button"
-                                        onClick={() => setIsEditing({...isEditing, children: !isEditing.children})}
-                                    >
-                                        {isEditing.children ? 'Cancel' : 'Add Child'}
-                                    </button>
-                                </div>
-                                {isEditing.children && (
-                                    <div className="add-child-form">
-                                        <input
-                                            type="text"
-                                            placeholder="First Name"
-                                            value={newChild.firstName}
-                                            onChange={(e) => setNewChild({...newChild, firstName: e.target.value})}
-                                        />
-                                        <input
-                                            type="text"
-                                            placeholder="Last Name"
-                                            value={newChild.lastName}
-                                            onChange={(e) => setNewChild({...newChild, lastName: e.target.value})}
-                                        />
-                                        <input
-                                            type="date"
-                                            placeholder="Date of Birth"
-                                            value={newChild.dateOfBirth}
-                                            onChange={(e) => setNewChild({...newChild, dateOfBirth: e.target.value})}
-                                        />
-                                        <button className="save-button" onClick={handleAddChild}>
-                                            Save Child
-                                        </button>
-                                    </div>
-                                )}
-                                <div className="children-list">
-                                    {children.map((child, index) => (
-                                        <div key={child._id || index} className="child-item">
-                                            <div className="child-info">
-                                                <span>{child.firstName} {child.lastName}</span>
-                                                <span className="child-age">DOB: {new Date(child.dateOfBirth).toLocaleDateString()}</span>
-                                            </div>
+                            {user.role === 'parent' && (
+                                <>
+                                    <div className="profile-section">
+                                        <div className="section-header">
+                                            <h3>Children</h3>
                                             <button 
-                                                className="remove-button small"
-                                                onClick={() => handleRemoveChild(child._id)}
+                                                className="edit-button"
+                                                onClick={() => setIsEditing({...isEditing, children: !isEditing.children})}
                                             >
-                                                Remove
+                                                {isEditing.children ? 'Cancel' : 'Add Child'}
                                             </button>
                                         </div>
-                                    ))}
-                                </div>
-                            </div>
+                                        {isEditing.children && (
+                                            <div className="add-child-form">
+                                                <input
+                                                    type="text"
+                                                    placeholder="First Name"
+                                                    value={newChild.firstName}
+                                                    onChange={(e) => setNewChild({...newChild, firstName: e.target.value})}
+                                                />
+                                                <input
+                                                    type="text"
+                                                    placeholder="Last Name"
+                                                    value={newChild.lastName}
+                                                    onChange={(e) => setNewChild({...newChild, lastName: e.target.value})}
+                                                />
+                                                <input
+                                                    type="date"
+                                                    placeholder="Date of Birth"
+                                                    value={newChild.dateOfBirth}
+                                                    onChange={(e) => setNewChild({...newChild, dateOfBirth: e.target.value})}
+                                                />
+                                                <button className="save-button" onClick={handleAddChild}>
+                                                    Save Child
+                                                </button>
+                                            </div>
+                                        )}
+                                        <div className="children-list">
+                                            {children.map((child, index) => (
+                                                <div key={child._id || index} className="child-item">
+                                                    <div className="child-info">
+                                                        <span>{child.firstName} {child.lastName}</span>
+                                                        <span className="child-age">DOB: {new Date(child.dateOfBirth).toLocaleDateString()}</span>
+                                                    </div>
+                                                    <button 
+                                                        className="remove-button small"
+                                                        onClick={() => handleRemoveChild(child._id)}
+                                                    >
+                                                        Remove
+                                                    </button>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </div>
+
+                                    <div className="bookmarks-section">
+                                        <h2>My Bookmarked Camps</h2>
+                                        {error && (
+                                            <div className="error-message">
+                                                {error}
+                                                <button onClick={fetchBookmarks} className="retry-button">
+                                                    Retry
+                                                </button>
+                                            </div>
+                                        )}
+                                        {loading ? (
+                                            <div className="loading-spinner" />
+                                        ) : bookmarks.length > 0 ? (
+                                            <div className="bookmarks-grid">
+                                                {bookmarks.map((bookmark) => (
+                                                    <div key={bookmark._id} className="bookmark-card">
+                                                        <img
+                                                            src={bookmark.campId?.images?.[0] || '/placeholder-image.jpg'}
+                                                            alt={bookmark.campId?.name || 'Camp image'}
+                                                            className="bookmark-image"
+                                                        />
+                                                        <div className="bookmark-content">
+                                                            <h3>{bookmark.campId?.name || 'Unknown Camp'}</h3>
+                                                            <p>{bookmark.campId?.description || 'No description available'}</p>
+                                                            <div className="bookmark-actions">
+                                                                <button
+                                                                    onClick={() => window.location.href = `/camps/${bookmark.campId?._id}`}
+                                                                    className="view-button"
+                                                                >
+                                                                    View Details
+                                                                </button>
+                                                                <button
+                                                                    onClick={() => {
+                                                                        console.log('Bookmark being removed:', bookmark);
+                                                                        handleRemoveBookmark(bookmark._id);
+                                                                    }}
+                                                                    className="remove-button"
+                                                                >
+                                                                    Remove
+                                                                </button>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        ) : (
+                                            <p>You haven't bookmarked any camps yet.</p>
+                                        )}
+                                    </div>
+                                </>
+                            )}
 
                             <div className="profile-section">
                                 <div className="section-header">
@@ -385,56 +439,6 @@ const ProfilePage = () => {
                                     </div>
                                 )}
                             </div>
-                        </div>
-
-                        <div className="bookmarks-section">
-                            <h2>My Bookmarked Camps</h2>
-                            {error && (
-                                <div className="error-message">
-                                    {error}
-                                    <button onClick={fetchBookmarks} className="retry-button">
-                                        Retry
-                                    </button>
-                                </div>
-                            )}
-                            {loading ? (
-                                <div className="loading-spinner" />
-                            ) : bookmarks.length > 0 ? (
-                                <div className="bookmarks-grid">
-                                    {bookmarks.map((bookmark) => (
-                                        <div key={bookmark._id} className="bookmark-card">
-                                            <img
-                                                src={bookmark.campId?.images?.[0] || '/placeholder-image.jpg'}
-                                                alt={bookmark.campId?.name || 'Camp image'}
-                                                className="bookmark-image"
-                                            />
-                                            <div className="bookmark-content">
-                                                <h3>{bookmark.campId?.name || 'Unknown Camp'}</h3>
-                                                <p>{bookmark.campId?.description || 'No description available'}</p>
-                                                <div className="bookmark-actions">
-                                                    <button
-                                                        onClick={() => window.location.href = `/camps/${bookmark.campId?._id}`}
-                                                        className="view-button"
-                                                    >
-                                                        View Details
-                                                    </button>
-                                                    <button
-                                                        onClick={() => {
-                                                            console.log('Bookmark being removed:', bookmark);
-                                                            handleRemoveBookmark(bookmark._id);
-                                                        }}
-                                                        className="remove-button"
-                                                    >
-                                                        Remove
-                                                    </button>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    ))}
-                                </div>
-                            ) : (
-                                <p>You haven't bookmarked any camps yet.</p>
-                            )}
                         </div>
                     </div>
                 </div>
