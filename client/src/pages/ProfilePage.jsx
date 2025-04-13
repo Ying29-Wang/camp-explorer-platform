@@ -41,20 +41,54 @@ const ProfilePage = () => {
             setLoading(true);
             setError(null);
             const response = await api.get('/bookmarks');
-            setBookmarks(response.data);
+            console.log('Bookmarks response:', response.data);
+            console.log('First bookmark structure:', JSON.stringify(response.data[0], null, 2));
+            if (response.data && Array.isArray(response.data)) {
+                setBookmarks(response.data);
+            } else {
+                console.error('Invalid bookmarks data:', response.data);
+                setError('Failed to load bookmarks. Invalid data received.');
+            }
         } catch (err) {
+            console.error('Error fetching bookmarks:', err);
             setError('Failed to load bookmarks. Please try again later.');
         } finally {
             setLoading(false);
         }
     };
 
-    const handleRemoveBookmark = async (campId) => {
+    const handleRemoveBookmark = async (bookmarkId) => {
+        if (!bookmarkId) {
+            console.error('No bookmark ID provided');
+            setError('Failed to remove bookmark: Invalid bookmark ID');
+            return;
+        }
+
         try {
-            await api.delete(`/bookmarks/${campId}`);
-            setBookmarks(bookmarks.filter(bookmark => bookmark.campId._id !== campId));
+            // Find the bookmark to get the campId
+            const bookmarkToRemove = bookmarks.find(b => b._id === bookmarkId);
+            if (!bookmarkToRemove || !bookmarkToRemove.campId) {
+                console.error('Bookmark or campId not found');
+                setError('Failed to remove bookmark: Invalid bookmark data');
+                return;
+            }
+
+            console.log('Removing bookmark for camp:', bookmarkToRemove.campId._id);
+            const response = await api.delete(`/bookmarks/${bookmarkToRemove.campId._id}`);
+            console.log('Delete response:', response.data);
+            
+            if (response.data && response.data.bookmarks) {
+                setBookmarks(response.data.bookmarks);
+            } else {
+                setBookmarks(prevBookmarks => prevBookmarks.filter(bookmark => bookmark._id !== bookmarkId));
+            }
+            
+            setError('');
         } catch (err) {
-            setError('Failed to remove bookmark. Please try again.');
+            console.error('Error removing bookmark:', err);
+            console.error('Error response:', err.response);
+            console.error('Error response data:', err.response?.data);
+            setError(err.response?.data?.message || 'Failed to remove bookmark. Please try again.');
         }
     };
 
@@ -82,14 +116,6 @@ const ProfilePage = () => {
             console.error('Error saving personal info:', err);
             setError('Failed to update profile. Please try again.');
         }
-    };
-
-    const handleChildChange = (index, field, value) => {
-        setChildren(prev => {
-            const updated = [...prev];
-            updated[index] = { ...updated[index], [field]: value };
-            return updated;
-        });
     };
 
     const handleAddChild = async () => {
@@ -295,7 +321,10 @@ const ProfilePage = () => {
                                                         View Details
                                                     </button>
                                                     <button
-                                                        onClick={() => handleRemoveBookmark(bookmark.campId?._id)}
+                                                        onClick={() => {
+                                                            console.log('Bookmark being removed:', bookmark);
+                                                            handleRemoveBookmark(bookmark._id);
+                                                        }}
                                                         className="remove-button"
                                                     >
                                                         Remove
