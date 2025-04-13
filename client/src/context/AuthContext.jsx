@@ -77,6 +77,24 @@ export const AuthProvider = ({ children }) => {
         }
     };
 
+    const updateUser = async (userData) => {
+        try {
+            // Update the user state with the complete user data
+            setUser(prevUser => ({
+                ...prevUser,
+                ...userData
+            }));
+            // Update localStorage with the complete user data
+            localStorage.setItem('user', JSON.stringify({
+                ...JSON.parse(localStorage.getItem('user')),
+                ...userData
+            }));
+        } catch (error) {
+            console.error('Error updating user:', error);
+            throw error;
+        }
+    };
+
     useEffect(() => {
         const checkAuth = async () => {
             try {
@@ -209,7 +227,8 @@ export const AuthProvider = ({ children }) => {
             logout, 
             isLoading,
             recentlyViewed,
-            addToRecentlyViewed
+            addToRecentlyViewed,
+            updateUser
         }}>
             {children}
         </AuthContext.Provider>

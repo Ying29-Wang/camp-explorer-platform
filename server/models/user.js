@@ -47,6 +47,14 @@ const UserSchema = new Schema({
         type: String,
         default: null
     },
+    phone: {
+        type: String,
+        default: null
+    },
+    location: {
+        type: String,
+        default: null
+    },
     notifications: {
         type: {
             email: { type: Boolean, default: true },
