@@ -10,76 +10,75 @@ const openai = new OpenAI({
 class AIService {
     // Generate personalized camp recommendations
     async generateCampRecommendations(userPreferences, pastReviews = []) {
-        // Validate required fields
-        if (!userPreferences.userId) {
-            throw new Error('User ID is required');
-        }
-        if (!userPreferences.ageRange) {
-            throw new Error('Age range is required');
-        }
-        if (!userPreferences.interests || !Array.isArray(userPreferences.interests)) {
-            throw new Error('Interests must be an array');
-        }
-        if (!userPreferences.location) {
-            throw new Error('Location preference is required');
-        }
-        if (!userPreferences.budgetRange) {
-            throw new Error('Budget range is required');
-        }
-
-        console.log('Starting camp recommendations with preferences:', userPreferences);
-        console.log('OpenAI API Key exists:', !!process.env.OPENAI_API_KEY);
-        console.log('OpenAI API Key length:', process.env.OPENAI_API_KEY?.length);
-        
-        const camps = await Camp.find({});
-        console.log('Found camps:', camps.length);
-        
-        const reviews = await Review.find({ userId: userPreferences.userId })
-            .populate('campId', 'name description')
-            .populate('userId', 'username');
-        console.log('Found user reviews:', reviews.length);
-
-        // Try OpenAI API first
         try {
-            const prompt = `Based on the following user preferences and past reviews, recommend 5 suitable camps:
-            User Preferences:
-            - Age Range: ${userPreferences.ageRange}
-            - Interests: ${userPreferences.interests.join(', ')}
-            - Location Preference: ${userPreferences.location}
-            - Budget Range: ${userPreferences.budgetRange}
-            
-            Past Reviews:
-            ${reviews.map(review => `- ${review.campId ? review.campId.name : 'Unknown Camp'}: ${review.rating} stars, ${review.reviewText}`).join('\n')}
-            
-            Available Camps:
-            ${camps.map(camp => `- ${camp.name}: ${camp.description.substring(0, 100)}...`).join('\n')}
-            
-            Please provide detailed recommendations explaining why each camp would be a good fit.`;
+            // Set default values for missing fields
+            const preferences = {
+                userId: userPreferences.userId || 'anonymous',
+                ageRange: userPreferences.ageRange || '5-18',
+                interests: Array.isArray(userPreferences.interests) ? userPreferences.interests : 
+                          (userPreferences.interests ? [userPreferences.interests] : ['general']),
+                location: userPreferences.location || 'any',
+                budgetRange: userPreferences.budgetRange || '0-1000'
+            };
 
-            console.log('Calling OpenAI API with prompt:', prompt);
+            console.log('Starting camp recommendations with preferences:', preferences);
+            console.log('OpenAI API Key exists:', !!process.env.OPENAI_API_KEY);
+            
+            const camps = await Camp.find({});
+            console.log('Found camps:', camps.length);
+            
+            let reviews = [];
+            if (preferences.userId !== 'anonymous') {
+                reviews = await Review.find({ userId: preferences.userId })
+                    .populate('campId', 'name description')
+                    .populate('userId', 'username');
+            }
+            console.log('Found user reviews:', reviews.length);
 
-            const response = await openai.chat.completions.create({
-                model: "gpt-3.5-turbo",
-                messages: [
-                    {
-                        role: "system",
-                        content: "You are a helpful camp recommendation assistant. Provide detailed, personalized camp recommendations based on user preferences and past experiences."
-                    },
-                    {
-                        role: "user",
-                        content: prompt
-                    }
-                ],
-                temperature: 0.7,
-                max_tokens: 1000
-            });
+            // Try OpenAI API first
+            try {
+                const prompt = `Based on the following user preferences and past reviews, recommend 5 suitable camps:
+                User Preferences:
+                - Age Range: ${preferences.ageRange}
+                - Interests: ${preferences.interests.join(', ')}
+                - Location Preference: ${preferences.location}
+                - Budget Range: ${preferences.budgetRange}
+                
+                ${reviews.length > 0 ? `Past Reviews:
+                ${reviews.map(review => `- ${review.campId ? review.campId.name : 'Unknown Camp'}: ${review.rating} stars, ${review.reviewText}`).join('\n')}` : ''}
+                
+                Available Camps:
+                ${camps.map(camp => `- ${camp.name}: ${camp.description.substring(0, 100)}...`).join('\n')}
+                
+                Please provide detailed recommendations explaining why each camp would be a good fit.`;
 
-            console.log('OpenAI API response:', response);
-            return response.choices[0].message.content;
-        } catch (openaiError) {
-            console.warn('OpenAI API call failed, falling back to basic recommendations:', openaiError.message);
-            // Return basic recommendations directly instead of throwing
-            return this.generateBasicRecommendations(camps, userPreferences);
+                console.log('Calling OpenAI API with prompt:', prompt);
+
+                const response = await openai.chat.completions.create({
+                    model: "gpt-3.5-turbo",
+                    messages: [
+                        {
+                            role: "system",
+                            content: "You are a helpful camp recommendation assistant. Provide detailed, personalized camp recommendations based on user preferences and past experiences."
+                        },
+                        {
+                            role: "user",
+                            content: prompt
+                        }
+                    ],
+                    temperature: 0.7,
+                    max_tokens: 1000
+                });
+
+                console.log('OpenAI API response:', response);
+                return response.choices[0].message.content;
+            } catch (openaiError) {
+                console.warn('OpenAI API call failed, falling back to basic recommendations:', openaiError.message);
+                return this.generateBasicRecommendations(camps, preferences);
+            }
+        } catch (error) {
+            console.error('Error in generateCampRecommendations:', error);
+            return "We're having trouble generating recommendations at the moment. Please try again later.";
         }
     }
 
