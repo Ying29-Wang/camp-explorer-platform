@@ -1,4 +1,5 @@
 import React, { createContext, useState, useContext, useCallback } from 'react';
+import { searchCamps } from '../services/campService';
 
 const SearchContext = createContext();
 
@@ -41,6 +42,21 @@ export const SearchProvider = ({ children }) => {
         }
     };
 
+    const handleSearch = async (searchParams) => {
+        setIsSearching(true);
+        try {
+            const results = await searchCamps(searchParams);
+            setSearchResults(results);
+            return results;
+        } catch (error) {
+            console.error('Search error:', error);
+            setSearchResults([]);
+            throw error;
+        } finally {
+            setIsSearching(false);
+        }
+    };
+
     const value = {
         searchResults,
         setSearchResults,
@@ -50,7 +66,8 @@ export const SearchProvider = ({ children }) => {
         setFilters: updateFilters,
         isSearching,
         setIsSearching,
-        executeSearch
+        executeSearch,
+        searchCamps: handleSearch
     };
 
     return (

@@ -4,36 +4,56 @@ import { useSearch } from '../../context/SearchContext';
 import './QuickFilters.css';
 
 const QuickFilters = () => {
-    const { setSearchFilters } = useSearch();
+    const { setFilters, searchCamps, filters, setSearchResults } = useSearch();
     
-    const quickFilters = [
-        { label: "Ages 5-10", value: { minAge: 5, maxAge: 10 } },
-        { label: "Under $500", value: { maxPrice: 500 } },
-        { label: "Outdoor", value: { activities: ["hiking", "nature"] } },
-        { label: "Arts", value: { activities: ["art", "painting", "music"] } },
-        { label: "Sports", value: { activities: ["sports", "swimming"] } },
+    const sortOptions = [
+        { label: "Price: Low to High", value: { sortBy: "price", sortOrder: "asc" } },
+        { label: "Price: High to Low", value: { sortBy: "price", sortOrder: "desc" } },
+        { label: "Name: A to Z", value: { sortBy: "name", sortOrder: "asc" } },
+        { label: "Name: Z to A", value: { sortBy: "name", sortOrder: "desc" } },
+        { label: "Start Date: Earliest", value: { sortBy: "startDate", sortOrder: "asc" } },
+        { label: "Start Date: Latest", value: { sortBy: "startDate", sortOrder: "desc" } }
     ];
 
-    const handleFilterClick = (filter) => {
-        setSearchFilters(prev => ({ ...prev, ...filter.value }));
+    const handleSortChange = async (e) => {
+        const selectedOption = sortOptions.find(option => option.label === e.target.value);
+        if (selectedOption) {
+            // Create new filters object with updated sort parameters
+            const newFilters = {
+                ...filters,
+                sortBy: selectedOption.value.sortBy,
+                sortOrder: selectedOption.value.sortOrder
+            };
+            
+            // Update filters in context
+            setFilters(newFilters);
+            
+            // Execute search with updated filters
+            try {
+                const results = await searchCamps(newFilters);
+                console.log('Search results after sort:', results);
+                setSearchResults(results);
+            } catch (error) {
+                console.error('Error executing search:', error);
+            }
+        }
     };
 
     return (
-        <section className="quick-filters" aria-labelledby="quick-filters-heading">
-            <h2 id="quick-filters-heading" className="visually-hidden">Quick Filters</h2>
-            <div className="filter-chips">
-                {quickFilters.map((filter, index) => (
-                    <button
-                        key={index}
-                        className="filter-chip"
-                        onClick={() => handleFilterClick(filter)}
-                        aria-label={`Filter by ${filter.label}`}
-                    >
-                        {filter.label}
-                    </button>
+        <div className="sort-container">
+            <select 
+                className="sort-select"
+                onChange={handleSortChange}
+                defaultValue=""
+            >
+                <option value="" disabled>Sort by...</option>
+                {sortOptions.map((option, index) => (
+                    <option key={index} value={option.label}>
+                        {option.label}
+                    </option>
                 ))}
-            </div>
-        </section>
+            </select>
+        </div>
     );
 };
 
