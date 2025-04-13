@@ -242,6 +242,10 @@ const ProfilePage = () => {
                                 </div>
                                 <div className="info-grid">
                                     <div className="info-item">
+                                        <label>Username:</label>
+                                        <span>{user.username}</span>
+                                    </div>
+                                    <div className="info-item">
                                         <label>Email:</label>
                                         <span>{user.email}</span>
                                     </div>
