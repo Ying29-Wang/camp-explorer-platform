@@ -1,0 +1,80 @@
+.camp-card {
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    overflow: hidden;
+    transition: all 0.3s ease;
+    cursor: pointer;
+    background: white;
+  }
+  
+  .camp-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  }
+  
+  .card-image-container {
+    position: relative;
+    padding-top: 56.25%; /* 16:9 aspect ratio */
+    overflow: hidden;
+  }
+  
+  .camp-card-image {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+  
+  .card-content {
+    padding: 1rem;
+  }
+  
+  .camp-name {
+    margin: 0 0 0.5rem;
+    font-size: 1.1rem;
+    color: #2c3e50;
+  }
+  
+  .camp-location {
+    margin: 0 0 0.5rem;
+    color: #7f8c8d;
+    font-size: 0.9rem;
+  }
+  
+  .camp-description {
+    margin: 0 0 1rem;
+    color: #34495e;
+    font-size: 0.9rem;
+    line-height: 1.4;
+  }
+  
+  .card-actions {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  
+  .view-details-button {
+    background: #3498db;
+    color: white;
+    border: none;
+    padding: 0.5rem 1rem;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background 0.2s;
+  }
+  
+  .bookmark-button {
+    background: none;
+    border: none;
+    color: #bdc3c7;
+    cursor: pointer;
+    font-size: 1.2rem;
+    transition: color 0.2s;
+  }
+  
+  .bookmark-button:hover {
+    color: #e74c3c;
+  }

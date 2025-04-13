@@ -3,7 +3,6 @@ import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import FeaturedCamps from '../components/features/FeaturedCamps';
 import RecentlyViewed from '../components/features/RecentlyViewed';
-import Testimonials from '../components/features/Testimonials';
 import QuickFilters from '../components/features/QuickFilters';
 import HeroSection from '../components/layout/HeroSection';
 import Spinner from '../components/common/Spinner';
@@ -36,7 +35,6 @@ const HomePage = () => {
             
             {isLoggedIn && <RecentlyViewed />}
             
-            <Testimonials />
         </div>
     );
 };
