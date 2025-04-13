@@ -11,7 +11,8 @@ const ProfilePage = () => {
     const [error, setError] = useState(null);
     const [isEditing, setIsEditing] = useState({
         personalInfo: false,
-        children: false
+        children: false,
+        password: false
     });
     const [formData, setFormData] = useState({
         phone: user?.phone || '',
@@ -23,6 +24,11 @@ const ProfilePage = () => {
         lastName: '', 
         dateOfBirth: '',
         interests: []
+    });
+    const [passwordData, setPasswordData] = useState({
+        currentPassword: '',
+        newPassword: '',
+        confirmPassword: ''
     });
 
     useEffect(() => {
@@ -163,6 +169,41 @@ const ProfilePage = () => {
         }
     };
 
+    const handlePasswordChange = (e) => {
+        const { name, value } = e.target;
+        setPasswordData(prev => ({
+            ...prev,
+            [name]: value
+        }));
+    };
+
+    const handleChangePassword = async () => {
+        if (passwordData.newPassword !== passwordData.confirmPassword) {
+            setError('New passwords do not match');
+            return;
+        }
+
+        try {
+            const response = await api.put('/auth/change-password', {
+                currentPassword: passwordData.currentPassword,
+                newPassword: passwordData.newPassword
+            });
+            
+            if (response.data.msg === 'Password changed successfully') {
+                setPasswordData({
+                    currentPassword: '',
+                    newPassword: '',
+                    confirmPassword: ''
+                });
+                setIsEditing(prev => ({ ...prev, password: false }));
+                setError('');
+            }
+        } catch (err) {
+            console.error('Error changing password:', err);
+            setError(err.response?.data?.msg || 'Failed to change password. Please try again.');
+        }
+    };
+
     if (!user) {
         return (
             <>
@@ -286,6 +327,59 @@ const ProfilePage = () => {
                                         </div>
                                     ))}
                                 </div>
+                            </div>
+
+                            <div className="profile-section">
+                                <div className="section-header">
+                                    <h3>Change Password</h3>
+                                    <button 
+                                        className="edit-button"
+                                        onClick={() => setIsEditing({...isEditing, password: !isEditing.password})}
+                                    >
+                                        {isEditing.password ? 'Cancel' : 'Change Password'}
+                                    </button>
+                                </div>
+                                {isEditing.password && (
+                                    <div className="password-form">
+                                        <div className="form-group">
+                                            <label>Current Password:</label>
+                                            <input
+                                                type="password"
+                                                name="currentPassword"
+                                                value={passwordData.currentPassword}
+                                                onChange={handlePasswordChange}
+                                                placeholder="Enter current password"
+                                            />
+                                        </div>
+                                        <div className="form-group">
+                                            <label>New Password:</label>
+                                            <input
+                                                type="password"
+                                                name="newPassword"
+                                                value={passwordData.newPassword}
+                                                onChange={handlePasswordChange}
+                                                placeholder="Enter new password"
+                                            />
+                                        </div>
+                                        <div className="form-group">
+                                            <label>Confirm New Password:</label>
+                                            <input
+                                                type="password"
+                                                name="confirmPassword"
+                                                value={passwordData.confirmPassword}
+                                                onChange={handlePasswordChange}
+                                                placeholder="Confirm new password"
+                                            />
+                                        </div>
+                                        <button 
+                                            className="save-button" 
+                                            onClick={handleChangePassword}
+                                            disabled={!passwordData.currentPassword || !passwordData.newPassword || !passwordData.confirmPassword}
+                                        >
+                                            Save New Password
+                                        </button>
+                                    </div>
+                                )}
                             </div>
                         </div>
 
