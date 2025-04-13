@@ -18,7 +18,12 @@ const ProfilePage = () => {
         location: user?.location || ''
     });
     const [children, setChildren] = useState(user?.children || []);
-    const [newChild, setNewChild] = useState({ name: '', age: '' });
+    const [newChild, setNewChild] = useState({ 
+        firstName: '', 
+        lastName: '', 
+        dateOfBirth: '',
+        interests: []
+    });
 
     useEffect(() => {
         if (user) {
@@ -88,26 +93,47 @@ const ProfilePage = () => {
     };
 
     const handleAddChild = async () => {
-        if (!newChild.name || !newChild.age) {
+        if (!newChild.firstName || !newChild.lastName || !newChild.dateOfBirth) {
             setError('Please fill in all child details');
             return;
         }
         try {
-            const response = await api.post(`/users/${user._id}/children`, newChild);
-            setChildren(response.data.children);
-            setNewChild({ name: '', age: '' });
+            const response = await api.post(`/users/${user._id}/children`, {
+                firstName: newChild.firstName,
+                lastName: newChild.lastName,
+                dateOfBirth: newChild.dateOfBirth,
+                interests: newChild.interests
+            });
+            
+            if (response.data && response.data.children) {
+                setChildren(response.data.children);
+            } else {
+                setChildren(prevChildren => [...prevChildren, response.data]);
+            }
+            
+            setNewChild({ firstName: '', lastName: '', dateOfBirth: '', interests: [] });
             setIsEditing(prev => ({ ...prev, children: false }));
+            setError('');
         } catch (err) {
-            setError('Failed to add child. Please try again.');
+            console.error('Error adding child:', err);
+            setError(err.response?.data?.message || 'Failed to add child. Please try again.');
         }
     };
 
     const handleRemoveChild = async (childId) => {
         try {
             const response = await api.delete(`/users/${user._id}/children/${childId}`);
-            setChildren(response.data.children);
+            
+            if (response.data && response.data.children) {
+                setChildren(response.data.children);
+            } else {
+                setChildren(prevChildren => prevChildren.filter(child => child._id !== childId));
+            }
+            
+            setError('');
         } catch (err) {
-            setError('Failed to remove child. Please try again.');
+            console.error('Error removing child:', err);
+            setError(err.response?.data?.message || 'Failed to remove child. Please try again.');
         }
     };
 
@@ -197,15 +223,21 @@ const ProfilePage = () => {
                                     <div className="add-child-form">
                                         <input
                                             type="text"
-                                            placeholder="Child's name"
-                                            value={newChild.name}
-                                            onChange={(e) => setNewChild({...newChild, name: e.target.value})}
+                                            placeholder="First Name"
+                                            value={newChild.firstName}
+                                            onChange={(e) => setNewChild({...newChild, firstName: e.target.value})}
                                         />
                                         <input
-                                            type="number"
-                                            placeholder="Age"
-                                            value={newChild.age}
-                                            onChange={(e) => setNewChild({...newChild, age: e.target.value})}
+                                            type="text"
+                                            placeholder="Last Name"
+                                            value={newChild.lastName}
+                                            onChange={(e) => setNewChild({...newChild, lastName: e.target.value})}
+                                        />
+                                        <input
+                                            type="date"
+                                            placeholder="Date of Birth"
+                                            value={newChild.dateOfBirth}
+                                            onChange={(e) => setNewChild({...newChild, dateOfBirth: e.target.value})}
                                         />
                                         <button className="save-button" onClick={handleAddChild}>
                                             Save Child
@@ -216,8 +248,8 @@ const ProfilePage = () => {
                                     {children.map((child, index) => (
                                         <div key={child._id || index} className="child-item">
                                             <div className="child-info">
-                                                <span>{child.name}</span>
-                                                <span className="child-age">Age: {child.age}</span>
+                                                <span>{child.firstName} {child.lastName}</span>
+                                                <span className="child-age">DOB: {new Date(child.dateOfBirth).toLocaleDateString()}</span>
                                             </div>
                                             <button 
                                                 className="remove-button small"
