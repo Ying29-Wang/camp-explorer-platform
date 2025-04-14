@@ -27,7 +27,6 @@ const CampSchema = new Schema({
     },
     description: {
         type: String,
-        required: true,
         text: true
     },
     location: {
@@ -47,83 +46,69 @@ const CampSchema = new Schema({
         }
     },
     formattedAddress: {
-        type: String,
-        required: false
+        type: String
     },
     ageRange: {
         min: {
-            type: Number,
-            required: true,
+            type: Number
         },
         max: {
-            type: Number,
-            required: true,
-        },
+            type: Number
+        }
     },
     category: {
         type: String,
-        required: true,
-        enum: CAMP_CATEGORIES,
+        enum: CAMP_CATEGORIES
     },
     activities: {
         type: [String],
-        default: [],
+        default: []
     },
     price: {
-        type: Number,
-        required: true,
+        type: Number
     },
     image: {
         type: [String],
-        default: [],
+        default: []
     },
     source: {
         type: String,
         enum: ['direct', 'external'],
-        default: 'direct',
+        default: 'direct'
     },
     website: {
-        type: String,
-        required: true,
+        type: String
     },
     contact: {
-        type: String,
-        required: true,
+        type: String
     },
     email: {
-        type: String,
-        required: true,
+        type: String
     },
     phone: {
-        type: String,
-        required: true,
+        type: String
     },
     startDate: {
-        type: Date,
-        required: true,
+        type: Date
     },
     endDate: {
-        type: Date,
-        required: true,
+        type: Date
     },
     capacity: {
-        type: Number,
-        required: true,
+        type: Number
     },
     registered: {
         type: Number,
-        default: 0,
+        default: 0
     },
     owner: {
         type: mongoose.Schema.Types.ObjectId,
-        ref: 'User',
-        required: false
+        ref: 'User'
     },
     isSeedCamp: {
         type: Boolean,
         default: false
     },
-    // Essential status and tracking fields
     status: {
         type: String,
         enum: ['active', 'inactive'],

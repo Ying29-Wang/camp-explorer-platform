@@ -301,7 +301,7 @@ router.get('/:id', async (req, res) => {
 router.post('/', auth, validateCamp, async (req, res) => {
     try {
         // Validate required fields
-        const requiredFields = ['name', 'description', 'location', 'price', 'ageRange', 'category', 'website', 'contact', 'email', 'phone', 'startDate', 'endDate', 'capacity'];
+        const requiredFields = ['name', 'location'];
         const missingFields = requiredFields.filter(field => !req.body[field]);
         
         if (missingFields.length > 0) {

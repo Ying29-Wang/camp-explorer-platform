@@ -15,6 +15,24 @@ const commonValidationRules = {
 // Camp validation rules
 const campValidationRules = {
     ...commonValidationRules,
+    name: {
+        in: ['body'],
+        isString: {
+            errorMessage: 'Name must be a string'
+        },
+        notEmpty: {
+            errorMessage: 'Name is required'
+        }
+    },
+    location: {
+        in: ['body'],
+        isString: {
+            errorMessage: 'Location must be a string'
+        },
+        notEmpty: {
+            errorMessage: 'Location is required'
+        }
+    },
     viewCount: {
         in: ['body'],
         isInt: {
@@ -27,6 +45,85 @@ const campValidationRules = {
         in: ['body'],
         isMongoId: {
             errorMessage: 'Invalid owner ID format'
+        },
+        optional: true
+    },
+    description: {
+        in: ['body'],
+        isString: {
+            errorMessage: 'Description must be a string'
+        },
+        optional: true
+    },
+    price: {
+        in: ['body'],
+        isNumeric: {
+            errorMessage: 'Price must be a number'
+        },
+        optional: true
+    },
+    ageRange: {
+        in: ['body'],
+        isObject: {
+            errorMessage: 'Age range must be an object'
+        },
+        optional: true
+    },
+    category: {
+        in: ['body'],
+        isIn: {
+            options: [CAMP_CATEGORIES],
+            errorMessage: 'Invalid category'
+        },
+        optional: true
+    },
+    website: {
+        in: ['body'],
+        isURL: {
+            errorMessage: 'Invalid website URL'
+        },
+        optional: true
+    },
+    contact: {
+        in: ['body'],
+        isString: {
+            errorMessage: 'Contact must be a string'
+        },
+        optional: true
+    },
+    email: {
+        in: ['body'],
+        isEmail: {
+            errorMessage: 'Invalid email format'
+        },
+        optional: true
+    },
+    phone: {
+        in: ['body'],
+        isString: {
+            errorMessage: 'Phone must be a string'
+        },
+        optional: true
+    },
+    startDate: {
+        in: ['body'],
+        isISO8601: {
+            errorMessage: 'Invalid start date format'
+        },
+        optional: true
+    },
+    endDate: {
+        in: ['body'],
+        isISO8601: {
+            errorMessage: 'Invalid end date format'
+        },
+        optional: true
+    },
+    capacity: {
+        in: ['body'],
+        isInt: {
+            options: { min: 0 },
+            errorMessage: 'Capacity must be a non-negative integer'
         },
         optional: true
     }
