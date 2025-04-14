@@ -30,8 +30,8 @@ const AIReviewAnalysis = ({ campId }) => {
 
     if (loading) {
         return (
-            <Box display="flex" justifyContent="center" p={3}>
-                <CircularProgress />
+            <Box display="flex" justifyContent="center" p={3} role="status" aria-label="Loading analysis">
+                <CircularProgress aria-hidden="true" />
             </Box>
         );
     }
@@ -40,9 +40,20 @@ const AIReviewAnalysis = ({ campId }) => {
         return (
             <Alert 
                 severity="error" 
-                sx={{ mb: 2 }}
+                sx={{ 
+                    mb: 2,
+                    backgroundColor: '#fee2e2',
+                    color: '#dc2626'
+                }}
+                role="alert"
                 action={
-                    <Button color="inherit" size="small" onClick={fetchAnalysis}>
+                    <Button 
+                        color="inherit" 
+                        size="small" 
+                        onClick={fetchAnalysis}
+                        aria-label="Retry analysis"
+                        sx={{ color: '#dc2626' }}
+                    >
                         Retry
                     </Button>
                 }
@@ -57,27 +68,51 @@ const AIReviewAnalysis = ({ campId }) => {
     }
 
     return (
-        <Card sx={{ mb: 3, backgroundColor: '#ffffff' }}>
-            <CardContent>
+        <Card 
+            sx={{ 
+                mb: 2,
+                backgroundColor: '#ffffff !important',
+                '& .MuiCardContent-root': {
+                    backgroundColor: '#ffffff !important',
+                    '& .MuiTypography-root': {
+                        color: '#000000 !important',
+                        '&.MuiTypography-h3': {
+                            color: '#000000 !important',
+                            fontWeight: 'bold'
+                        },
+                        '&.MuiTypography-body1': {
+                            color: '#000000 !important',
+                            lineHeight: 1.6
+                        }
+                    }
+                }
+            }} 
+            role="region" 
+            aria-labelledby="ai-analysis-heading"
+        >
+            <CardContent sx={{ backgroundColor: '#ffffff !important' }}>
                 <Typography 
                     variant="h3" 
                     component="h3" 
-                    gutterBottom
+                    gutterBottom 
+                    id="ai-analysis-heading"
                     sx={{ 
-                        color: '#000000',
-                        fontWeight: 600
+                        color: '#000000 !important',
+                        fontWeight: 'bold',
+                        marginBottom: '1rem'
                     }}
                 >
-                    AI Review Analysis
+                    AI Analysis
                 </Typography>
                 <Typography 
                     variant="body1" 
                     sx={{ 
-                        color: '#000000',
-                        whiteSpace: 'pre-line'
+                        color: '#000000 !important',
+                        lineHeight: 1.6,
+                        backgroundColor: '#ffffff !important'
                     }}
                 >
-                    {analysis}
+                    {analysis.summary}
                 </Typography>
             </CardContent>
         </Card>

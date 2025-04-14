@@ -190,7 +190,7 @@ const CampDetailsPage = () => {
 
     return (
         <main id="main-content" lang="en" role="main">
-            <a href="#main-content" className="skip-link">Skip to main content</a>
+            <a href="#main-content" className="skip-link" aria-label="Skip to main content">Skip to main content</a>
             <Header />
             <div className="camp-details">
                 <div className="camp-header">
@@ -204,6 +204,11 @@ const CampDetailsPage = () => {
                             className={`bookmark-btn ${isBookmarked ? 'bookmarked' : ''}`}
                             aria-label={isBookmarked ? 'Remove bookmark' : 'Add bookmark'}
                             aria-pressed={isBookmarked}
+                            style={{
+                                backgroundColor: isBookmarked ? '#2563eb' : '#ffffff',
+                                color: isBookmarked ? '#ffffff' : '#000000',
+                                border: '1px solid #000000'
+                            }}
                         >
                             {isBookmarked ? 'Remove Bookmark' : 'Add Bookmark'}
                         </button>
@@ -219,14 +224,14 @@ const CampDetailsPage = () => {
                         <h2 id="age-range-heading" style={{ color: '#000000' }}>Age Range</h2>
                         <ul className="camp-details-list">
                             <li style={{ color: '#000000' }}>
-                                <strong>Minimum Age:</strong> {camp.minAge || 'Not specified'}
+                                <strong style={{ color: '#000000' }}>Minimum Age:</strong> {camp.minAge || 'Not specified'}
                             </li>
                             <li style={{ color: '#000000' }}>
-                                <strong>Maximum Age:</strong> {camp.maxAge || 'Not specified'}
+                                <strong style={{ color: '#000000' }}>Maximum Age:</strong> {camp.maxAge || 'Not specified'}
                             </li>
                             {camp.ageGroups && camp.ageGroups.length > 0 && (
                                 <li style={{ color: '#000000' }}>
-                                    <strong>Age Groups:</strong> {camp.ageGroups.join(', ')}
+                                    <strong style={{ color: '#000000' }}>Age Groups:</strong> {camp.ageGroups.join(', ')}
                                 </li>
                             )}
                         </ul>
@@ -236,25 +241,25 @@ const CampDetailsPage = () => {
                         <h2 id="schedule-heading" style={{ color: '#000000' }}>Schedule</h2>
                         <ul className="camp-details-list">
                             <li style={{ color: '#000000' }}>
-                                <strong>Start Date:</strong> {camp.startDate ? new Date(camp.startDate).toLocaleDateString() : 'Not specified'}
+                                <strong style={{ color: '#000000' }}>Start Date:</strong> {camp.startDate ? new Date(camp.startDate).toLocaleDateString() : 'Not specified'}
                             </li>
                             <li style={{ color: '#000000' }}>
-                                <strong>End Date:</strong> {camp.endDate ? new Date(camp.endDate).toLocaleDateString() : 'Not specified'}
+                                <strong style={{ color: '#000000' }}>End Date:</strong> {camp.endDate ? new Date(camp.endDate).toLocaleDateString() : 'Not specified'}
                             </li>
                             <li style={{ color: '#000000' }}>
-                                <strong>Duration:</strong> {camp.duration || 'Not specified'}
+                                <strong style={{ color: '#000000' }}>Duration:</strong> {camp.duration || 'Not specified'}
                             </li>
                             <li style={{ color: '#000000' }}>
-                                <strong>Daily Schedule:</strong> {camp.dailySchedule || 'Not specified'}
+                                <strong style={{ color: '#000000' }}>Daily Schedule:</strong> {camp.dailySchedule || 'Not specified'}
                             </li>
                             {camp.dropOffTime && (
                                 <li style={{ color: '#000000' }}>
-                                    <strong>Drop-off Time:</strong> {camp.dropOffTime}
+                                    <strong style={{ color: '#000000' }}>Drop-off Time:</strong> {camp.dropOffTime}
                                 </li>
                             )}
                             {camp.pickUpTime && (
                                 <li style={{ color: '#000000' }}>
-                                    <strong>Pick-up Time:</strong> {camp.pickUpTime}
+                                    <strong style={{ color: '#000000' }}>Pick-up Time:</strong> {camp.pickUpTime}
                                 </li>
                             )}
                         </ul>
@@ -286,30 +291,15 @@ const CampDetailsPage = () => {
                         <div className="camp-contact" role="region" aria-labelledby="contact-heading">
                             <h2 id="contact-heading" style={{ color: '#000000' }}>Contact Information</h2>
                             <ul className="camp-details-list">
-                                {camp.contact.email && (
-                                    <li style={{ color: '#000000' }}>
-                                        <strong>Email:</strong> {camp.contact.email}
-                                    </li>
-                                )}
-                                {camp.contact.phone && (
-                                    <li style={{ color: '#000000' }}>
-                                        <strong>Phone:</strong> {camp.contact.phone}
-                                    </li>
-                                )}
-                                {camp.contact.website && (
-                                    <li style={{ color: '#000000' }}>
-                                        <strong>Website:</strong>{' '}
-                                        <a 
-                                            href={camp.contact.website} 
-                                            target="_blank" 
-                                            rel="noopener noreferrer"
-                                            style={{ color: '#1a0dab' }}
-                                        >
-                                            {camp.contact.website}
-                                            <span className="sr-only">(opens in new tab)</span>
-                                        </a>
-                                    </li>
-                                )}
+                                <li style={{ color: '#000000' }}>
+                                    <strong style={{ color: '#000000' }}>Email:</strong> {camp.contact.email}
+                                </li>
+                                <li style={{ color: '#000000' }}>
+                                    <strong style={{ color: '#000000' }}>Phone:</strong> {camp.contact.phone}
+                                </li>
+                                <li style={{ color: '#000000' }}>
+                                    <strong style={{ color: '#000000' }}>Website:</strong> {camp.contact.website}
+                                </li>
                             </ul>
                         </div>
                     )}

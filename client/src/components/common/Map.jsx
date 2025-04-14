@@ -77,9 +77,22 @@ const Map = ({ center, markers = [], zoom = 13 }) => {
                     shadowSize: [41, 41]
                 });
 
+                const popupContent = `
+                    <div style="
+                        background-color: #ffffff;
+                        color: #000000;
+                        padding: 10px;
+                        border-radius: 4px;
+                        box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+                    ">
+                        <h3 style="margin: 0 0 8px 0; color: #000000;">${marker.title || 'Location'}</h3>
+                        <p style="margin: 0; color: #000000;">${marker.description || 'No description available'}</p>
+                    </div>
+                `;
+
                 const newMarker = L.marker(marker, { icon: customIcon })
                     .addTo(mapInstance.current)
-                    .bindPopup('Camp Location')
+                    .bindPopup(popupContent)
                     .openPopup();
 
                 markersRef.current.push(newMarker);
@@ -127,6 +140,10 @@ const Map = ({ center, markers = [], zoom = 13 }) => {
                 borderRadius: '8px',
                 overflow: 'hidden'
             }}
+            role="application"
+            aria-label="Interactive map"
+            aria-roledescription="Map showing camp locations"
+            tabIndex={0}
         />
     );
 };
