@@ -1,4 +1,5 @@
-const { validationResult } = require('express-validator');
+const { body, validationResult } = require('express-validator');
+const { CAMP_CATEGORIES } = require('../constants/campConstants');
 
 // Common validation rules
 const commonValidationRules = {

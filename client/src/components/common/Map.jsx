@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useRef, useEffect, useMemo } from 'react';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 
@@ -10,33 +10,25 @@ L.Icon.Default.mergeOptions({
     shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
 });
 
-const Map = ({ center, zoom = 13, markers = [] }) => {
+const Map = ({ center, markers = [], zoom = 13 }) => {
     const mapRef = useRef(null);
     const mapInstance = useRef(null);
+    const markersRef = useRef([]);
 
-    // Validate coordinate format
-    const isValidCoordinate = (coord) => {
-        return Array.isArray(coord) && coord.length === 2 && 
-               typeof coord[0] === 'number' && typeof coord[1] === 'number';
-    };
+    // Memoize the center and markers to prevent unnecessary updates
+    const memoizedCenter = useMemo(() => center, [center[0], center[1]]);
+    const memoizedMarkers = useMemo(() => markers, [JSON.stringify(markers)]);
 
-    // Validate marker format
-    const isValidMarker = (marker) => {
-        return Array.isArray(marker) && marker.length === 2 && 
-               typeof marker[0] === 'number' && typeof marker[1] === 'number';
-    };
-
-    // Check if all inputs are valid
-    const isValidInput = center && isValidCoordinate(center) && 
-                        markers.every(isValidMarker);
+    // Check if input is valid
+    const isValidInput = memoizedCenter && Array.isArray(memoizedCenter) && memoizedCenter.length === 2;
 
     useEffect(() => {
         if (!isValidInput) {
-            console.error('Invalid map input:', { center, markers });
+            console.error('Invalid map input:', { center: memoizedCenter, markers: memoizedMarkers });
             return;
         }
 
-        // Initialize map
+        // Initialize map only once
         if (!mapInstance.current) {
             mapInstance.current = L.map(mapRef.current, {
                 zoomControl: true,
@@ -44,7 +36,7 @@ const Map = ({ center, zoom = 13, markers = [] }) => {
                 doubleClickZoom: true,
                 touchZoom: true,
                 dragging: true
-            }).setView(center, zoom);
+            }).setView(memoizedCenter, zoom);
 
             // Add tile layer
             L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
@@ -57,40 +49,57 @@ const Map = ({ center, zoom = 13, markers = [] }) => {
             L.control.zoom({
                 position: 'topright'
             }).addTo(mapInstance.current);
+        } else {
+            // Update center if it changed
+            mapInstance.current.setView(memoizedCenter, zoom);
         }
 
-        // Clear existing markers
-        mapInstance.current.eachLayer((layer) => {
-            if (layer instanceof L.Marker) {
-                mapInstance.current.removeLayer(layer);
+        // Remove only the markers that are no longer needed
+        markersRef.current.forEach(marker => {
+            if (!memoizedMarkers.some(m => m[0] === marker.getLatLng().lat && m[1] === marker.getLatLng().lng)) {
+                mapInstance.current.removeLayer(marker);
             }
         });
 
-        // Add new markers
-        markers.forEach(marker => {
-            const customIcon = L.icon({
-                iconUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon.png',
-                iconSize: [25, 41],
-                iconAnchor: [12, 41],
-                popupAnchor: [1, -34],
-                shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
-                shadowSize: [41, 41]
-            });
+        // Add new markers that don't exist yet
+        memoizedMarkers.forEach(marker => {
+            const markerExists = markersRef.current.some(m => 
+                m.getLatLng().lat === marker[0] && m.getLatLng().lng === marker[1]
+            );
 
-            L.marker(marker, { icon: customIcon })
-                .addTo(mapInstance.current)
-                .bindPopup('Camp Location')
-                .openPopup();
+            if (!markerExists) {
+                const customIcon = L.icon({
+                    iconUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon.png',
+                    iconSize: [25, 41],
+                    iconAnchor: [12, 41],
+                    popupAnchor: [1, -34],
+                    shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
+                    shadowSize: [41, 41]
+                });
+
+                const newMarker = L.marker(marker, { icon: customIcon })
+                    .addTo(mapInstance.current)
+                    .bindPopup('Camp Location')
+                    .openPopup();
+
+                markersRef.current.push(newMarker);
+            }
         });
+
+        // Update markersRef to only include current markers
+        markersRef.current = markersRef.current.filter(marker => 
+            memoizedMarkers.some(m => m[0] === marker.getLatLng().lat && m[1] === marker.getLatLng().lng)
+        );
 
         // Cleanup function
         return () => {
             if (mapInstance.current) {
                 mapInstance.current.remove();
                 mapInstance.current = null;
+                markersRef.current = [];
             }
         };
-    }, [center, zoom, markers, isValidInput]);
+    }, [memoizedCenter, zoom, memoizedMarkers, isValidInput]);
 
     if (!isValidInput) {
         return (
@@ -122,4 +131,4 @@ const Map = ({ center, zoom = 13, markers = [] }) => {
     );
 };
 
-export default Map;
+export default React.memo(Map);

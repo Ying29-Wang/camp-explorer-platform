@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import { useParams } from 'react-router-dom';
 import { fetchCampById } from '../services/campService';
 import { fetchReviewsByCampId } from '../services/reviewService';
@@ -136,21 +136,18 @@ const CampDetailsPage = () => {
         }
     };
 
-    if (loading) return <Spinner />;
-    if (error) return <ErrorMessage message={error} />;
-    if (!camp) return <ErrorMessage message="Camp not found" />;
-
-    // Convert location string to coordinates if available
-    const getCoordinates = () => {
-        if (camp.coordinates && camp.coordinates.coordinates) {
-            // Extract the coordinates array from the GeoJSON format and reverse the order
-            // GeoJSON uses [longitude, latitude], Leaflet needs [latitude, longitude]
+    // Memoize the coordinates to prevent unnecessary re-renders
+    const coordinates = useMemo(() => {
+        if (camp?.coordinates?.coordinates) {
             const [longitude, latitude] = camp.coordinates.coordinates;
             return [latitude, longitude];
         }
-        // Fallback coordinates (you can replace these with actual coordinates)
         return [40.7128, -74.0060]; // Default to New York City
-    };
+    }, [camp?.coordinates?.coordinates]);
+
+    if (loading) return <Spinner />;
+    if (error) return <ErrorMessage message={error} />;
+    if (!camp) return <ErrorMessage message="Camp not found" />;
 
     return (
         <div className="camp-details-page">
@@ -187,8 +184,9 @@ const CampDetailsPage = () => {
                     <div className="camp-section">
                         <h2>Location</h2>
                         <Map 
-                            center={getCoordinates()}
-                            markers={[getCoordinates()]}
+                            center={coordinates}
+                            markers={[coordinates]}
+                            zoom={13}
                         />
                     </div>
 

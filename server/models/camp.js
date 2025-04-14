@@ -1,23 +1,7 @@
 const mongoose = require('mongoose');
 const { create } = require('./user');
 const Schema = mongoose.Schema;
-
-const CAMP_CATEGORIES = [
-    'Adventure',
-    'Arts',
-    'Science',
-    'Technology',
-    'Sports',
-    'Music',
-    'Academic',
-    'Nature',
-    'Leadership',
-    'Special Needs',
-    'Language',
-    'Religious',
-    'Cooking',
-    'General'
-  ];
+const { CAMP_CATEGORIES } = require('../constants/campConstants');
 
 const CampSchema = new Schema({
     name: {
