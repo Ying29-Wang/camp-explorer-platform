@@ -67,6 +67,9 @@ export const fetchCampsByOwner = async () => {
 // Create new camp
 export const createCamp = async (campData) => {
     const token = localStorage.getItem('token');
+    console.log('Creating camp with data:', campData);
+    console.log('Token exists:', !!token);
+    
     const response = await fetch(`${API_BASE}/camps`, {
         method: 'POST',
         headers: {
@@ -77,6 +80,11 @@ export const createCamp = async (campData) => {
     });
 
     if (!response.ok) {
+        const errorData = await response.json().catch(() => ({ message: 'Unknown error' }));
+        console.error('Error response:', errorData);
+        if (errorData.errors) {
+            throw new Error(`Validation errors: ${errorData.errors.map(e => e.msg).join(', ')}`);
+        }
         throw new Error(`Failed to create camp: ${response.status} ${response.statusText}`);
     }
 

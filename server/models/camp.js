@@ -1,23 +1,7 @@
 const mongoose = require('mongoose');
 const { create } = require('./user');
 const Schema = mongoose.Schema;
-
-const CAMP_CATEGORIES = [
-    'Adventure',
-    'Arts',
-    'Science',
-    'Technology',
-    'Sports',
-    'Music',
-    'Academic',
-    'Nature',
-    'Leadership',
-    'Special Needs',
-    'Language',
-    'Religious',
-    'Cooking',
-    'General'
-  ];
+const { CAMP_CATEGORIES } = require('../constants/campConstants');
 
 const CampSchema = new Schema({
     name: {
@@ -27,7 +11,6 @@ const CampSchema = new Schema({
     },
     description: {
         type: String,
-        required: true,
         text: true
     },
     location: {
@@ -35,95 +18,78 @@ const CampSchema = new Schema({
         required: true,
         text: true
     },
-    coordinates: {
-        type: {
-            type: String,
-            enum: ['Point'],
-            default: 'Point'
-        },
-        coordinates: {
-            type: [Number], // [longitude, latitude]
-            required: false
-        }
+    latitude: {
+        type: Number,
+        default: 0
+    },
+    longitude: {
+        type: Number,
+        default: 0
     },
     formattedAddress: {
-        type: String,
-        required: false
+        type: String
     },
     ageRange: {
         min: {
-            type: Number,
-            required: true,
+            type: Number
         },
         max: {
-            type: Number,
-            required: true,
-        },
+            type: Number
+        }
     },
     category: {
         type: String,
-        required: true,
-        enum: CAMP_CATEGORIES,
+        enum: CAMP_CATEGORIES
     },
     activities: {
         type: [String],
-        default: [],
+        default: []
     },
     price: {
-        type: Number,
-        required: true,
+        type: Number
     },
     image: {
         type: [String],
-        default: [],
+        default: []
     },
     source: {
         type: String,
         enum: ['direct', 'external'],
-        default: 'direct',
+        default: 'direct'
     },
     website: {
-        type: String,
-        required: true,
+        type: String
     },
     contact: {
-        type: String,
-        required: true,
+        type: String
     },
     email: {
-        type: String,
-        required: true,
+        type: String
     },
     phone: {
-        type: String,
-        required: true,
+        type: String
     },
     startDate: {
-        type: Date,
-        required: true,
+        type: Date
     },
     endDate: {
-        type: Date,
-        required: true,
+        type: Date
     },
     capacity: {
-        type: Number,
-        required: true,
+        type: Number
     },
     registered: {
         type: Number,
-        default: 0,
+        default: 0
     },
     owner: {
         type: mongoose.Schema.Types.ObjectId,
-        ref: 'User',
-        required: false
+        ref: 'User'
     },
     isSeedCamp: {
         type: Boolean,
         default: false
     },
-    // Essential status and tracking fields
     status: {
         type: String,
         enum: ['active', 'inactive'],
@@ -148,36 +114,15 @@ const CampSchema = new Schema({
     }
 }, { timestamps: true });
 
-// Add 2dsphere index for geospatial queries
-CampSchema.index({ coordinates: '2dsphere' });
-// Add index for status
-CampSchema.index({ status: 1 });
+// Add text index for search
+CampSchema.index({ name: 'text', description: 'text', location: 'text' });
 
-// Static method to increment view count
-CampSchema.statics.incrementViewCount = async function(campId) {
-    return this.findByIdAndUpdate(
-        campId,
-        { $inc: { viewCount: 1 } },
-        { new: true }
-    );
-};
-
-// Create text index for search
-CampSchema.index({ 
-    name: 'text', 
-    description: 'text', 
-    location: 'text',
-    activities: 'text'
-});
-
-CampSchema.statics.CATEGORIES = CAMP_CATEGORIES;
-
-// Add query helper for non-deleted camps
+// Query helper for non-deleted camps
 CampSchema.query.nonDeleted = function() {
     return this.where({ isDeleted: false });
 };
 
-// Override the remove method to implement soft delete
+// Soft delete method
 CampSchema.methods.softDelete = async function(deletedBy = null) {
     this.isDeleted = true;
     this.deletedAt = new Date();
@@ -185,23 +130,4 @@ CampSchema.methods.softDelete = async function(deletedBy = null) {
     return this.save();
 };
 
-// Modify the pre-remove middleware to handle soft delete
-CampSchema.pre('remove', async function(next) {
-    try {
-        // Only perform cascading deletes if this is a hard delete
-        if (!this.isDeleted) {
-            // Delete all reviews associated with this camp
-            await mongoose.model('Review').deleteMany({ campId: this._id });
-            
-            // Delete all recently viewed entries for this camp
-            await mongoose.model('RecentlyViewed').deleteMany({ campId: this._id });
-        }
-        next();
-    } catch (error) {
-        next(error);
-    }
-});
-
-const Camp = mongoose.model('Camp', CampSchema);
-
-module.exports = Camp;
+module.exports = mongoose.model('Camp', CampSchema);
