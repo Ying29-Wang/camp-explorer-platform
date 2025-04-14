@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { fetchCampsByOwner, createCamp } from '../../../services/campService';
+import { fetchCampsByOwner, createCamp, updateCamp } from '../../../services/campService';
 import { useAuth } from '../../../context/AuthContext';
 import Header from '../../../components/layout/Header';
 import { CAMP_CATEGORIES } from '../../../constants/campConstants';
@@ -10,6 +10,7 @@ const CampManagement = () => {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [showCreateForm, setShowCreateForm] = useState(false);
+    const [editingCamp, setEditingCamp] = useState(null);
     const [newCamp, setNewCamp] = useState({
         name: '',
         location: '',
@@ -87,23 +88,89 @@ const CampManagement = () => {
         }
     };
 
+    const handleEditCamp = async (e) => {
+        e.preventDefault();
+        try {
+            setError(null);
+            
+            // Only include fields that have values
+            const formattedCampData = {
+                name: editingCamp.name,
+                location: editingCamp.location,
+                ...(editingCamp.description && { description: editingCamp.description }),
+                ...(editingCamp.price && { price: Number(editingCamp.price) }),
+                ...(editingCamp.ageRange.min && editingCamp.ageRange.max && {
+                    ageRange: {
+                        min: Number(editingCamp.ageRange.min),
+                        max: Number(editingCamp.ageRange.max)
+                    }
+                }),
+                ...(editingCamp.category && { 
+                    category: editingCamp.category.charAt(0).toUpperCase() + editingCamp.category.slice(1).toLowerCase() 
+                }),
+                ...(editingCamp.contact && { contact: editingCamp.contact }),
+                ...(editingCamp.email && { email: editingCamp.email }),
+                ...(editingCamp.phone && { phone: editingCamp.phone })
+            };
+
+            const updatedCamp = await updateCamp(editingCamp._id, formattedCampData);
+            setCamps(camps.map(camp => camp._id === updatedCamp._id ? updatedCamp : camp));
+            setEditingCamp(null);
+        } catch (err) {
+            console.error('Error updating camp:', err);
+            setError(err.message || 'Failed to update camp. Please try again.');
+        }
+    };
+
     const handleInputChange = (e) => {
         const { name, value } = e.target;
         if (name.startsWith('ageRange.')) {
             const ageField = name.split('.')[1];
-            setNewCamp(prev => ({
-                ...prev,
-                ageRange: {
-                    ...prev.ageRange,
-                    [ageField]: value
-                }
-            }));
+            if (editingCamp) {
+                setEditingCamp(prev => ({
+                    ...prev,
+                    ageRange: {
+                        ...prev.ageRange,
+                        [ageField]: value
+                    }
+                }));
+            } else {
+                setNewCamp(prev => ({
+                    ...prev,
+                    ageRange: {
+                        ...prev.ageRange,
+                        [ageField]: value
+                    }
+                }));
+            }
         } else {
-            setNewCamp(prev => ({
-                ...prev,
-                [name]: value
-            }));
+            if (editingCamp) {
+                setEditingCamp(prev => ({
+                    ...prev,
+                    [name]: value
+                }));
+            } else {
+                setNewCamp(prev => ({
+                    ...prev,
+                    [name]: value
+                }));
+            }
         }
+    };
+
+    const startEditing = (camp) => {
+        setEditingCamp({
+            ...camp,
+            price: camp.price?.toString() || '',
+            ageRange: {
+                min: camp.ageRange?.min?.toString() || '',
+                max: camp.ageRange?.max?.toString() || ''
+            }
+        });
+    };
+
+    const cancelEditing = () => {
+        setEditingCamp(null);
     };
 
     if (loading) return <div>Loading...</div>;
@@ -246,17 +313,140 @@ const CampManagement = () => {
                         <div className="camps-list">
                             {camps.map(camp => (
                                 <div key={camp._id} className="camp-card">
-                                    <h4>{camp.name}</h4>
-                                    {camp.description && <p>{camp.description}</p>}
-                                    <p>Location: {camp.location}</p>
-                                    {camp.price && <p>Price: ${camp.price}</p>}
-                                    {camp.ageRange?.min && camp.ageRange?.max && (
-                                        <p>Age Range: {camp.ageRange.min}-{camp.ageRange.max}</p>
+                                    {editingCamp?._id === camp._id ? (
+                                        <form onSubmit={handleEditCamp} className="edit-camp-form">
+                                            <div className="form-group">
+                                                <label>Name</label>
+                                                <input
+                                                    type="text"
+                                                    name="name"
+                                                    value={editingCamp.name}
+                                                    onChange={handleInputChange}
+                                                    required
+                                                />
+                                            </div>
+                                            <div className="form-group">
+                                                <label>Location</label>
+                                                <input
+                                                    type="text"
+                                                    name="location"
+                                                    value={editingCamp.location}
+                                                    onChange={handleInputChange}
+                                                    required
+                                                />
+                                            </div>
+                                            <div className="form-group">
+                                                <label>Description</label>
+                                                <textarea
+                                                    name="description"
+                                                    value={editingCamp.description}
+                                                    onChange={handleInputChange}
+                                                />
+                                            </div>
+                                            <div className="form-group">
+                                                <label>Price</label>
+                                                <input
+                                                    type="number"
+                                                    name="price"
+                                                    value={editingCamp.price}
+                                                    onChange={handleInputChange}
+                                                />
+                                            </div>
+                                            <div className="form-group">
+                                                <label>Age Range</label>
+                                                <div className="age-range-inputs">
+                                                    <input
+                                                        type="number"
+                                                        name="ageRange.min"
+                                                        value={editingCamp.ageRange.min}
+                                                        onChange={handleInputChange}
+                                                        placeholder="Min"
+                                                    />
+                                                    <input
+                                                        type="number"
+                                                        name="ageRange.max"
+                                                        value={editingCamp.ageRange.max}
+                                                        onChange={handleInputChange}
+                                                        placeholder="Max"
+                                                    />
+                                                </div>
+                                            </div>
+                                            <div className="form-group">
+                                                <label>Category</label>
+                                                <select
+                                                    name="category"
+                                                    value={editingCamp.category}
+                                                    onChange={handleInputChange}
+                                                >
+                                                    <option value="">Select a category</option>
+                                                    {CAMP_CATEGORIES.map(category => (
+                                                        <option key={category} value={category}>
+                                                            {category}
+                                                        </option>
+                                                    ))}
+                                                </select>
+                                            </div>
+                                            <div className="form-group">
+                                                <label>Contact</label>
+                                                <input
+                                                    type="text"
+                                                    name="contact"
+                                                    value={editingCamp.contact}
+                                                    onChange={handleInputChange}
+                                                />
+                                            </div>
+                                            <div className="form-group">
+                                                <label>Email</label>
+                                                <input
+                                                    type="email"
+                                                    name="email"
+                                                    value={editingCamp.email}
+                                                    onChange={handleInputChange}
+                                                />
+                                            </div>
+                                            <div className="form-group">
+                                                <label>Phone</label>
+                                                <input
+                                                    type="tel"
+                                                    name="phone"
+                                                    value={editingCamp.phone}
+                                                    onChange={handleInputChange}
+                                                />
+                                            </div>
+                                            <div className="form-actions">
+                                                <button type="submit" className="submit-btn">Save Changes</button>
+                                                <button 
+                                                    type="button" 
+                                                    className="cancel-btn"
+                                                    onClick={cancelEditing}
+                                                >
+                                                    Cancel
+                                                </button>
+                                            </div>
+                                        </form>
+                                    ) : (
+                                        <>
+                                            <h4>{camp.name}</h4>
+                                            {camp.description && <p>{camp.description}</p>}
+                                            <p>Location: {camp.location}</p>
+                                            {camp.price && <p>Price: ${camp.price}</p>}
+                                            {camp.ageRange?.min && camp.ageRange?.max && (
+                                                <p>Age Range: {camp.ageRange.min}-{camp.ageRange.max}</p>
+                                            )}
+                                            {camp.category && <p>Category: {camp.category}</p>}
+                                            {camp.contact && <p>Contact: {camp.contact}</p>}
+                                            {camp.email && <p>Email: {camp.email}</p>}
+                                            {camp.phone && <p>Phone: {camp.phone}</p>}
+                                            <div className="camp-actions">
+                                                <button 
+                                                    className="edit-btn"
+                                                    onClick={() => startEditing(camp)}
+                                                >
+                                                    Edit
+                                                </button>
+                                            </div>
+                                        </>
                                     )}
-                                    {camp.category && <p>Category: {camp.category}</p>}
-                                    {camp.contact && <p>Contact: {camp.contact}</p>}
-                                    {camp.email && <p>Email: {camp.email}</p>}
-                                    {camp.phone && <p>Phone: {camp.phone}</p>}
                                 </div>
                             ))}
                         </div>
