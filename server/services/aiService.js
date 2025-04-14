@@ -206,15 +206,28 @@ class AIService {
     // Generate enhanced camp description
     async generateCampDescription(campData) {
         try {
+            console.log('Generating camp description with data:', campData);
+            
+            // Validate required fields
+            if (!campData.name || !campData.type || !campData.ageRange || !campData.location) {
+                throw new Error('Missing required fields: name, type, ageRange, or location');
+            }
+
+            const activitiesText = campData.activities && Array.isArray(campData.activities) 
+                ? campData.activities.join(', ') 
+                : 'Various activities';
+
             const prompt = `Create an engaging and detailed description for a camp with the following details:
             Name: ${campData.name}
             Type: ${campData.type}
             Age Range: ${campData.ageRange}
             Location: ${campData.location}
-            Activities: ${campData.activities.join(', ')}
-            Duration: ${campData.duration}
+            ${campData.activities ? `Activities: ${activitiesText}` : ''}
+            ${campData.duration ? `Duration: ${campData.duration}` : ''}
             
             Please create a compelling description that highlights the unique aspects of this camp and would appeal to parents looking for a camp for their children.`;
+
+            console.log('Sending prompt to OpenAI:', prompt);
 
             const response = await openai.chat.completions.create({
                 model: "gpt-3.5-turbo",
@@ -232,10 +245,44 @@ class AIService {
                 max_tokens: 500
             });
 
+            if (!response.choices || !response.choices[0] || !response.choices[0].message) {
+                throw new Error('Invalid response format from OpenAI');
+            }
+
             return response.choices[0].message.content;
         } catch (error) {
-            console.error('Error generating camp description:', error);
-            throw new Error('Failed to generate camp description');
+            console.error('Error in generateCampDescription:', error);
+            throw new Error('Failed to generate camp description: ' + error.message);
+        }
+    }
+
+    // Analyze camp images using OpenAI's Vision API
+    async analyzeCampImage(imageData) {
+        try {
+            const response = await openai.chat.completions.create({
+                model: "gpt-4-vision-preview",
+                messages: [
+                    {
+                        role: "user",
+                        content: [
+                            {
+                                type: "text",
+                                text: "Analyze this camp image and provide detailed information about:\n1. The type of camp (e.g., sports, arts, science)\n2. The age group it might be suitable for\n3. The activities visible in the image\n4. The setting and environment\n5. Any notable features or facilities\n\nProvide the analysis in a structured format."
+                            },
+                            {
+                                type: "image_url",
+                                image_url: imageData
+                            }
+                        ]
+                    }
+                ],
+                max_tokens: 1000
+            });
+
+            return response.choices[0].message.content;
+        } catch (error) {
+            console.error('Error analyzing camp image:', error);
+            throw new Error('Failed to analyze camp image');
         }
     }
 }

@@ -9,127 +9,53 @@ import {
     Button,
     TextField,
     Grid,
+    Divider
 } from '@mui/material';
 import aiService from '../services/aiService';
 
-const AIDescriptionGenerator = ({ onDescriptionGenerated }) => {
-    const [campData, setCampData] = useState({
-        name: '',
-        type: '',
-        ageRange: '',
-        location: '',
-        activities: '',
-        duration: '',
-    });
+const AIDescriptionGenerator = ({ campData, onDescriptionGenerated }) => {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
     const [generatedDescription, setGeneratedDescription] = useState(null);
 
-    const handleInputChange = (e) => {
-        const { name, value } = e.target;
-        setCampData(prev => ({
-            ...prev,
-            [name]: value
-        }));
-    };
-
     const handleGenerate = async () => {
         if (!campData.name || !campData.type || !campData.ageRange || !campData.location) {
-            setError('Please fill in all required fields');
+            setError('Please fill in the required camp details first (name, type, age range, and location)');
             return;
         }
 
         setLoading(true);
         setError(null);
+        setGeneratedDescription(null);
 
         try {
-            const activitiesArray = campData.activities.split(',').map(activity => activity.trim());
-            const result = await aiService.generateCampDescription({
-                ...campData,
-                activities: activitiesArray
-            });
+            const result = await aiService.generateCampDescription(campData);
             setGeneratedDescription(result);
             if (onDescriptionGenerated) {
                 onDescriptionGenerated(result);
             }
         } catch (err) {
-            setError('Failed to generate description. Please try again later.');
-            console.error(err);
+            console.error('Error in handleGenerate:', err);
+            // Check for quota error
+            if (err.message.includes('quota')) {
+                setError('The AI service is currently unavailable due to quota limits. Please try again later or contact support.');
+            } else {
+                setError(err.message || 'Failed to generate description. Please try again later.');
+            }
         } finally {
             setLoading(false);
         }
     };
 
     return (
-        <Card sx={{ mb: 3 }}>
+        <Card sx={{ mb: 3, mt: 2, backgroundColor: '#f5f5f5' }}>
             <CardContent>
-                <Typography variant="h6" gutterBottom>
+                <Typography variant="h6" gutterBottom color="primary">
                     AI Description Generator
                 </Typography>
-
-                <Grid container spacing={2} sx={{ mb: 2 }}>
-                    <Grid item xs={12} sm={6}>
-                        <TextField
-                            fullWidth
-                            label="Camp Name"
-                            name="name"
-                            value={campData.name}
-                            onChange={handleInputChange}
-                            required
-                        />
-                    </Grid>
-                    <Grid item xs={12} sm={6}>
-                        <TextField
-                            fullWidth
-                            label="Camp Type"
-                            name="type"
-                            value={campData.type}
-                            onChange={handleInputChange}
-                            required
-                        />
-                    </Grid>
-                    <Grid item xs={12} sm={6}>
-                        <TextField
-                            fullWidth
-                            label="Age Range"
-                            name="ageRange"
-                            value={campData.ageRange}
-                            onChange={handleInputChange}
-                            required
-                            placeholder="e.g., 8-12"
-                        />
-                    </Grid>
-                    <Grid item xs={12} sm={6}>
-                        <TextField
-                            fullWidth
-                            label="Location"
-                            name="location"
-                            value={campData.location}
-                            onChange={handleInputChange}
-                            required
-                        />
-                    </Grid>
-                    <Grid item xs={12}>
-                        <TextField
-                            fullWidth
-                            label="Activities (comma-separated)"
-                            name="activities"
-                            value={campData.activities}
-                            onChange={handleInputChange}
-                            placeholder="e.g., swimming, hiking, arts and crafts"
-                        />
-                    </Grid>
-                    <Grid item xs={12}>
-                        <TextField
-                            fullWidth
-                            label="Duration"
-                            name="duration"
-                            value={campData.duration}
-                            onChange={handleInputChange}
-                            placeholder="e.g., 1 week, 2 weeks"
-                        />
-                    </Grid>
-                </Grid>
+                <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+                    Let AI help you create an engaging camp description based on your camp details.
+                </Typography>
 
                 {error && (
                     <Alert severity="error" sx={{ mb: 2 }}>
@@ -142,6 +68,7 @@ const AIDescriptionGenerator = ({ onDescriptionGenerated }) => {
                         variant="contained"
                         onClick={handleGenerate}
                         disabled={loading}
+                        color="primary"
                     >
                         Generate Description
                     </Button>
@@ -155,7 +82,8 @@ const AIDescriptionGenerator = ({ onDescriptionGenerated }) => {
 
                 {generatedDescription && (
                     <Box mt={3}>
-                        <Typography variant="subtitle1" gutterBottom>
+                        <Divider sx={{ my: 2 }} />
+                        <Typography variant="subtitle1" gutterBottom color="primary">
                             Generated Description:
                         </Typography>
                         <Typography variant="body1" style={{ whiteSpace: 'pre-line' }}>
