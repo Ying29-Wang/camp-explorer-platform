@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { fetchCampsByOwner, createCamp, updateCamp, deleteCamp, getCoordinatesFromLocation } from '../../../services/campService';
 import { useAuth } from '../../../context/AuthContext';
 import Header from '../../../components/layout/Header';
+import AIDescriptionGenerator from '../../../components/AIDescriptionGenerator';
 import './CampManagement.css';
 
 const CampManagement = () => {
@@ -10,6 +11,8 @@ const CampManagement = () => {
     const [error, setError] = useState(null);
     const [editingCamp, setEditingCamp] = useState(null);
     const [showForm, setShowForm] = useState(false);
+    const [uploadedImage, setUploadedImage] = useState(null);
+    const [isAnalyzing, setIsAnalyzing] = useState(false);
     const [formData, setFormData] = useState({
         name: '',
         description: '',
@@ -177,6 +180,79 @@ const CampManagement = () => {
         });
     };
 
+    const handleImageUpload = (e) => {
+        const file = e.target.files[0];
+        if (file) {
+            setUploadedImage(file);
+            // Create a temporary URL for the image preview
+            const imageUrl = URL.createObjectURL(file);
+            setFormData(prev => ({
+                ...prev,
+                image: imageUrl
+            }));
+        }
+    };
+
+    const handleImageDrop = (e) => {
+        e.preventDefault();
+        const file = e.dataTransfer.files[0];
+        if (file && file.type.startsWith('image/')) {
+            setUploadedImage(file);
+            const imageUrl = URL.createObjectURL(file);
+            setFormData(prev => ({
+                ...prev,
+                image: imageUrl
+            }));
+        }
+    };
+
+    const handleDragOver = (e) => {
+        e.preventDefault();
+    };
+
+    const analyzeImage = async () => {
+        if (!uploadedImage) return;
+        
+        try {
+            setIsAnalyzing(true);
+            setError(null);
+            
+            // Create FormData to send the image
+            const formData = new FormData();
+            formData.append('image', uploadedImage);
+            
+            // Call the AI service to analyze the image
+            const response = await fetch('/api/ai/analyze-camp-image', {
+                method: 'POST',
+                body: formData
+            });
+            
+            if (!response.ok) {
+                throw new Error('Failed to analyze image');
+            }
+            
+            const analysis = await response.json();
+            
+            // Update form data with the analysis results
+            setFormData(prev => ({
+                ...prev,
+                category: analysis.category || prev.category,
+                ageRange: {
+                    min: analysis.ageRange?.min || prev.ageRange.min,
+                    max: analysis.ageRange?.max || prev.ageRange.max
+                },
+                activities: analysis.activities?.join(', ') || prev.activities,
+                description: analysis.description || prev.description
+            }));
+            
+        } catch (err) {
+            console.error('Error analyzing image:', err);
+            setError('Failed to analyze image. Please try again or fill in the details manually.');
+        } finally {
+            setIsAnalyzing(false);
+        }
+    };
+
     return (
         <div className="camp-management">
             <Header />
@@ -223,39 +299,24 @@ const CampManagement = () => {
                                     </div>
 
                                     <div className="form-group">
-                                        <label>Description</label>
-                                        <textarea
-                                            name="description"
-                                            value={formData.description}
+                                        <label>Category *</label>
+                                        <select
+                                            name="category"
+                                            value={formData.category}
                                             onChange={handleInputChange}
                                             required
-                                        />
+                                        >
+                                            <option value="">Select a category</option>
+                                            <option value="Adventure">Adventure</option>
+                                            <option value="Sports">Sports</option>
+                                            <option value="Arts">Arts</option>
+                                            <option value="Science">Science</option>
+                                            <option value="Technology">Technology</option>
+                                        </select>
                                     </div>
 
                                     <div className="form-group">
-                                        <label>Location</label>
-                                        <input
-                                            type="text"
-                                            name="location"
-                                            value={formData.location}
-                                            onChange={handleInputChange}
-                                            required
-                                        />
-                                    </div>
-
-                                    <div className="form-group">
-                                        <label>Price</label>
-                                        <input
-                                            type="number"
-                                            name="price"
-                                            value={formData.price}
-                                            onChange={handleInputChange}
-                                            required
-                                        />
-                                    </div>
-
-                                    <div className="form-group">
-                                        <label>Age Range</label>
+                                        <label>Age Range *</label>
                                         <div className="age-range-inputs">
                                             <input
                                                 type="number"
@@ -277,20 +338,75 @@ const CampManagement = () => {
                                     </div>
 
                                     <div className="form-group">
-                                        <label>Category</label>
-                                        <select
-                                            name="category"
-                                            value={formData.category}
+                                        <label>Location *</label>
+                                        <input
+                                            type="text"
+                                            name="location"
+                                            value={formData.location}
                                             onChange={handleInputChange}
                                             required
+                                        />
+                                    </div>
+
+                                    <div className="form-group">
+                                        <label>Description</label>
+                                        <div className="description-section">
+                                            <textarea
+                                                name="description"
+                                                value={formData.description}
+                                                onChange={handleInputChange}
+                                                required
+                                            />
+                                            <AIDescriptionGenerator 
+                                                campData={{
+                                                    name: formData.name,
+                                                    type: formData.category,
+                                                    ageRange: `${formData.ageRange.min}-${formData.ageRange.max}`,
+                                                    location: formData.location,
+                                                    activities: formData.activities.split(',').map(a => a.trim()),
+                                                    duration: `${formData.startDate} to ${formData.endDate}`
+                                                }}
+                                                onDescriptionGenerated={(description) => {
+                                                    setFormData(prev => ({
+                                                        ...prev,
+                                                        description: description
+                                                    }));
+                                                }}
+                                            />
+                                        </div>
+                                    </div>
+
+                                    <div className="form-group">
+                                        <label>Camp Image</label>
+                                        <div 
+                                            className="image-upload-container"
+                                            onDrop={handleImageDrop}
+                                            onDragOver={handleDragOver}
                                         >
-                                            <option value="">Select a category</option>
-                                            <option value="Adventure">Adventure</option>
-                                            <option value="Sports">Sports</option>
-                                            <option value="Arts">Arts</option>
-                                            <option value="Science">Science</option>
-                                            <option value="Technology">Technology</option>
-                                        </select>
+                                            <input
+                                                type="file"
+                                                accept="image/*"
+                                                onChange={handleImageUpload}
+                                                className="image-upload-input"
+                                            />
+                                            {formData.image ? (
+                                                <div className="image-preview">
+                                                    <img src={formData.image} alt="Camp preview" />
+                                                    <button 
+                                                        type="button" 
+                                                        className="analyze-image-button"
+                                                        onClick={analyzeImage}
+                                                        disabled={isAnalyzing}
+                                                    >
+                                                        {isAnalyzing ? 'Analyzing...' : 'Analyze Image'}
+                                                    </button>
+                                                </div>
+                                            ) : (
+                                                <div className="upload-placeholder">
+                                                    <p>Drag and drop an image here, or click to select</p>
+                                                </div>
+                                            )}
+                                        </div>
                                     </div>
 
                                     <div className="form-group">
@@ -305,7 +421,7 @@ const CampManagement = () => {
                                     </div>
 
                                     <div className="form-group">
-                                        <label>Start Date</label>
+                                        <label>Start Date *</label>
                                         <input
                                             type="date"
                                             name="startDate"
@@ -316,7 +432,7 @@ const CampManagement = () => {
                                     </div>
 
                                     <div className="form-group">
-                                        <label>End Date</label>
+                                        <label>End Date *</label>
                                         <input
                                             type="date"
                                             name="endDate"
@@ -327,7 +443,7 @@ const CampManagement = () => {
                                     </div>
 
                                     <div className="form-group">
-                                        <label>Capacity</label>
+                                        <label>Capacity *</label>
                                         <input
                                             type="number"
                                             name="capacity"
@@ -338,11 +454,11 @@ const CampManagement = () => {
                                     </div>
 
                                     <div className="form-group">
-                                        <label>Image URL</label>
+                                        <label>Price *</label>
                                         <input
-                                            type="text"
-                                            name="image"
-                                            value={formData.image}
+                                            type="number"
+                                            name="price"
+                                            value={formData.price}
                                             onChange={handleInputChange}
                                             required
                                         />
@@ -360,7 +476,7 @@ const CampManagement = () => {
                                     </div>
 
                                     <div className="form-group">
-                                        <label>Contact Person</label>
+                                        <label>Contact Person *</label>
                                         <input
                                             type="text"
                                             name="contact"
@@ -371,7 +487,7 @@ const CampManagement = () => {
                                     </div>
 
                                     <div className="form-group">
-                                        <label>Email</label>
+                                        <label>Email *</label>
                                         <input
                                             type="email"
                                             name="email"
@@ -382,7 +498,7 @@ const CampManagement = () => {
                                     </div>
 
                                     <div className="form-group">
-                                        <label>Phone</label>
+                                        <label>Phone *</label>
                                         <input
                                             type="tel"
                                             name="phone"

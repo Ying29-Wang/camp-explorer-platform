@@ -5,6 +5,7 @@ import CampCard from '../components/features/camps/CampCard';
 import FilterSidebar from '../components/features/search/FilterSidebar';
 import Pagination from '../components/common/Pagination';
 import Header from '../components/layout/Header';
+import AIRecommendations from '../components/AIRecommendations';
 import { searchCamps } from '../services/campService';
 import './SearchResults.css';
 
@@ -114,20 +115,24 @@ const SearchResults = () => {
                         isLoading={isSearching}
                     />
 
-                    <div className="results-grid">
-                        {currentResults.length > 0 ? (
-                            currentResults.map(camp => (
-                                <CampCard 
-                                    key={camp._id}
-                                    camp={camp}
-                                    variant="search"
-                                />
-                            ))
-                        ) : (
-                            <div className="no-results">
-                                <p>No camps match your search criteria</p>
-                            </div>
-                        )}
+                    <div className="results-section">
+                        <AIRecommendations userPreferences={filters} />
+                        
+                        <div className="results-grid">
+                            {currentResults.length > 0 ? (
+                                currentResults.map(camp => (
+                                    <CampCard 
+                                        key={camp._id}
+                                        camp={camp}
+                                        variant="search"
+                                    />
+                                ))
+                            ) : (
+                                <div className="no-results">
+                                    <p>No camps match your search criteria</p>
+                                </div>
+                            )}
+                        </div>
                     </div>
                 </div>
 
