@@ -71,12 +71,6 @@ const ReviewCard = ({ review, onDelete, onEdit }) => {
   return (
     <div className="review-card">
       <div className="review-header">
-        <div className="review-camp">
-          <Link to={`/camps/${review.campId?._id}`}>
-            <h3 style={{ color: '#000000' }}>{review.campId?.name || 'Unknown Camp'}</h3>
-          </Link>
-          <p className="camp-location" style={{ color: '#000000' }}>{review.campId?.location || ''}</p>
-        </div>
         <div className="review-meta">
           {renderStars(review.rating)}
           <span className="review-date" style={{ color: '#000000' }}>
