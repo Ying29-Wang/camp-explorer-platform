@@ -73,31 +73,51 @@ const ReviewCard = ({ review, onDelete, onEdit }) => {
       <div className="review-header">
         <div className="review-camp">
           <Link to={`/camps/${review.campId?._id}`}>
-            <h3>{review.campId?.name || 'Unknown Camp'}</h3>
+            <h3 style={{ color: '#000000' }}>{review.campId?.name || 'Unknown Camp'}</h3>
           </Link>
-          <p className="camp-location">{review.campId?.location || ''}</p>
+          <p className="camp-location" style={{ color: '#000000' }}>{review.campId?.location || ''}</p>
         </div>
         <div className="review-meta">
           {renderStars(review.rating)}
-          <span className="review-date">
+          <span className="review-date" style={{ color: '#000000' }}>
             {format(new Date(review.createdAt), 'MMM d, yyyy')}
           </span>
         </div>
       </div>
       <div className="review-content">
-        <p>{review.reviewText}</p>
+        <p style={{ color: '#000000' }}>{review.reviewText}</p>
       </div>
       {onDelete && (
         <div className="review-actions">
           <button 
             onClick={() => setIsEditing(true)}
             className="edit-button"
+            style={{ 
+              backgroundColor: '#2563eb',
+              color: '#ffffff',
+              border: 'none',
+              padding: '0.5rem 1rem',
+              borderRadius: '4px',
+              cursor: 'pointer',
+              fontSize: '0.9rem',
+              transition: 'background-color 0.2s'
+            }}
           >
             Edit
           </button>
           <button 
             onClick={() => onDelete(review._id)}
             className="delete-button"
+            style={{ 
+              backgroundColor: '#dc2626',
+              color: '#ffffff',
+              border: 'none',
+              padding: '0.5rem 1rem',
+              borderRadius: '4px',
+              cursor: 'pointer',
+              fontSize: '0.9rem',
+              transition: 'background-color 0.2s'
+            }}
           >
             Delete
           </button>

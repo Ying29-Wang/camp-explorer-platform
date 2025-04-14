@@ -57,12 +57,26 @@ const AIReviewAnalysis = ({ campId }) => {
     }
 
     return (
-        <Card sx={{ mb: 3 }}>
+        <Card sx={{ mb: 3, backgroundColor: '#ffffff' }}>
             <CardContent>
-                <Typography variant="h6" gutterBottom>
+                <Typography 
+                    variant="h3" 
+                    component="h3" 
+                    gutterBottom
+                    sx={{ 
+                        color: '#000000',
+                        fontWeight: 600
+                    }}
+                >
                     AI Review Analysis
                 </Typography>
-                <Typography variant="body1" style={{ whiteSpace: 'pre-line' }}>
+                <Typography 
+                    variant="body1" 
+                    sx={{ 
+                        color: '#000000',
+                        whiteSpace: 'pre-line'
+                    }}
+                >
                     {analysis}
                 </Typography>
             </CardContent>

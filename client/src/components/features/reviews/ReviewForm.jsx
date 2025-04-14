@@ -24,8 +24,8 @@ const ReviewForm = ({ campId, onReviewSubmit }) => {
 
   return (
     <div className="review-form">
-      <h3>Write a Review</h3>
-      {error && <p className="error-message">{error}</p>}
+      <h3 style={{ color: '#000000' }}>Write a Review</h3>
+      {error && <p className="error-message" style={{ color: '#dc2626' }}>{error}</p>}
       <form onSubmit={handleSubmit}>
         <div className="rating-input">
           {[1, 2, 3, 4, 5].map((star) => (
@@ -33,6 +33,11 @@ const ReviewForm = ({ campId, onReviewSubmit }) => {
               key={star}
               className={`star ${star <= rating ? 'filled' : ''}`}
               onClick={() => setRating(star)}
+              style={{ 
+                color: star <= rating ? '#ffc107' : '#000000',
+                fontSize: '1.5rem',
+                cursor: 'pointer'
+              }}
             >
               {star <= rating ? '★' : '☆'}
             </span>
@@ -43,8 +48,30 @@ const ReviewForm = ({ campId, onReviewSubmit }) => {
           onChange={(e) => setReviewText(e.target.value)}
           placeholder="Share your experience..."
           rows={4}
+          style={{
+            width: '100%',
+            padding: '0.75rem',
+            border: '1px solid #000000',
+            borderRadius: '4px',
+            color: '#000000',
+            backgroundColor: '#ffffff'
+          }}
         />
-        <button type="submit">Submit Review</button>
+        <button 
+          type="submit"
+          style={{
+            backgroundColor: '#2563eb',
+            color: '#ffffff',
+            border: 'none',
+            padding: '0.75rem 1.5rem',
+            borderRadius: '4px',
+            cursor: 'pointer',
+            fontSize: '1rem',
+            marginTop: '1rem'
+          }}
+        >
+          Submit Review
+        </button>
       </form>
     </div>
   );
