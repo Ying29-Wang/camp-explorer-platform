@@ -176,22 +176,34 @@ const FilterSidebar = ({ filters, onFilterChange, onSearch, isLoading }) => {
                 {expandedSections.age && (
                     <div className="section-content">
                         <div className="range-inputs">
-                            <input
-                                type="number"
-                                placeholder="Min Age"
-                                min="0"
-                                max="100"
-                                value={localFilters.minAge || ''}
-                                onChange={(e) => handleFilterChange('minAge', e.target.value)}
-                            />
-                            <input
-                                type="number"
-                                placeholder="Max Age"
-                                min="0"
-                                max="100"
-                                value={localFilters.maxAge || ''}
-                                onChange={(e) => handleFilterChange('maxAge', e.target.value)}
-                            />
+                            <div className="input-group">
+                                <label htmlFor="min-age">Minimum Age</label>
+                                <input
+                                    id="min-age"
+                                    type="number"
+                                    placeholder="Min Age"
+                                    min="0"
+                                    max="100"
+                                    value={localFilters.minAge || ''}
+                                    onChange={(e) => handleFilterChange('minAge', e.target.value)}
+                                    aria-describedby="min-age-description"
+                                />
+                                <span id="min-age-description" className="visually-hidden">Enter the minimum age for the camp</span>
+                            </div>
+                            <div className="input-group">
+                                <label htmlFor="max-age">Maximum Age</label>
+                                <input
+                                    id="max-age"
+                                    type="number"
+                                    placeholder="Max Age"
+                                    min="0"
+                                    max="100"
+                                    value={localFilters.maxAge || ''}
+                                    onChange={(e) => handleFilterChange('maxAge', e.target.value)}
+                                    aria-describedby="max-age-description"
+                                />
+                                <span id="max-age-description" className="visually-hidden">Enter the maximum age for the camp</span>
+                            </div>
                         </div>
                     </div>
                 )}

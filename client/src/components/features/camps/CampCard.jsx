@@ -22,11 +22,12 @@ const CampCard = ({ camp, variant = 'default' }) => {
       <div className="card-image-container">
         <img
           src={camp.image?.[0] || '/default-camp.jpg'}
-          alt={camp.name}
+          alt={`${camp.name} - ${camp.location || 'Location not specified'}`}
           className="camp-card-image"
           loading="lazy"
           onError={(e) => {
             e.target.src = '/default-camp.jpg';
+            e.target.alt = 'Default camp image';
           }}
         />
       </div>

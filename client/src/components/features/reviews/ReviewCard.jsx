@@ -27,6 +27,11 @@ const ReviewCard = ({ review, onDelete, onEdit }) => {
             key={i} 
             className={`star ${i < rating ? 'filled' : ''}`}
             onClick={() => setRating(i + 1)}
+            style={{
+              color: i < rating ? '#000000' : '#666666',
+              fontSize: '1.2rem',
+              cursor: 'pointer'
+            }}
           >
             {i < rating ? '★' : '☆'}
           </span>
@@ -37,28 +42,63 @@ const ReviewCard = ({ review, onDelete, onEdit }) => {
 
   if (isEditing) {
     return (
-      <div className="review-card">
-        <form onSubmit={handleSubmit}>
+      <div className="review-card" role="article">
+        <form onSubmit={handleSubmit} aria-labelledby="edit-review-heading">
+          <h3 id="edit-review-heading" style={{ color: '#000000' }}>Edit Review</h3>
           <div className="form-group">
-            <label>Rating</label>
-            <div className="rating-input">
+            <label htmlFor="edit-rating" style={{ color: '#000000' }}>Rating</label>
+            <div className="rating-input" role="radiogroup" aria-labelledby="edit-rating">
               {renderStars(rating)}
             </div>
           </div>
           <div className="form-group">
-            <label>Review</label>
+            <label htmlFor="edit-review-text" style={{ color: '#000000' }}>Review</label>
             <textarea
+              id="edit-review-text"
               value={reviewText}
               onChange={(e) => setReviewText(e.target.value)}
               rows="4"
+              aria-required="true"
+              style={{ 
+                color: '#000000',
+                backgroundColor: '#ffffff',
+                border: '1px solid #000000'
+              }}
             />
           </div>
           <div className="review-actions">
-            <button type="submit" className="edit-button">Save</button>
+            <button 
+              type="submit" 
+              className="edit-button"
+              aria-label="Save review changes"
+              style={{ 
+                backgroundColor: '#000000',
+                color: '#ffffff',
+                border: 'none',
+                padding: '0.5rem 1rem',
+                borderRadius: '4px',
+                cursor: 'pointer',
+                fontSize: '0.9rem',
+                fontWeight: 'bold'
+              }}
+            >
+              Save
+            </button>
             <button 
               type="button" 
               className="delete-button"
               onClick={() => setIsEditing(false)}
+              aria-label="Cancel editing"
+              style={{ 
+                backgroundColor: '#666666',
+                color: '#ffffff',
+                border: 'none',
+                padding: '0.5rem 1rem',
+                borderRadius: '4px',
+                cursor: 'pointer',
+                fontSize: '0.9rem',
+                fontWeight: 'bold'
+              }}
             >
               Cancel
             </button>
@@ -69,35 +109,51 @@ const ReviewCard = ({ review, onDelete, onEdit }) => {
   }
 
   return (
-    <div className="review-card">
+    <div className="review-card" role="article">
       <div className="review-header">
-        <div className="review-camp">
-          <Link to={`/camps/${review.campId?._id}`}>
-            <h3>{review.campId?.name || 'Unknown Camp'}</h3>
-          </Link>
-          <p className="camp-location">{review.campId?.location || ''}</p>
-        </div>
         <div className="review-meta">
-          {renderStars(review.rating)}
-          <span className="review-date">
+          <div className="review-stars" role="img" aria-label={`${review.rating} out of 5 stars`}>
+            {renderStars(review.rating)}
+          </div>
+          <span className="review-date" style={{ color: '#000000' }}>
             {format(new Date(review.createdAt), 'MMM d, yyyy')}
           </span>
         </div>
       </div>
       <div className="review-content">
-        <p>{review.reviewText}</p>
+        <p style={{ color: '#000000' }}>{review.reviewText}</p>
       </div>
       {onDelete && (
         <div className="review-actions">
           <button 
             onClick={() => setIsEditing(true)}
             className="edit-button"
+            aria-label="Edit review"
+            style={{ 
+              backgroundColor: '#2563eb',
+              color: '#ffffff',
+              border: 'none',
+              padding: '0.5rem 1rem',
+              borderRadius: '4px',
+              cursor: 'pointer',
+              fontSize: '0.9rem'
+            }}
           >
             Edit
           </button>
           <button 
             onClick={() => onDelete(review._id)}
             className="delete-button"
+            aria-label="Delete review"
+            style={{ 
+              backgroundColor: '#dc2626',
+              color: '#ffffff',
+              border: 'none',
+              padding: '0.5rem 1rem',
+              borderRadius: '4px',
+              cursor: 'pointer',
+              fontSize: '0.9rem'
+            }}
           >
             Delete
           </button>

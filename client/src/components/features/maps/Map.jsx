@@ -59,11 +59,11 @@ const Map = () => {
               ]}
             >
               <Popup>
-                <div>
-                  <h3>{camp.name}</h3>
-                  <p>{camp.location}</p>
-                  <p>Age Range: {camp.ageRange.min}-{camp.ageRange.max} years</p>
-                  <p>Price: ${camp.price}</p>
+                <div style={{ color: '#000000', backgroundColor: '#ffffff' }}>
+                  <h3 style={{ color: '#000000', margin: '0 0 0.5rem 0' }}>{camp.name}</h3>
+                  <p style={{ color: '#000000', margin: '0 0 0.25rem 0' }}>{camp.location}</p>
+                  <p style={{ color: '#000000', margin: '0 0 0.25rem 0' }}>Age Range: {camp.ageRange.min}-{camp.ageRange.max} years</p>
+                  <p style={{ color: '#000000', margin: '0' }}>Price: ${camp.price}</p>
                 </div>
               </Popup>
             </Marker>

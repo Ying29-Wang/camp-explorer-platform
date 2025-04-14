@@ -1,4 +1,4 @@
-import { useEffect, useState, useMemo } from 'react';
+import { useEffect, useState, useMemo, lazy, Suspense } from 'react';
 import { useParams } from 'react-router-dom';
 import { fetchCampById } from '../services/campService';
 import { fetchReviewsByCampId } from '../services/reviewService';
@@ -7,11 +7,14 @@ import api from '../services/api';
 
 import Header from '../components/layout/Header';
 import Map from '../components/common/Map.jsx';
-import ReviewCard from '../components/features/reviews/ReviewCard.jsx';
-import ReviewForm from '../components/features/reviews/ReviewForm.jsx';
 import Spinner from '../components/common/Spinner.jsx';
 import ErrorMessage from '../components/common/ErrorMessage.jsx';
-import AIReviewAnalysis from '../components/AIReviewAnalysis';
+
+// 使用 React.lazy 进行组件代码分割
+const ReviewCard = lazy(() => import('../components/features/reviews/ReviewCard.jsx'));
+const ReviewForm = lazy(() => import('../components/features/reviews/ReviewForm.jsx'));
+const AIReviewAnalysis = lazy(() => import('../components/AIReviewAnalysis'));
+
 import './CampDetailsPage.css';
 
 const CampDetailsPage = () => {
@@ -23,11 +26,33 @@ const CampDetailsPage = () => {
     const [error, setError] = useState(null);
     const [isBookmarked, setIsBookmarked] = useState(false);
 
+    // 添加缓存状态
+    const [cache, setCache] = useState({
+        camp: null,
+        reviews: [],
+        timestamp: null
+    });
+
+    // 检查缓存是否有效（5分钟）
+    const isCacheValid = (timestamp) => {
+        if (!timestamp) return false;
+        return Date.now() - timestamp < 5 * 60 * 1000;
+    };
+
     useEffect(() => {
         const fetchData = async () => {
             try {
                 setLoading(true);
                 setError(null);
+
+                // 检查缓存
+                if (cache.camp && cache.reviews && isCacheValid(cache.timestamp)) {
+                    setCamp(cache.camp);
+                    setReviews(cache.reviews);
+                    setLoading(false);
+                    return;
+                }
+
                 console.log('Fetching camp data for ID:', id);
                 
                 const [campData, reviewData] = await Promise.all([
@@ -41,8 +66,22 @@ const CampDetailsPage = () => {
                     throw new Error('Camp not found');
                 }
 
+                // 更新缓存
+                setCache({
+                    camp: campData,
+                    reviews: reviewData || [],
+                    timestamp: Date.now()
+                });
+
                 setCamp(campData);
                 setReviews(reviewData || []);
+
+                // 预加载相关数据
+                if (campData.relatedCamps) {
+                    campData.relatedCamps.forEach(campId => {
+                        fetchCampById(campId).catch(console.error);
+                    });
+                }
 
                 // Check if camp is bookmarked
                 if (isLoggedIn) {
@@ -63,7 +102,7 @@ const CampDetailsPage = () => {
         };
 
         fetchData();
-    }, [id, isLoggedIn]);
+    }, [id, isLoggedIn, cache]);
 
     // Track camp view
     useEffect(() => {
@@ -142,7 +181,7 @@ const CampDetailsPage = () => {
             const [longitude, latitude] = camp.coordinates.coordinates;
             return [latitude, longitude];
         }
-        return [40.7128, -74.0060]; // Default to New York City
+        return null; // Return null if no coordinates available
     }, [camp?.coordinates?.coordinates]);
 
     if (loading) return <Spinner />;
@@ -150,81 +189,168 @@ const CampDetailsPage = () => {
     if (!camp) return <ErrorMessage message="Camp not found" />;
 
     return (
-        <div className="camp-details-page">
+        <main id="main-content" lang="en" role="main">
+            <a href="#main-content" className="skip-link" aria-label="Skip to main content">Skip to main content</a>
             <Header />
             <div className="camp-details">
                 <div className="camp-header">
-                    <h1>{camp.name}</h1>
-                    <p className="camp-location">
-                        <i className="fas fa-map-marker-alt"></i> {camp.location}
+                    <h1 style={{ color: '#000000' }}>{camp.name}</h1>
+                    <p className="camp-location" style={{ color: '#000000' }}>
+                        <i className="fas fa-map-marker-alt" aria-hidden="true"></i> {camp.location}
                     </p>
                     {isLoggedIn && (
                         <button 
                             onClick={handleBookmark}
                             className={`bookmark-btn ${isBookmarked ? 'bookmarked' : ''}`}
+                            aria-label={isBookmarked ? 'Remove bookmark' : 'Add bookmark'}
+                            aria-pressed={isBookmarked}
+                            style={{
+                                backgroundColor: isBookmarked ? '#2563eb' : '#ffffff',
+                                color: isBookmarked ? '#ffffff' : '#000000',
+                                border: '1px solid #000000'
+                            }}
                         >
                             {isBookmarked ? 'Remove Bookmark' : 'Add Bookmark'}
                         </button>
                     )}
                 </div>
-
                 <div className="camp-content">
-                    <div className="camp-section">
-                        <h2>About</h2>
-                        {camp.image && camp.image.length > 0 && (
-                            <img 
-                                src={camp.image[0]} 
-                                alt={camp.name}
-                                className="camp-image"
-                            />
-                        )}
-                        <p>{camp.description}</p>
+                    <div className="camp-info" role="region" aria-labelledby="about-heading">
+                        <h2 id="about-heading" style={{ color: '#000000' }}>About</h2>
+                        <p style={{ color: '#000000' }}>{camp.description}</p>
                     </div>
 
-                    <div className="camp-section">
-                        <h2>Location</h2>
-                        <Map 
-                            center={coordinates}
-                            markers={[coordinates]}
-                            zoom={13}
-                        />
-                    </div>
-
-                    <div className="camp-section">
-                        <h2>Activities</h2>
+                    <div className="camp-details-section" role="region" aria-labelledby="age-range-heading">
+                        <h2 id="age-range-heading" style={{ color: '#000000' }}>Age Range</h2>
                         <ul className="camp-details-list">
-                            {camp.activities?.map((activity, index) => (
-                                <li key={index}>{activity}</li>
-                            ))}
+                            <li style={{ color: '#000000' }}>
+                                <strong style={{ color: '#000000' }}>Minimum Age:</strong> {camp.minAge || 'Not specified'}
+                            </li>
+                            <li style={{ color: '#000000' }}>
+                                <strong style={{ color: '#000000' }}>Maximum Age:</strong> {camp.maxAge || 'Not specified'}
+                            </li>
+                            {camp.ageGroups && camp.ageGroups.length > 0 && (
+                                <li style={{ color: '#000000' }}>
+                                    <strong style={{ color: '#000000' }}>Age Groups:</strong> {camp.ageGroups.join(', ')}
+                                </li>
+                            )}
                         </ul>
                     </div>
 
-                    <div className="camp-section">
-                        <h2>Contact Information</h2>
+                    <div className="camp-details-section" role="region" aria-labelledby="schedule-heading">
+                        <h2 id="schedule-heading" style={{ color: '#000000' }}>Schedule</h2>
                         <ul className="camp-details-list">
-                            <li>Email: {camp.contact?.email}</li>
-                            <li>Phone: {camp.contact?.phone}</li>
-                            <li>Website: <a href={camp.contact?.website} target="_blank" rel="noopener noreferrer">{camp.contact?.website}</a></li>
+                            <li style={{ color: '#000000' }}>
+                                <strong style={{ color: '#000000' }}>Start Date:</strong> {camp.startDate ? new Date(camp.startDate).toLocaleDateString() : 'Not specified'}
+                            </li>
+                            <li style={{ color: '#000000' }}>
+                                <strong style={{ color: '#000000' }}>End Date:</strong> {camp.endDate ? new Date(camp.endDate).toLocaleDateString() : 'Not specified'}
+                            </li>
+                            <li style={{ color: '#000000' }}>
+                                <strong style={{ color: '#000000' }}>Duration:</strong> {camp.duration || 'Not specified'}
+                            </li>
+                            <li style={{ color: '#000000' }}>
+                                <strong style={{ color: '#000000' }}>Daily Schedule:</strong> {camp.dailySchedule || 'Not specified'}
+                            </li>
+                            {camp.dropOffTime && (
+                                <li style={{ color: '#000000' }}>
+                                    <strong style={{ color: '#000000' }}>Drop-off Time:</strong> {camp.dropOffTime}
+                                </li>
+                            )}
+                            {camp.pickUpTime && (
+                                <li style={{ color: '#000000' }}>
+                                    <strong style={{ color: '#000000' }}>Pick-up Time:</strong> {camp.pickUpTime}
+                                </li>
+                            )}
                         </ul>
                     </div>
 
-                    <div className="camp-reviews">
-                        <h3>Reviews</h3>
+                    {camp.activities && camp.activities.length > 0 && (
+                        <div className="camp-activities" role="region" aria-labelledby="activities-heading">
+                            <h2 id="activities-heading" style={{ color: '#000000' }}>Activities</h2>
+                            <ul className="camp-details-list">
+                                {camp.activities.map((activity, index) => (
+                                    <li key={index} style={{ color: '#000000' }}>{activity}</li>
+                                ))}
+                            </ul>
+                        </div>
+                    )}
+
+                    {camp.amenities && camp.amenities.length > 0 && (
+                        <div className="camp-amenities" role="region" aria-labelledby="amenities-heading">
+                            <h2 id="amenities-heading" style={{ color: '#000000' }}>Amenities</h2>
+                            <ul className="camp-details-list">
+                                {camp.amenities.map((amenity, index) => (
+                                    <li key={index} style={{ color: '#000000' }}>{amenity}</li>
+                                ))}
+                            </ul>
+                        </div>
+                    )}
+
+                    {camp.contact && (
+                        <div className="camp-contact" role="region" aria-labelledby="contact-heading">
+                            <h2 id="contact-heading" style={{ color: '#000000' }}>Contact Information</h2>
+                            <ul className="camp-details-list">
+                                <li style={{ color: '#000000' }}>
+                                    <strong style={{ color: '#000000' }}>Email:</strong> {camp.contact.email}
+                                </li>
+                                <li style={{ color: '#000000' }}>
+                                    <strong style={{ color: '#000000' }}>Phone:</strong> {camp.contact.phone}
+                                </li>
+                                <li style={{ color: '#000000' }}>
+                                    <strong style={{ color: '#000000' }}>Website:</strong> {camp.contact.website}
+                                </li>
+                            </ul>
+                        </div>
+                    )}
+
+                    {coordinates && (
+                        <div className="map-section" role="region" aria-label="Map showing camp location">
+                            <div className="map-container">
+                                <Map 
+                                    center={coordinates}
+                                    markers={[coordinates]}
+                                    zoom={13}
+                                    aria-label={`Map showing location of ${camp.name}`}
+                                />
+                            </div>
+                        </div>
+                    )}
+
+                    <div className="camp-reviews" role="region" aria-labelledby="reviews-heading">
+                        <h2 id="reviews-heading" style={{ color: '#000000' }}>Reviews</h2>
                         {reviews.length > 0 && (
-                            <AIReviewAnalysis campId={id} />
+                            <Suspense fallback={<Spinner />}>
+                                <AIReviewAnalysis campId={id} />
+                            </Suspense>
                         )}
                         {reviews.length > 0 ? (
-                            reviews.map(review => (
-                                <ReviewCard key={review._id} review={review} />
-                            ))
+                            <div className="reviews-list">
+                                {reviews.map(review => (
+                                    <Suspense key={review._id} fallback={<Spinner />}>
+                                        <ReviewCard review={review} />
+                                    </Suspense>
+                                ))}
+                            </div>
                         ) : (
-                            <p>No reviews yet. Be the first to review!</p>
+                            <p style={{ color: '#000000' }}>No reviews yet. Be the first to review!</p>
                         )}
-                        <ReviewForm campId={id} onReviewSubmit={handleReviewSubmit} />
+                        {isLoggedIn && (
+                            <div className="camp-review-form" role="region" aria-labelledby="review-form-heading">
+                                <h2 id="review-form-heading" style={{ color: '#000000' }}>Write a Review</h2>
+                                <Suspense fallback={<Spinner />}>
+                                    <ReviewForm 
+                                        campId={id} 
+                                        onReviewSubmit={handleReviewSubmit}
+                                        aria-label="Submit a review"
+                                    />
+                                </Suspense>
+                            </div>
+                        )}
                     </div>
                 </div>
             </div>
-        </div>
+        </main>
     );
 };
 

@@ -27,7 +27,7 @@ const FeaturedCamps = () => {
           let processedData = results.slice(0, 6).map((camp, index) => ({
             ...camp,
             _id: camp._id || index + 1,
-            image: camp.image || [camp1, camp2, camp3][index % 3],
+            image: camp.images?.[0] || [camp1, camp2, camp3][index % 3],
             name: camp.name || `Camp ${index + 1}`,
             location: camp.location || 'Default Location',
             ageRange: camp.ageRange || { min: 5, max: 15 },
@@ -75,7 +75,7 @@ const FeaturedCamps = () => {
         {campsToDisplay.map((camp) => (
           <div key={camp._id} className="camp-card">
             <img 
-              src={camp.image} 
+              src={camp.image || camp.images?.[0] || [camp1, camp2, camp3][Math.floor(Math.random() * 3)]} 
               alt={camp.name} 
               className="camp-image"
               onError={(e) => {
