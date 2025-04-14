@@ -56,7 +56,7 @@ export const AuthProvider = ({ children }) => {
         
         try {
             // Update backend
-            await fetch(`${API_URL}/recently-viewed`, {
+            const response = await fetch(`${API_URL}/recently-viewed`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -65,13 +65,23 @@ export const AuthProvider = ({ children }) => {
                 body: JSON.stringify({ campId: camp._id })
             });
             
-            // Update local state
-            setRecentlyViewed(prev => {
-                const existingIndex = prev.findIndex(item => item._id === camp._id);
-                return existingIndex >= 0 
-                    ? [camp, ...prev.filter(item => item._id !== camp._id)].slice(0, 5)
-                    : [camp, ...prev].slice(0, 5);
+            if (!response.ok) {
+                throw new Error('Failed to update recently viewed');
+            }
+            
+            // Get the updated list from backend
+            const updatedResponse = await fetch(`${API_URL}/recently-viewed`, {
+                headers: {
+                    'Authorization': `Bearer ${localStorage.getItem('token')}`
+                }
             });
+            
+            if (!updatedResponse.ok) {
+                throw new Error('Failed to fetch updated recently viewed list');
+            }
+            
+            const updatedData = await updatedResponse.json();
+            setRecentlyViewed(updatedData);
         } catch (error) {
             console.error('Error updating recently viewed:', error);
         }

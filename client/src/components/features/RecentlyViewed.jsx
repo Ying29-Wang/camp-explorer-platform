@@ -15,10 +15,13 @@ const RecentlyViewed = () => {
     useEffect(() => {
         try {
             if (recentlyViewed && Array.isArray(recentlyViewed)) {
-                // Extract camp data from recentlyViewed items and filter out invalid entries
+                // Extract camp data from recentlyViewed items
                 const campData = recentlyViewed
-                    .filter(item => item && item.campId && typeof item.campId === 'object')
-                    .map(item => item.campId);
+                    .filter(item => item && item.campId && item.campId._id)
+                    .map(item => ({
+                        ...item.campId,
+                        viewedAt: item.viewedAt
+                    }));
                 setCamps(campData);
             } else {
                 setCamps([]);

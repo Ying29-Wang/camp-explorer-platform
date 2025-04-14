@@ -16,7 +16,7 @@ import './CampDetailsPage.css';
 
 const CampDetailsPage = () => {
     const { id } = useParams();
-    const { isLoggedIn, user } = useAuth();
+    const { isLoggedIn, user, addToRecentlyViewed } = useAuth();
     const [camp, setCamp] = useState(null);
     const [reviews, setReviews] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -75,16 +75,7 @@ const CampDetailsPage = () => {
 
             try {
                 console.log('Tracking view - User:', user._id, 'Camp ID:', camp._id);
-                
-                const response = await api.post('/recently-viewed', { 
-                    campId: camp._id
-                });
-                
-                if (response.data) {
-                    console.log('Successfully tracked view:', response.data);
-                } else {
-                    console.warn('View tracking response missing data');
-                }
+                await addToRecentlyViewed(camp);
             } catch (error) {
                 console.error('Error tracking view:', error);
                 console.error('Error details:', {
@@ -98,7 +89,7 @@ const CampDetailsPage = () => {
         if (camp && isLoggedIn) {
             trackView();
         }
-    }, [camp, isLoggedIn, user]);
+    }, [camp, isLoggedIn, user, addToRecentlyViewed]);
 
     const handleBookmark = async () => {
         if (!isLoggedIn) {

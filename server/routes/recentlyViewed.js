@@ -87,7 +87,10 @@ router.get('/', auth, async (req, res) => {
         const userId = req.user._id || req.user.id;
         console.log('Fetching recently viewed for user:', userId);
         const recentlyViewed = await RecentlyViewed.find({ userId: userId })
-            .populate('campId')
+            .populate({
+                path: 'campId',
+                select: 'name location image description'
+            })
             .sort({ viewedAt: -1 })
             .limit(10);
             
