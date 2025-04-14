@@ -179,54 +179,63 @@ const RegistrationPage = () => {
         {registrationStep === 'form' ? (
           <form onSubmit={handleFormSubmit}>
             <div className="form-group">
-              <label>Username</label>
+              <label htmlFor="username">Username</label>
               <input
+                id="username"
                 type="text"
                 name="username"
                 autoComplete="username"
                 value={formData.username}
                 onChange={handleChange}
                 className={errors.username ? 'error-border' : ''}
+                aria-describedby={errors.username ? 'username-error' : undefined}
               />
-              {errors.username && <div className="field-error">{errors.username}</div>}
+              {errors.username && <div id="username-error" className="field-error">{errors.username}</div>}
             </div>
 
             <div className="form-group">
-              <label>Email</label>
+              <label htmlFor="email">Email</label>
               <input
+                id="email"
                 type="email"
                 name="email"
                 autoComplete="email"
                 value={formData.email}
                 onChange={handleChange}
                 className={errors.email ? 'error-border' : ''}
+                aria-describedby={errors.email ? 'email-error' : undefined}
               />
-              {errors.email && <div className="field-error">{errors.email}</div>}
+              {errors.email && <div id="email-error" className="field-error">{errors.email}</div>}
             </div>
 
             <div className="form-group">
-              <label>Password</label>
+              <label htmlFor="password">Password</label>
               <input
+                id="password"
                 type="password"
                 name="password"
                 autoComplete="new-password"
                 value={formData.password}
                 onChange={handleChange}
                 className={errors.password ? 'error-border' : ''}
+                aria-describedby={errors.password ? 'password-error' : undefined}
               />
-              {errors.password && <div className="field-error">{errors.password}</div>}
+              {errors.password && <div id="password-error" className="field-error">{errors.password}</div>}
             </div>
 
             <div className="form-group">
-              <label>Account Type</label>
+              <label htmlFor="role">Account Type</label>
               <select
+                id="role"
                 name="role"
                 value={formData.role}
                 onChange={handleChange}
+                aria-describedby={errors.role ? 'role-error' : undefined}
               >
                 <option value="parent">Parent</option>
                 <option value="camp_owner">Camp Owner</option>
               </select>
+              {errors.role && <div id="role-error" className="field-error">{errors.role}</div>}
             </div>
 
             <button type="submit" className="submit-button">

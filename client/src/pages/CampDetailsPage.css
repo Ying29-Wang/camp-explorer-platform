@@ -14,20 +14,20 @@
 .camp-details-list li {
     margin: 0.5rem 0;
     padding: 0.5rem;
-    background: #f8f9fa;
+    background: #f8fafc;
     border-radius: 4px;
 }
 
 .camp-section {
     margin: 2rem 0;
-    background: white;
+    background: #ffffff;
     padding: 2rem;
     border-radius: 8px;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .camp-section h2 {
-    color: #333;
+    color: #000000;
     margin-bottom: 1rem;
     font-size: 1.5rem;
 }
@@ -42,15 +42,15 @@
     text-align: center;
     margin-bottom: 2rem;
     padding: 3rem 2rem;
-    background: linear-gradient(to right, #2c3e50, #3498db);
+    background: linear-gradient(to right, #1e293b, #2563eb);
     border-radius: 8px;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    color: white;
+    color: #ffffff;
 }
 
 .camp-header h1 {
     font-size: 3.5rem;
-    color: white;
+    color: #ffffff;
     margin-bottom: 1rem;
     font-weight: 700;
     text-transform: capitalize;
@@ -59,7 +59,7 @@
 }
 
 .camp-location {
-    color: rgba(255, 255, 255, 0.9);
+    color: #ffffff;
     font-size: 1.4rem;
     display: flex;
     align-items: center;
@@ -68,7 +68,7 @@
 }
 
 .camp-location i {
-    color: #ffd700;
+    color: #fbbf24;
     font-size: 1.2em;
 }
 
@@ -99,7 +99,7 @@
 
 .camp-details-page {
     min-height: 100vh;
-    background-color: #f5f5f5;
+    background-color: #ffffff;
 }
 
 .camp-details {
@@ -112,15 +112,15 @@
     text-align: center;
     margin-bottom: 2rem;
     padding: 3rem 2rem;
-    background: linear-gradient(to right, #2c3e50, #3498db);
+    background: linear-gradient(to right, #1e293b, #2563eb);
     border-radius: 8px;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    color: white;
+    color: #ffffff;
 }
 
 .camp-header h1 {
     font-size: 3.5rem;
-    color: white;
+    color: #ffffff;
     margin-bottom: 1rem;
     font-weight: 700;
     text-transform: capitalize;
@@ -129,7 +129,7 @@
 }
 
 .camp-location {
-    color: rgba(255, 255, 255, 0.9);
+    color: #ffffff;
     font-size: 1.4rem;
     display: flex;
     align-items: center;
@@ -138,7 +138,7 @@
 }
 
 .camp-location i {
-    color: #ffd700;
+    color: #fbbf24;
     font-size: 1.2em;
 }
 
@@ -149,14 +149,14 @@
 }
 
 .camp-section {
-    background: white;
+    background: #ffffff;
     padding: 2rem;
     border-radius: 8px;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .camp-section h2 {
-    color: #333;
+    color: #000000;
     margin-bottom: 1rem;
     font-size: 1.5rem;
 }
@@ -171,14 +171,14 @@
 }
 
 .reviews-section {
-    background: white;
+    background: #ffffff;
     padding: 2rem;
     border-radius: 8px;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .reviews-section h2 {
-    color: #333;
+    color: #000000;
     margin-bottom: 1.5rem;
     font-size: 1.5rem;
 }
@@ -207,8 +207,8 @@
 }
 
 .bookmark-btn {
-    background-color: #4CAF50;
-    color: white;
+    background-color: #16a34a;
+    color: #ffffff;
     border: none;
     padding: 10px 20px;
     border-radius: 4px;
@@ -219,13 +219,13 @@
 }
 
 .bookmark-btn:hover {
-    background-color: #45a049;
+    background-color: #15803d;
 }
 
 .bookmark-btn.bookmarked {
-    background-color: #f44336;
+    background-color: #dc2626;
 }
 
 .bookmark-btn.bookmarked:hover {
-    background-color: #d32f2f;
+    background-color: #b91c1c;
 }
