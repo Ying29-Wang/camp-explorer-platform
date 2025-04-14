@@ -155,8 +155,16 @@ class AIService {
     // Analyze reviews for sentiment and key insights
     async analyzeReviews(campId) {
         try {
-            const reviews = await Review.find({ camp: campId });
+            const reviews = await Review.find({ campId: campId });
             const camp = await Camp.findById(campId);
+
+            if (!camp) {
+                throw new Error('Camp not found');
+            }
+
+            if (!reviews || reviews.length === 0) {
+                return "No reviews available for analysis.";
+            }
 
             const prompt = `Analyze the following reviews for the camp "${camp.name}" and provide:
             1. Overall sentiment (positive/negative/neutral)
@@ -165,28 +173,33 @@ class AIService {
             4. Common themes
             
             Reviews:
-            ${reviews.map(review => `- Rating: ${review.rating}/5, Comment: ${review.comment}`).join('\n')}`;
+            ${reviews.map(review => `- Rating: ${review.rating}/5, Comment: ${review.reviewText || 'No comment provided'}`).join('\n')}`;
 
-            const response = await openai.chat.completions.create({
-                model: "gpt-3.5-turbo",
-                messages: [
-                    {
-                        role: "system",
-                        content: "You are a review analysis assistant. Analyze camp reviews to extract key insights and sentiment."
-                    },
-                    {
-                        role: "user",
-                        content: prompt
-                    }
-                ],
-                temperature: 0.5,
-                max_tokens: 500
-            });
+            try {
+                const response = await openai.chat.completions.create({
+                    model: "gpt-3.5-turbo",
+                    messages: [
+                        {
+                            role: "system",
+                            content: "You are a review analysis assistant. Analyze camp reviews to extract key insights and sentiment."
+                        },
+                        {
+                            role: "user",
+                            content: prompt
+                        }
+                    ],
+                    temperature: 0.5,
+                    max_tokens: 500
+                });
 
-            return response.choices[0].message.content;
+                return response.choices[0].message.content;
+            } catch (openaiError) {
+                console.error('OpenAI API error:', openaiError);
+                return "We're having trouble analyzing the reviews at the moment. Please try again later.";
+            }
         } catch (error) {
-            console.error('Error analyzing reviews:', error);
-            throw new Error('Failed to analyze reviews');
+            console.error('Error in analyzeReviews:', error);
+            throw new Error('Failed to analyze reviews: ' + error.message);
         }
     }
 

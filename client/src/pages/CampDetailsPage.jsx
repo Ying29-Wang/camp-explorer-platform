@@ -11,6 +11,7 @@ import ReviewCard from '../components/features/reviews/ReviewCard.jsx';
 import ReviewForm from '../components/features/reviews/ReviewForm.jsx';
 import Spinner from '../components/common/Spinner.jsx';
 import ErrorMessage from '../components/common/ErrorMessage.jsx';
+import AIReviewAnalysis from '../components/AIReviewAnalysis';
 import './CampDetailsPage.css';
 
 const CampDetailsPage = () => {
@@ -220,6 +221,9 @@ const CampDetailsPage = () => {
 
                     <div className="camp-reviews">
                         <h3>Reviews</h3>
+                        {reviews.length > 0 && (
+                            <AIReviewAnalysis campId={id} />
+                        )}
                         {reviews.length > 0 ? (
                             reviews.map(review => (
                                 <ReviewCard key={review._id} review={review} />
