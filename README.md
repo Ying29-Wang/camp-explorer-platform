@@ -1,19 +1,5 @@
 # Camp Explorer Platform
 
-<<<<<<< HEAD
-A comprehensive full-stack web application for discovering, managing, and reviewing camping locations. Built with React, Node.js, Express, and MongoDB.
-
-## 🚀 Features
-
-### Core Functionality
-
-- ✅ Browse and search camping locations
-- ✅ View detailed camp information
-- ✅ User authentication and authorization
-- ✅ Review and rating system
-- ✅ Interactive map integration
-- ✅ Responsive design for all devices
-=======
 A comprehensive platform for discovering and managing summer camps, built with React, Node.js, and MongoDB.
 
 ## Authors
@@ -33,214 +19,83 @@ A comprehensive platform for discovering and managing summer camps, built with R
 
 ## Features
 
-- **User Management**
-  - User registration and authentication
-  - Role-based access (Parents, Camp Owners, Admin)
-  - Profile management
-  - Child profile management for parents
-  - Review management (create, edit, and delete reviews)
+### Core Features
+- User registration and authentication
+- Role-based access control (Parents, Camp Owners, Admin)
+- Profile management
+- Camp search and discovery
+- Interactive map integration with OpenStreetMap
+- Review and rating system
+- Responsive design for all devices
 
-- **Camp Management**
-  - Camp listing and search
-  - Detailed camp information
-  - Camp registration and management
-  - Location-based camp discovery
+### User Management
+- Profile customization
+- Child profile management for parents
+- Review management (create, edit, delete)
+- Bookmarks and recently viewed camps
 
-- **Interactive Features**
-  - OpenStreetMap integration for camp locations
-  - Distance-based camp search
-  - Interactive camp details
+### Camp Management
+- Create and manage camp listings
+- Detailed camp information display
+- Location-based camp discovery
+- Image upload and management
+- Contact information management
+- Activity and schedule management
 
-- **Admin Dashboard**
-  - User management
-  - Camp management
+### Admin Features
+- User management and role control
+- Camp listing moderation
+- System monitoring and maintenance
 
 ## Tech Stack
 
 ### Frontend
-- React.js
-- Vite
-- React Router
+- React.js with Vite
+- React Router for navigation
 - Context API for state management
-- Material-UI (MUI)
-- Axios for API calls
->>>>>>> a403b2879b8f2f5592f2bc00de8d52367392cf69
-
-### API Operations
-
-<<<<<<< HEAD
-- **Camps Management**
-
-  - ✅ Create new camp listings
-  - ✅ Read camp details and listings
-  - ✅ Update camp information
-  - ✅ Delete camp listings
-
-- **User Management**
-
-  - ✅ User registration
-  - ✅ User profiles
-  - ✅ User role management
-  - ✅ Admin controls
-
-- **Review System**
-  - ✅ Post reviews
-  - ✅ Read reviews
-  - ✅ Update reviews
-  - ✅ Delete reviews
-
-### Authentication & Security
-
-- ✅ Secure user registration
-- ✅ JWT-based authentication
-- ✅ Role-based access control
-- ✅ Protected routes
-- ✅ Session management
-
-### External Integrations
-
-- ✅ Google Maps API integration
-- ✅ Geocoding service for address conversion
-- ✅ Real-time location services
-
-### Pages & UI Components
-
-- ✅ Homepage with featured camps
-- ✅ Search results with filters
-- ✅ Detailed camp view
-- ✅ User profile management
-- ✅ Login/Register forms
-- ✅ Camp management dashboard
-- ✅ Admin control panel
-
-### Data Handling
-
-- ✅ Form validation
-- ✅ Error handling
-- ✅ Loading states
-- ✅ Data persistence
-- ✅ Input sanitization
-
-## Tech Stack
-
-### Frontend
-
-- React.js
-- Vite
-- React Router
-- Tailwind CSS
-- Axios
-- React Icons
-- Google Maps API
+- Material-UI (MUI) components
+- Axios for API communication
+- OpenStreetMap integration
+- CSS Modules for styling
 
 ### Backend
+- Node.js with Express
+- MongoDB with Mongoose
+- JWT for authentication
+- RESTful API design
+- Image processing and storage
+- Geolocation services
 
-- Node.js
-- Express.js
-- MongoDB
-- Mongoose
-- JWT Authentication
-- Geocoding API
+## API Features
+
+### Authentication
+- JWT-based secure authentication
+- Session management
+- Protected routes
+- Role-based access control
+
+### Data Operations
+- CRUD operations for camps
+- User profile management
+- Review system
+- Bookmark functionality
+- Search and filtering
+- Geolocation services
+
+### Security
+- Input validation
+- Data sanitization
+- Error handling
+- Rate limiting
+- CORS protection
 
 ## Prerequisites
-
 - Node.js (v14 or higher)
 - MongoDB
 - npm or yarn
-- Google Maps API key
-- Geocoding API key
+- OpenStreetMap API key
 
-## Installation
-
-1. Clone the repository:
-
-```bash
-git clone [your-repository-url]
-cd camp-explorer-platform
-```
-
-2. Install dependencies:
-
-```bash
-npm run install-all
-```
-
-3. Set up environment variables:
-   - Create a `.env` file in the server directory with:
-     ```
-     PORT=5000
-     MONGO_URI=your_mongodb_connection_string
-     JWT_SECRET=your_jwt_secret
-     GOOGLE_MAPS_API_KEY=your_google_maps_api_key
-     GEOCODING_API_KEY=your_geocoding_api_key
-     ```
-   - Create a `.env` file in the client directory with:
-     ```
-     VITE_API_URL=http://localhost:5000
-     VITE_APP_NAME=Camp Explorer
-     VITE_GOOGLE_MAPS_API_KEY=your_google_maps_api_key
-     ```
-
-## Running the Application
-
-1. Start both frontend and backend servers:
-
-```bash
-npm start
-```
-
-Or run them separately:
-
-2. Start the backend server:
-
-```bash
-npm run server
-```
-
-3. Start the frontend development server:
-
-```bash
-npm run client
-```
-
-The application will be available at:
-
-- Frontend: http://localhost:5173
-- Backend API: http://localhost:5000
-=======
-### Backend
-- Node.js
-- Express.js
-- MongoDB
-- Mongoose ODM
-- JWT Authentication
-- CORS enabled
-- OpenStreetMap API
-
-## Prerequisites
-
-- Node.js (v14 or higher)
-- MongoDB
-- Render account (for deployment)
-
-## Environment Variables
-
-### Frontend (.env)
-```
-VITE_API_URL=http://localhost:5001/api  # Development
-# VITE_API_URL=https://camp-explorer-server.onrender.com/api  # Production
-```
-
-### Backend (.env)
-```
-PORT=5001
-MONGODB_URI=your_mongodb_uri
-JWT_SECRET=your_jwt_secret
-CORS_ORIGIN=http://localhost:5173  # Development
-# CORS_ORIGIN=https://camp-explorer-client.onrender.com  # Production
-```
-
-## Installation
+## Getting Started
 
 1. Clone the repository:
 ```bash
@@ -250,151 +105,97 @@ cd camp-explorer-platform
 
 2. Install dependencies:
 ```bash
-# Install server dependencies
-cd server
-npm install
-
-# Install client dependencies
-cd ../client
-npm install
+npm run install-all
 ```
 
 3. Set up environment variables:
-```bash
-# Create .env files in both server and client directories
-# Add the required environment variables as shown above
-```
+   - Create `.env` files in both client and server directories
+   - Add required environment variables (see Environment Variables section)
 
 4. Start the development servers:
 ```bash
-# Start the backend server
-cd server
+# Option 1: Start both client and server from root directory
 npm run dev
 
-# Start the frontend development server
-cd ../client
-npm run dev
+# Option 2: Start servers separately
+npm run server  # In root directory
+npm run client  # In root directory
 ```
 
-## Deployment
-
-The application is configured for deployment on Render:
-
-### Backend Deployment
-1. Create a new Web Service on Render
-2. Connect your GitHub repository
-3. Set the following environment variables:
-   - `MONGODB_URI`
-   - `JWT_SECRET`
-   - `CORS_ORIGIN=https://camp-explorer-client.onrender.com`
-4. Deploy
-
-### Frontend Deployment
-1. Create a new Static Site on Render
-2. Connect your GitHub repository
-3. Set the build command: `npm run build`
-4. Set the publish directory: `dist`
-5. Set the following environment variables:
-   - `VITE_API_URL=https://camp-explorer-server.onrender.com/api`
-6. Deploy
->>>>>>> a403b2879b8f2f5592f2bc00de8d52367392cf69
+5. Access the application:
+   - Frontend: http://localhost:5173
+   - Backend API: http://localhost:5001
 
 ## Project Structure
 
 ```
 camp-explorer-platform/
-├── client/                 # Frontend React application
-<<<<<<< HEAD
+├── client/                      # Frontend React application
 │   ├── src/
-│   │   ├── components/     # React components
-│   │   ├── pages/         # Page components
-│   │   ├── context/       # React context
-│   │   ├── services/      # API services
-│   │   └── App.jsx        # Main application component
-│   └── vite.config.js     # Vite configuration
-├── server/                 # Backend Node.js application
-│   ├── models/            # MongoDB models
-│   ├── routes/            # API routes
-│   ├── controllers/       # Route controllers
-│   ├── middleware/        # Custom middleware
-│   └── app.js             # Express application
-└── package.json           # Root package.json
-=======
-│   ├── public/            # Static assets
-│   ├── src/               # Source code
-│   │   ├── components/    # React components
-│   │   ├── context/       # Context providers
-│   │   ├── pages/         # Page components
-│   │   ├── services/      # API services
-│   │   └── utils/         # Utility functions
-│   ├── package.json       # Frontend dependencies
-│   └── vite.config.js     # Vite configuration
+│   │   ├── assets/             # Static assets (images, fonts, etc.)
+│   │   ├── components/         # Reusable React components
+│   │   │   ├── common/        # Shared components
+│   │   │   ├── features/      # Feature-specific components
+│   │   │   └── layout/        # Layout components
+│   │   ├── config/            # Configuration files
+│   │   ├── constants/         # Constants and enums
+│   │   ├── context/           # React Context providers
+│   │   ├── hooks/             # Custom React hooks
+│   │   ├── pages/             # Page components
+│   │   ├── services/          # API service functions
+│   │   ├── utils/             # Utility functions
+│   │   ├── App.jsx            # Main App component
+│   │   ├── App.css            # Global styles
+│   │   ├── main.jsx           # Application entry point
+│   │   ├── index.css          # Base styles
+│   │   └── routes.jsx         # Route configuration
+│   └── public/                # Public static files
 │
-├── server/                # Backend Node.js application
-│   ├── models/           # Mongoose models
-│   ├── routes/           # API routes
-│   ├── middleware/       # Express middleware
-│   ├── bin/             # Server startup scripts
-│   ├── package.json      # Backend dependencies
-│   └── app.js           # Express application setup
-│
-└── README.md             # Project documentation
->>>>>>> a403b2879b8f2f5592f2bc00de8d52367392cf69
+└── server/                     # Backend Node.js application
+    ├── bin/                   # Executable scripts
+    ├── config/                # Configuration files
+    ├── constants/             # Constants and enums
+    ├── controllers/           # Route controllers
+    ├── middleware/            # Express middleware
+    ├── models/                # Mongoose models
+    ├── public/                # Public static files
+    ├── routes/                # API routes
+    ├── scripts/               # Utility scripts
+    ├── seeds/                 # Database seed files
+    ├── services/              # Business logic services
+    ├── tests/                 # Test files
+    ├── uploads/               # File upload directory
+    ├── app.js                 # Express application setup
+    ├── db.js                  # Database connection
+    └── index.js               # Application entry point
 ```
 
 ## API Endpoints
 
-<<<<<<< HEAD
-### Camps
-
-- `GET /api/camps` - Get all camps
-- `GET /api/camps/:id` - Get camp by ID
-- `POST /api/camps` - Create new camp
-- `PUT /api/camps/:id` - Update camp
-- `DELETE /api/camps/:id` - Delete camp
-
-### Users
-
-- `POST /api/auth/register` - Register new user
-- `POST /api/auth/login` - User login
-- `GET /api/auth/me` - Get current user
-- `PUT /api/users/:id` - Update user
-- `DELETE /api/users/:id` - Delete user
-
-### Reviews
-
-- `GET /api/reviews` - Get all reviews
-- `GET /api/reviews/:id` - Get review by ID
-- `POST /api/reviews` - Create new review
-- `PUT /api/reviews/:id` - Update review
-- `DELETE /api/reviews/:id` - Delete review
-
-## Security Features
-
-- JWT-based authentication
-- Password hashing
-- Input validation
-- CORS protection
-- Rate limiting
-- Role-based access control
-=======
 ### Authentication
 - `POST /api/auth/register` - Register a new user
 - `POST /api/auth/login` - User login
 - `GET /api/auth/me` - Get current user info
+- `GET /api/auth/users` - Get all users (Admin only)
 
 ### Users
 - `GET /api/users` - Get all users (Admin only)
 - `GET /api/users/:id` - Get user by ID
+- `POST /api/users` - Create a new user
 - `PUT /api/users/:id` - Update user profile
-- `PUT /api/users/:id/children` - Update user's children information
-- `DELETE /api/users/:id` - Delete user (Admin only)
+- `PUT /api/users/:id/basic-info` - Update user's basic information
+- `PUT /api/users/:id/preferences` - Update user's preferences
+- `PUT /api/users/:id/status` - Update user status (Admin only)
+- `PUT /api/users/:id/children/:childId` - Update a child's information
+- `DELETE /api/users/:id` - Delete user (Admin or self)
 
 ### Camps
 - `GET /api/camps` - Get all camps
+- `GET /api/camps/owner` - Get all camps owned by the current user
 - `GET /api/camps/:id` - Get camp details
 - `POST /api/camps` - Create a new camp
 - `PUT /api/camps/:id` - Update camp details
+- `PUT /api/camps/:id/status` - Update camp status
 - `DELETE /api/camps/:id` - Delete a camp
 
 ### Reviews
@@ -402,38 +203,35 @@ camp-explorer-platform/
 - `GET /api/reviews/camp/:campId` - Get reviews for a specific camp
 - `POST /api/reviews` - Create a new review
 - `PUT /api/reviews/:id` - Update a review
+- `PUT /api/reviews/:id/status` - Update review status
 - `DELETE /api/reviews/:id` - Delete a review
 
 ### Maps
 - `GET /api/maps/nearby` - Get nearby camps
 - `GET /api/maps/camps` - Get all camps with coordinates
->>>>>>> a403b2879b8f2f5592f2bc00de8d52367392cf69
+- `GET /api/maps/camps/:id` - Get a specific camp by ID
+
+### AI
+- `POST /api/ai/recommendations` - Get personalized camp recommendations
+- `GET /api/ai/analyze-reviews/:campId` - Analyze reviews for a specific camp
+- `POST /api/ai/generate-description` - Generate enhanced camp description
+- `POST /api/ai/analyze-camp-image` - Analyze camp image
+
+### Bookmarks
+- `GET /api/bookmarks` - Get user's bookmarks
+- `POST /api/bookmarks` - Add a camp to bookmarks
+- `DELETE /api/bookmarks/:id` - Remove a camp from bookmarks
 
 ## Contributing
 
 1. Fork the repository
-<<<<<<< HEAD
-2. Create your feature branch (`git checkout -b feature/AmazingFeature`)
-3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
-4. Push to the branch (`git push origin feature/AmazingFeature`)
-=======
 2. Create your feature branch (`git checkout -b feature/amazing-feature`)
 3. Commit your changes (`git commit -m 'Add some amazing feature'`)
 4. Push to the branch (`git push origin feature/amazing-feature`)
->>>>>>> a403b2879b8f2f5592f2bc00de8d52367392cf69
 5. Open a Pull Request
 
 ## License
 
-<<<<<<< HEAD
-This project is licensed under the ISC License.
-
-## Contact
-
-[Your Name] - [Your Email]
-
-Project Link: [https://github.com/yourusername/camp-explorer-platform](https://github.com/yourusername/camp-explorer-platform)
-=======
 This project is licensed under the MIT License - see the LICENSE file for details.
 
 ## Contact
@@ -441,4 +239,3 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 For any questions or support, please contact: 
 wang.ying17@northeastern.edu
 ejiogu.d@northeastern.edu
->>>>>>> a403b2879b8f2f5592f2bc00de8d52367392cf69
