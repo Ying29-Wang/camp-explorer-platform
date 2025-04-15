@@ -1,12 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import api from '../services/api';
+import { fetchUserReviews, deleteReview } from '../services/reviewService';
 import Header from '../components/layout/Header';
 import './ProfilePage.css';
 
 const ProfilePage = () => {
     const { user, updateUser } = useAuth();
     const [bookmarks, setBookmarks] = useState([]);
+    const [reviews, setReviews] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [isEditing, setIsEditing] = useState({
@@ -14,6 +16,7 @@ const ProfilePage = () => {
         children: false,
         password: false
     });
+    const [editingReview, setEditingReview] = useState(null);
     const [formData, setFormData] = useState({
         phone: user?.phone || '',
         location: user?.location || ''
@@ -34,6 +37,7 @@ const ProfilePage = () => {
     useEffect(() => {
         if (user) {
             fetchBookmarks();
+            fetchUserReviewsData();
             setFormData({
                 phone: user.phone || '',
                 location: user.location || ''
@@ -58,6 +62,20 @@ const ProfilePage = () => {
         } catch (err) {
             console.error('Error fetching bookmarks:', err);
             setError('Failed to load bookmarks. Please try again later.');
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const fetchUserReviewsData = async () => {
+        try {
+            setLoading(true);
+            setError(null);
+            const userReviews = await fetchUserReviews();
+            setReviews(userReviews);
+        } catch (err) {
+            console.error('Error fetching user reviews:', err);
+            setError('Failed to load reviews. Please try again later.');
         } finally {
             setLoading(false);
         }
@@ -201,6 +219,36 @@ const ProfilePage = () => {
         } catch (err) {
             console.error('Error changing password:', err);
             setError(err.response?.data?.msg || 'Failed to change password. Please try again.');
+        }
+    };
+
+    const handleDeleteReview = async (reviewId) => {
+        if (!window.confirm('Are you sure you want to delete this review?')) {
+            return;
+        }
+        try {
+            await deleteReview(reviewId);
+            setReviews(reviews.filter(review => review._id !== reviewId));
+        } catch (err) {
+            console.error('Error deleting review:', err);
+            setError('Failed to delete review. Please try again later.');
+        }
+    };
+
+    const handleEditReview = (review) => {
+        setEditingReview(review);
+    };
+
+    const handleUpdateReview = async (reviewId, updatedData) => {
+        try {
+            const response = await api.put(`/reviews/${reviewId}`, updatedData);
+            setReviews(reviews.map(review => 
+                review._id === reviewId ? response.data : review
+            ));
+            setEditingReview(null);
+        } catch (err) {
+            console.error('Error updating review:', err);
+            setError('Failed to update review. Please try again later.');
         }
     };
 
@@ -382,6 +430,90 @@ const ProfilePage = () => {
                                             </div>
                                         ) : (
                                             <p>You haven't bookmarked any camps yet.</p>
+                                        )}
+                                    </div>
+
+                                    <div className="reviews-section">
+                                        <h2>My Reviews</h2>
+                                        {error && (
+                                            <div className="error-message">
+                                                {error}
+                                                <button onClick={fetchUserReviewsData} className="retry-button">
+                                                    Retry
+                                                </button>
+                                            </div>
+                                        )}
+                                        {loading ? (
+                                            <div className="loading-spinner" />
+                                        ) : reviews.length > 0 ? (
+                                            <div className="reviews-list">
+                                                {reviews.map(review => (
+                                                    <div key={review._id} className="review-item">
+                                                        <div className="review-header">
+                                                            <h3>{review.campId?.name || 'Unknown Camp'}</h3>
+                                                            <div className="review-rating">
+                                                                {Array(5).fill().map((_, i) => (
+                                                                    <span key={i} style={{ color: i < review.rating ? '#ffc107' : '#e4e5e9' }}>
+                                                                        ★
+                                                                    </span>
+                                                                ))}
+                                                            </div>
+                                                        </div>
+                                                        <div className="review-text">
+                                                            {editingReview?._id === review._id ? (
+                                                                <textarea
+                                                                    value={editingReview.content}
+                                                                    onChange={(e) => setEditingReview({
+                                                                        ...editingReview,
+                                                                        content: e.target.value
+                                                                    })}
+                                                                    rows="4"
+                                                                />
+                                                            ) : (
+                                                                <p>{review.content}</p>
+                                                            )}
+                                                        </div>
+                                                        <div className="review-actions">
+                                                            {editingReview?._id === review._id ? (
+                                                                <>
+                                                                    <button
+                                                                        className="save-button"
+                                                                        onClick={() => handleUpdateReview(review._id, {
+                                                                            content: editingReview.content,
+                                                                            rating: editingReview.rating
+                                                                        })}
+                                                                    >
+                                                                        Save
+                                                                    </button>
+                                                                    <button
+                                                                        className="remove-button"
+                                                                        onClick={() => setEditingReview(null)}
+                                                                    >
+                                                                        Cancel
+                                                                    </button>
+                                                                </>
+                                                            ) : (
+                                                                <>
+                                                                    <button
+                                                                        className="edit-button"
+                                                                        onClick={() => handleEditReview(review)}
+                                                                    >
+                                                                        Edit
+                                                                    </button>
+                                                                    <button
+                                                                        className="remove-button"
+                                                                        onClick={() => handleDeleteReview(review._id)}
+                                                                    >
+                                                                        Delete
+                                                                    </button>
+                                                                </>
+                                                            )}
+                                                        </div>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        ) : (
+                                            <p>You haven't written any reviews yet.</p>
                                         )}
                                     </div>
                                 </>
