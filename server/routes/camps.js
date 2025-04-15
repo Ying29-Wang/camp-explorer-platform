@@ -103,78 +103,34 @@ async function handleSearch(req, res) {
         const params = req.method === 'GET' ? req.query : req.body;
         
         // Build query
-        const query = {};
+        const query = { status: 'active' }; // 默认只查询活跃的营地
         
-        // Text search
+        // 只保留最基本的搜索条件
         if (params.searchText) {
-            query.$text = { $search: params.searchText };
+            query.$or = [
+                { name: { $regex: params.searchText, $options: 'i' } },
+                { description: { $regex: params.searchText, $options: 'i' } },
+                { location: { $regex: params.searchText, $options: 'i' } }
+            ];
         }
         
-        // Category filter
+        // 只保留分类筛选
         if (params.category) {
             query.category = params.category;
         }
         
-        // Location filter
-        if (params.location) {
-            query.location = { $regex: params.location, $options: 'i' };
-        }
-        
-        // Age range filter
-        if (params.minAge || params.maxAge) {
-            query['ageRange.min'] = { $gte: parseInt(params.minAge) || 0 };
-            query['ageRange.max'] = { $lte: parseInt(params.maxAge) || 100 };
-        }
-        
-        // Price range filter
-        if (params.minPrice || params.maxPrice) {
-            query.price = {};
-            if (params.minPrice) query.price.$gte = parseFloat(params.minPrice);
-            if (params.maxPrice) query.price.$lte = parseFloat(params.maxPrice);
-        }
-        
-        // Date range filter
-        if (params.startDate || params.endDate) {
-            query.startDate = {};
-            if (params.startDate) query.startDate.$gte = new Date(params.startDate);
-            if (params.endDate) query.startDate.$lte = new Date(params.endDate);
-        }
-        
-        // Activities filter
-        if (params.activities) {
-            const activities = Array.isArray(params.activities) 
-                ? params.activities 
-                : params.activities.split(',');
-            query.activities = { $in: activities };
-        }
-
-        // Status filter
-        if (params.status) {
-            query.status = params.status;
-        } else {
-            // Default to active camps if no status specified
-            query.status = 'active';
-        }
-        
-        // Build sort options
-        const sortOptions = {};
-        if (params.sortBy) {
-            sortOptions[params.sortBy] = params.sortOrder === 'desc' ? -1 : 1;
-        }
-        
-        // Build pagination options
+        // 简单的分页
         const page = parseInt(params.page) || 1;
         const limit = parseInt(params.limit) || 10;
         const skip = (page - 1) * limit;
         
-        // Execute query with text search score if text search is used
-        const findOptions = params.searchText ? { score: { $meta: 'textScore' } } : {};
-        const camps = await Camp.find(query, findOptions)
-            .sort(sortOptions)
+        // 执行查询
+        const camps = await Camp.find(query)
+            .sort({ createdAt: -1 })
             .skip(skip)
             .limit(limit);
             
-        // Get total count for pagination
+        // 获取总数
         const total = await Camp.countDocuments(query);
         
         res.json({
@@ -252,15 +208,40 @@ router.get('/homepage', async (req, res) => {
 });
 
 // Test endpoint to check database connection
-router.get('/test', async (req, res) => {
+router.get('/test-connection', async (req, res) => {
     try {
-        console.log('Testing database connection...');
+        console.log('=== Database Connection Test ===');
+        console.log('MongoDB Connection State:', mongoose.connection.readyState);
+        console.log('MongoDB URI:', process.env.MONGODB_URI ? 'exists' : 'missing');
+        console.log('Environment:', process.env.NODE_ENV);
+        
+        // 检查连接状态
+        if (mongoose.connection.readyState !== 1) {
+            return res.status(503).json({ 
+                success: false,
+                message: 'Database not connected',
+                state: mongoose.connection.readyState
+            });
+        }
+        
+        // 尝试执行一个简单的查询
         const count = await Camp.countDocuments();
         console.log('Number of camps in database:', count);
-        res.json({ message: 'Database connection successful', campCount: count });
+        
+        res.json({ 
+            success: true,
+            message: 'Database connection successful',
+            state: mongoose.connection.readyState,
+            campCount: count
+        });
     } catch (err) {
         console.error('Database test error:', err);
-        res.status(500).json({ message: 'Database connection failed', error: err.message });
+        res.status(500).json({ 
+            success: false,
+            message: 'Database connection failed',
+            error: err.message,
+            state: mongoose.connection.readyState
+        });
     }
 });
 

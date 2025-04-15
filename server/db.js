@@ -2,20 +2,20 @@ const mongoose = require('mongoose');
 
 const connectDB = async () => {
   try {
-    const mongoUri = process.env.MONGODB_URI;
+    const uri = process.env.MONGODB_URI;
     
-    if (!mongoUri) {
-      console.error('MongoDB URI is undefined. Please check your environment variables.');
+    if (!uri) {
+      console.error('MONGODB_URI is not defined in environment variables');
       process.exit(1);
     }
 
     console.log('=== MongoDB Connection Attempt ===');
     console.log('Environment:', process.env.NODE_ENV);
-    console.log('MongoDB URI:', mongoUri.replace(/(mongodb\+srv:\/\/[^:]+):([^@]+)@/, '$1:****@'));
+    console.log('MongoDB URI:', uri.replace(/(mongodb\+srv:\/\/[^:]+):([^@]+)@/, '$1:****@'));
     console.log('Node Version:', process.version);
     console.log('Mongoose Version:', mongoose.version);
     
-    // 基础配置
+    // 基础配置（适用于所有环境）
     const baseOptions = {
       useNewUrlParser: true,
       useUnifiedTopology: true,
@@ -36,16 +36,13 @@ const connectDB = async () => {
     // 生产环境配置
     const productionOptions = {
       serverSelectionTimeoutMS: 60000,
-      socketTimeoutMS: 90000,
+      socketTimeoutMS: 60000,
       connectTimeoutMS: 60000,
       maxPoolSize: 20,
       minPoolSize: 10,
-      retryAttempts: 5,
-      retryDelay: 2000,
       heartbeatFrequencyMS: 5000,
-      family: 4,
-      keepAlive: true,
-      keepAliveInitialDelay: 300000
+      maxIdleTimeMS: 60000,
+      waitQueueTimeoutMS: 30000
     };
 
     // 根据环境选择配置
@@ -61,50 +58,36 @@ const connectDB = async () => {
     // 设置调试模式（仅在开发环境）
     mongoose.set('debug', !isProduction);
     
-    const conn = await mongoose.connect(mongoUri, connectionOptions);
+    const conn = await mongoose.connect(uri, connectionOptions);
+    
+    console.log(`MongoDB Connected: ${conn.connection.host}`);
+    console.log('Environment:', process.env.NODE_ENV);
+    console.log('MongoDB Connection State:', conn.connection.readyState);
+    console.log('MongoDB Connection Options:', connectionOptions);
 
-    // 设置连接事件处理器
     mongoose.connection.on('connected', () => {
-      console.log(`=== MongoDB Connected Successfully (${isProduction ? 'Production' : 'Development'}) ===`);
-      console.log('Connection state:', mongoose.connection.readyState);
-      console.log('Host:', mongoose.connection.host);
-      console.log('Port:', mongoose.connection.port);
-      console.log('Database:', mongoose.connection.name);
-      console.log('==============================');
+      console.log('Mongoose connected to MongoDB');
     });
 
     mongoose.connection.on('error', (err) => {
-      console.error('=== MongoDB Connection Error ===');
-      console.error('Error message:', err.message);
-      console.error('Error name:', err.name);
-      console.error('Error stack:', err.stack);
-      console.error('Connection state:', mongoose.connection.readyState);
-      console.error('==============================');
+      console.error('Mongoose connection error:', err);
     });
 
     mongoose.connection.on('disconnected', () => {
-      console.log('=== MongoDB Disconnected ===');
-      console.log('Connection state:', mongoose.connection.readyState);
-      console.log('==============================');
+      console.log('Mongoose disconnected from MongoDB');
     });
 
-    // 处理进程终止
     process.on('SIGINT', async () => {
-      console.log('=== Closing MongoDB Connection ===');
       await mongoose.connection.close();
-      console.log('MongoDB connection closed through app termination');
-      console.log('==============================');
+      console.log('Mongoose connection closed through app termination');
       process.exit(0);
     });
 
     return conn;
   } catch (error) {
-    console.error('=== MongoDB Connection Failed ===');
-    console.error('Error message:', error.message);
-    console.error('Error name:', error.name);
+    console.error('MongoDB connection error:', error);
     console.error('Error stack:', error.stack);
-    console.error('Connection state:', mongoose.connection.readyState);
-    console.error('==============================');
+    console.error('Connection URI:', process.env.MONGODB_URI ? 'exists' : 'missing');
     process.exit(1);
   }
 };
