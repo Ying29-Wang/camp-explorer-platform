@@ -48,16 +48,44 @@ app.use(cors(corsOptions));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// Request logging middleware
-app.use((req, res, next) => {
-    console.log('=== New Request ===');
-    console.log('Method:', req.method);
-    console.log('Path:', req.path);
-    console.log('Headers:', req.headers);
-    console.log('Body:', req.body);
-    console.log('==================');
-    next();
-});
+// 生产环境日志中间件
+if (process.env.NODE_ENV === 'production') {
+    app.use((req, res, next) => {
+        const start = Date.now();
+        console.log('=== Production Request Details ===');
+        console.log('Time:', new Date().toISOString());
+        console.log('Method:', req.method);
+        console.log('Path:', req.path);
+        console.log('Headers:', req.headers);
+        console.log('Body:', req.body);
+        console.log('Node Version:', process.version);
+        console.log('Memory Usage:', JSON.stringify(process.memoryUsage()));
+        console.log('Environment:', {
+            NODE_ENV: process.env.NODE_ENV,
+            MONGODB_URI: process.env.MONGODB_URI ? 'exists' : 'missing'
+        });
+        
+        // 记录响应时间
+        res.on('finish', () => {
+            const duration = Date.now() - start;
+            console.log('Response Time:', duration, 'ms');
+            console.log('Status Code:', res.statusCode);
+            console.log('==============================');
+        });
+        
+        next();
+    });
+} else {
+    // 开发环境保持简单的日志
+    app.use((req, res, next) => {
+        console.log('=== New Request ===');
+        console.log('Method:', req.method);
+        console.log('Path:', req.path);
+        console.log('Body:', req.body);
+        console.log('==================');
+        next();
+    });
+}
 
 // Routes
 app.use('/api/camps', require('./routes/camps'));

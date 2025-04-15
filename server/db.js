@@ -15,30 +15,57 @@ const connectDB = async () => {
     console.log('Node Version:', process.version);
     console.log('Mongoose Version:', mongoose.version);
     
-    // 设置全局查询超时
-    mongoose.set('bufferTimeoutMS', 30000);
-    
-    // 设置调试模式
-    mongoose.set('debug', true);
-    
-    const conn = await mongoose.connect(mongoUri, {
+    // 基础配置
+    const baseOptions = {
       useNewUrlParser: true,
       useUnifiedTopology: true,
-      serverSelectionTimeoutMS: 30000,
-      socketTimeoutMS: 45000,
-      connectTimeoutMS: 30000,
-      maxPoolSize: 10,
-      minPoolSize: 5,
       retryWrites: true,
-      retryReads: true,
-      heartbeatFrequencyMS: 10000,
-      retryAttempts: 3,
-      retryDelay: 1000
-    });
+      retryReads: true
+    };
+
+    // 本地开发环境配置
+    const localOptions = {
+      serverSelectionTimeoutMS: 5000,
+      socketTimeoutMS: 10000,
+      connectTimeoutMS: 5000,
+      maxPoolSize: 5,
+      minPoolSize: 1,
+      heartbeatFrequencyMS: 10000
+    };
+
+    // 生产环境配置
+    const productionOptions = {
+      serverSelectionTimeoutMS: 60000,
+      socketTimeoutMS: 90000,
+      connectTimeoutMS: 60000,
+      maxPoolSize: 20,
+      minPoolSize: 10,
+      retryAttempts: 5,
+      retryDelay: 2000,
+      heartbeatFrequencyMS: 5000,
+      family: 4,
+      keepAlive: true,
+      keepAliveInitialDelay: 300000
+    };
+
+    // 根据环境选择配置
+    const isProduction = process.env.NODE_ENV === 'production';
+    const connectionOptions = {
+      ...baseOptions,
+      ...(isProduction ? productionOptions : localOptions)
+    };
+
+    // 设置全局查询超时
+    mongoose.set('bufferTimeoutMS', isProduction ? 60000 : 10000);
+    
+    // 设置调试模式（仅在开发环境）
+    mongoose.set('debug', !isProduction);
+    
+    const conn = await mongoose.connect(mongoUri, connectionOptions);
 
     // 设置连接事件处理器
     mongoose.connection.on('connected', () => {
-      console.log('=== MongoDB Connected Successfully ===');
+      console.log(`=== MongoDB Connected Successfully (${isProduction ? 'Production' : 'Development'}) ===`);
       console.log('Connection state:', mongoose.connection.readyState);
       console.log('Host:', mongoose.connection.host);
       console.log('Port:', mongoose.connection.port);
