@@ -1,9 +1,8 @@
 // Import API URL configuration
 import { API_URL } from '../config/api';
 
-// When using Vite's proxy, use a relative URL instead
-const API_BASE = '/api'; // Using relative URL with Vite proxy
-// const API_BASE = API_URL; // Commented out absolute URL
+// Use environment-aware API URL
+const API_BASE = API_URL;
 
 // Log the API base URL for verification
 console.log('API Base URL:', API_BASE);

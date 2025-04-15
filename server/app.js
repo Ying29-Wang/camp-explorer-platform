@@ -12,8 +12,25 @@ try {
 
 const app = express();
 
-// CORS middleware
-app.use(cors());
+// CORS middleware with specific configuration
+const corsOptions = {
+    origin: function (origin, callback) {
+        const allowedOrigins = [
+            'https://camp-explorer-client.onrender.com',
+            'http://localhost:5173'
+        ];
+        if (!origin || allowedOrigins.indexOf(origin) !== -1) {
+            callback(null, true);
+        } else {
+            callback(new Error('Not allowed by CORS'));
+        }
+    },
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization'],
+    credentials: true
+};
+
+app.use(cors(corsOptions));
 
 // Body parsing middleware
 app.use(express.json());
