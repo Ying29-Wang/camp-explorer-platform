@@ -60,34 +60,48 @@ const connectDB = async () => {
     
     const conn = await mongoose.connect(uri, connectionOptions);
     
-    console.log(`MongoDB Connected: ${conn.connection.host}`);
-    console.log('Environment:', process.env.NODE_ENV);
-    console.log('MongoDB Connection State:', conn.connection.readyState);
-    console.log('MongoDB Connection Options:', connectionOptions);
-
+    // 设置连接事件处理器
     mongoose.connection.on('connected', () => {
-      console.log('Mongoose connected to MongoDB');
+      console.log(`=== MongoDB Connected Successfully (${isProduction ? 'Production' : 'Development'}) ===`);
+      console.log('Connection state:', mongoose.connection.readyState);
+      console.log('Host:', mongoose.connection.host);
+      console.log('Port:', mongoose.connection.port);
+      console.log('Database:', mongoose.connection.name);
+      console.log('==============================');
     });
 
     mongoose.connection.on('error', (err) => {
-      console.error('Mongoose connection error:', err);
+      console.error('=== MongoDB Connection Error ===');
+      console.error('Error message:', err.message);
+      console.error('Error name:', err.name);
+      console.error('Error stack:', err.stack);
+      console.error('Connection state:', mongoose.connection.readyState);
+      console.error('==============================');
     });
 
     mongoose.connection.on('disconnected', () => {
-      console.log('Mongoose disconnected from MongoDB');
+      console.log('=== MongoDB Disconnected ===');
+      console.log('Connection state:', mongoose.connection.readyState);
+      console.log('==============================');
     });
 
+    // 处理进程终止
     process.on('SIGINT', async () => {
+      console.log('=== Closing MongoDB Connection ===');
       await mongoose.connection.close();
-      console.log('Mongoose connection closed through app termination');
+      console.log('MongoDB connection closed through app termination');
+      console.log('==============================');
       process.exit(0);
     });
 
     return conn;
   } catch (error) {
-    console.error('MongoDB connection error:', error);
+    console.error('=== MongoDB Connection Failed ===');
+    console.error('Error message:', error.message);
+    console.error('Error name:', error.name);
     console.error('Error stack:', error.stack);
-    console.error('Connection URI:', process.env.MONGODB_URI ? 'exists' : 'missing');
+    console.error('Connection state:', mongoose.connection.readyState);
+    console.error('==============================');
     process.exit(1);
   }
 };

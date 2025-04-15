@@ -75,6 +75,36 @@ if (process.env.NODE_ENV === 'production') {
         
         next();
     });
+
+    // 生产环境数据库连接测试中间件
+    app.use(async (req, res, next) => {
+        try {
+            // 检查数据库连接状态
+            const state = mongoose.connection.readyState;
+            console.log('Database Connection State:', state);
+            
+            if (state !== 1) { // 1 表示已连接
+                console.error('Database not connected. State:', state);
+                return res.status(503).json({ 
+                    error: 'Database not connected',
+                    state: state
+                });
+            }
+            
+            // 尝试执行一个简单的查询
+            const Camp = mongoose.model('Camp');
+            const count = await Camp.countDocuments();
+            console.log('Number of camps in database:', count);
+            
+            next();
+        } catch (error) {
+            console.error('Database test error:', error);
+            res.status(500).json({ 
+                error: 'Database error',
+                message: error.message
+            });
+        }
+    });
 } else {
     // 开发环境保持简单的日志
     app.use((req, res, next) => {
