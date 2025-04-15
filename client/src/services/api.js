@@ -1,9 +1,8 @@
 import axios from 'axios';
+import { API_URL } from '../config/api';
 
 const api = axios.create({
-    baseURL: import.meta.env.PROD 
-        ? '/api' 
-        : 'http://localhost:5001/api',
+    baseURL: API_URL,
     headers: {
         'Content-Type': 'application/json'
     }

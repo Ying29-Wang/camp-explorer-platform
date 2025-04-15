@@ -19,6 +19,9 @@ app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
+// Serve static files from public directory
+app.use(express.static(path.join(__dirname, 'public')));
+
 // Request logging middleware
 app.use((req, res, next) => {
     console.log('=== New Request ===');
@@ -39,6 +42,11 @@ app.use('/api/payments', require('./routes/payments'));
 app.use('/api/bookmarks', require('./routes/bookmarks'));
 app.use('/api/recently-viewed', require('./routes/recentlyViewed'));
 app.use('/api/ai', require('./routes/ai'));
+
+// Catch-all route for client-side routing
+app.get('*', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'index.html'));
+});
 
 // Error handling middleware
 app.use((err, req, res, next) => {
