@@ -1,8 +1,9 @@
 // Import API URL configuration
 import { API_URL } from '../config/api';
 
-// Use the API_URL from config which handles both development and production
-const API_BASE = API_URL;
+// When using Vite's proxy, use a relative URL instead
+const API_BASE = '/api'; // Using relative URL with Vite proxy
+// const API_BASE = API_URL; // Commented out absolute URL
 
 // Log the API base URL for verification
 console.log('API Base URL:', API_BASE);
@@ -50,7 +51,7 @@ export const fetchCampsByOwner = async () => {
         throw new Error('No authentication token found');
     }
 
-    const response = await fetch(`${API_BASE}/camps/owner`, {
+    const response = await fetch(`${API_BASE}/camps/owner?nonDeleted=true`, {
         headers: {
             'Authorization': `Bearer ${token}`
         }
@@ -113,18 +114,45 @@ export const updateCamp = async (id, campData) => {
 // Delete camp
 export const deleteCamp = async (id) => {
     const token = localStorage.getItem('token');
-    const response = await fetch(`${API_BASE}/camps/${id}`, {
-        method: 'DELETE',
-        headers: {
-            'Authorization': `Bearer ${token}`
-        }
-    });
-
-    if (!response.ok) {
-        throw new Error(`Failed to delete camp: ${response.status} ${response.statusText}`);
+    if (!token) {
+        throw new Error('No authentication token found');
     }
 
-    return true;
+    try {
+        console.log('Deleting camp with ID:', id);
+        console.log('Using token:', token.substring(0, 10) + '...');
+        
+        const response = await fetch(`${API_BASE}/camps/${id}`, {
+            method: 'DELETE',
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json'
+            }
+        });
+
+        if (!response.ok) {
+            // Try to get detailed error message from response
+            const errorData = await response.json().catch(() => ({ 
+                message: 'Unknown server error' 
+            }));
+            
+            console.error('Delete camp error response:', {
+                status: response.status,
+                statusText: response.statusText,
+                errorData
+            });
+
+            throw new Error(
+                errorData.message || 
+                `Failed to delete camp: ${response.status} ${response.statusText}`
+            );
+        }
+
+        return true;
+    } catch (error) {
+        console.error('Error in deleteCamp:', error);
+        throw error;
+    }
 };
 
 // Fallback data

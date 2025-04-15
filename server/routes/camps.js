@@ -269,7 +269,7 @@ router.get('/test', async (req, res) => {
 // @access  Private
 router.get('/owner', auth, async (req, res) => {
     try {
-        const camps = await Camp.find({ owner: req.user.id });
+        const camps = await Camp.find({ owner: req.user.id }).nonDeleted();
         res.json(camps);
     } catch (err) {
         console.error('Error in /api/camps/owner:', err.message);
@@ -381,14 +381,20 @@ router.delete('/:id', auth, async (req, res) => {
         }
 
         // Check if user is camp owner or admin
-        if (camp.ownerId.toString() !== req.user.id && req.user.role !== 'admin') {
+        if (camp.owner.toString() !== req.user.id && req.user.role !== 'admin') {
             return res.status(403).json({ message: 'Not authorized to delete this camp' });
         }
 
         // Perform soft delete
-        await camp.softDelete(req.user._id);
+        await Camp.findByIdAndUpdate(req.params.id, {
+            $set: {
+                isDeleted: true,
+                deletedAt: new Date(),
+                deletedBy: req.user.id
+            }
+        });
         
-        res.json({ message: 'Camp soft deleted successfully' });
+        res.json({ message: 'Camp deleted successfully' });
     } catch (error) {
         console.error('Error deleting camp:', error);
         res.status(500).json({ message: 'Server error', error: error.message });

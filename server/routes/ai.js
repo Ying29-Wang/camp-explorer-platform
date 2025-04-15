@@ -3,22 +3,6 @@ const router = express.Router();
 const aiService = require('../services/aiService');
 const auth = require('../middleware/auth');
 const Camp = require('../models/camp');
-const multer = require('multer');
-
-// Configure multer for image upload
-const upload = multer({
-    storage: multer.memoryStorage(),
-    limits: {
-        fileSize: 5 * 1024 * 1024, // 5MB limit
-    },
-    fileFilter: (req, file, cb) => {
-        if (file.mimetype.startsWith('image/')) {
-            cb(null, true);
-        } else {
-            cb(new Error('Only image files are allowed!'), false);
-        }
-    }
-});
 
 // Get personalized camp recommendations
 router.post('/recommendations', auth, async (req, res) => {
@@ -68,58 +52,5 @@ router.post('/generate-description', async (req, res) => {
         });
     }
 });
-
-// Analyze camp image
-router.post('/analyze-camp-image', upload.single('image'), async (req, res) => {
-    try {
-        if (!req.file) {
-            return res.status(400).json({ message: 'No image file provided' });
-        }
-
-        // Convert the uploaded file to a data URL
-        const imageData = `data:${req.file.mimetype};base64,${req.file.buffer.toString('base64')}`;
-        
-        // Use the AI service to analyze the image
-        const analysis = await aiService.analyzeCampImage(imageData);
-        
-        // Parse the analysis text into structured data
-        const structuredAnalysis = parseAnalysis(analysis);
-        
-        res.json(structuredAnalysis);
-    } catch (error) {
-        console.error('Error analyzing camp image:', error);
-        res.status(500).json({ message: 'Failed to analyze image', error: error.message });
-    }
-});
-
-// Helper function to parse the AI analysis into structured data
-function parseAnalysis(analysis) {
-    // Extract age range
-    const ageMatch = analysis.match(/age group.*?(\d+).*?(\d+)/i);
-    const ageRange = ageMatch ? {
-        min: parseInt(ageMatch[1]),
-        max: parseInt(ageMatch[2])
-    } : null;
-
-    // Extract category
-    const categoryMatch = analysis.match(/type of camp.*?([A-Za-z]+)/i);
-    const category = categoryMatch ? categoryMatch[1] : null;
-
-    // Extract activities
-    const activitiesMatch = analysis.match(/activities.*?([^.]+)/i);
-    const activities = activitiesMatch ? 
-        activitiesMatch[1].split(',').map(a => a.trim()) : 
-        [];
-
-    // Extract description
-    const description = analysis;
-
-    return {
-        ageRange,
-        category,
-        activities,
-        description
-    };
-}
 
 module.exports = router; 
