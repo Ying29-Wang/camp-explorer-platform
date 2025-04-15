@@ -381,12 +381,17 @@ router.delete('/:id', auth, async (req, res) => {
         }
 
         // Check if user is camp owner or admin
-        if (camp.ownerId.toString() !== req.user.id && req.user.role !== 'admin') {
+        if (camp.owner.toString() !== req.user.id && req.user.role !== 'admin') {
             return res.status(403).json({ message: 'Not authorized to delete this camp' });
         }
 
         // Perform soft delete
-        await camp.softDelete(req.user._id);
+        await Camp.findByIdAndUpdate(req.params.id, {
+            $set: {
+                status: 'deleted',
+                deletedAt: new Date()
+            }
+        });
         
         res.json({ message: 'Camp soft deleted successfully' });
     } catch (error) {

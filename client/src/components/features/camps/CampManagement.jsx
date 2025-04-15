@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { fetchCampsByOwner, createCamp, updateCamp } from '../../../services/campService';
+import { fetchCampsByOwner, createCamp, updateCamp, deleteCamp } from '../../../services/campService';
 import { useAuth } from '../../../context/AuthContext';
 import Header from '../../../components/layout/Header';
 import { CAMP_CATEGORIES } from '../../../constants/campConstants';
@@ -171,6 +171,21 @@ const CampManagement = () => {
 
     const cancelEditing = () => {
         setEditingCamp(null);
+    };
+
+    const handleDeleteCamp = async (campId) => {
+        if (!window.confirm('Are you sure you want to delete this camp? This action cannot be undone.')) {
+            return;
+        }
+
+        try {
+            setError(null);
+            await deleteCamp(campId);
+            setCamps(camps.filter(camp => camp._id !== campId));
+        } catch (err) {
+            console.error('Error deleting camp:', err);
+            setError(err.message || 'Failed to delete camp. Please try again.');
+        }
     };
 
     if (loading) return <div>Loading...</div>;
@@ -443,6 +458,12 @@ const CampManagement = () => {
                                                     onClick={() => startEditing(camp)}
                                                 >
                                                     Edit
+                                                </button>
+                                                <button 
+                                                    className="delete-btn"
+                                                    onClick={() => handleDeleteCamp(camp._id)}
+                                                >
+                                                    Delete
                                                 </button>
                                             </div>
                                         </>
