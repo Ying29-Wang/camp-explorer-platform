@@ -5,6 +5,9 @@
     transition: all 0.3s ease;
     cursor: pointer;
     background: white;
+    text-decoration: none;
+    display: block;
+    color: inherit;
   }
   
   .camp-card:hover {
@@ -45,23 +48,36 @@
   
   .card-content {
     padding: 1rem;
+    background-color: rgba(255, 255, 255, 0.95);
   }
   
   .camp-name {
     margin: 0 0 0.5rem;
     font-size: 1.1rem;
-    color: #2c3e50;
+    color: #000000;
+    font-weight: 600;
   }
   
   .camp-location {
     margin: 0 0 0.5rem;
-    color: #7f8c8d;
+    color: #000000;
+    font-size: 0.9rem;
+  }
+  
+  .camp-price {
+    color: #000000;
+    font-weight: 600;
+    font-size: 1.1rem;
+  }
+  
+  .camp-age {
+    color: #000000;
     font-size: 0.9rem;
   }
   
   .camp-description {
     margin: 0 0 1rem;
-    color: #34495e;
+    color: #000000;
     font-size: 0.9rem;
     line-height: 1.4;
   }
@@ -70,27 +86,72 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    padding: 0.5rem;
   }
   
   .view-details-button {
-    background: #3498db;
-    color: white;
+    background: #0043A4;
+    color: #FFFFFF;
     border: none;
-    padding: 0.5rem 1rem;
+    padding: 0.75rem 1rem;
     border-radius: 4px;
     cursor: pointer;
     transition: background 0.2s;
+    white-space: nowrap;
+    min-width: fit-content;
+    flex: 1;
+    text-align: center;
+    font-weight: 600;
+    font-size: 1rem;
+  }
+  
+  .view-details-button:hover {
+    background-color: #003584;
+  }
+  
+  .view-details-button:focus {
+    outline: 2px solid #0043A4;
+    outline-offset: 2px;
   }
   
   .bookmark-button {
     background: none;
-    border: none;
-    color: #bdc3c7;
+    border: 1px solid #4A5568;
+    color: #4A5568;
     cursor: pointer;
     font-size: 1.2rem;
-    transition: color 0.2s;
+    transition: all 0.2s;
+    padding: 0.5rem;
+    min-width: fit-content;
+    border-radius: 4px;
   }
   
   .bookmark-button:hover {
-    color: #e74c3c;
+    background-color: #F7FAFC;
+    color: #2D3748;
+    border-color: #2D3748;
+  }
+  
+  .bookmark-button:focus {
+    outline: 2px solid #4A5568;
+    outline-offset: 2px;
+  }
+  
+  /* Responsive styles */
+  @media (max-width: 768px) {
+    .card-actions {
+      flex-direction: column;
+      align-items: stretch;
+    }
+  
+    .view-details-button {
+      width: 100%;
+      margin-bottom: 0.5rem;
+    }
+  
+    .bookmark-button {
+      align-self: flex-end;
+    }
   }

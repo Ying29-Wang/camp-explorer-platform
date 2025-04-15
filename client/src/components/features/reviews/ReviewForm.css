@@ -4,6 +4,8 @@
   border: 1px solid #e0e0e0;
   border-radius: 8px;
   background: white;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .review-form h3 {
@@ -39,6 +41,8 @@
 
 .form-group {
   margin-bottom: 1.5rem;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .form-group label {
@@ -53,6 +57,10 @@
   border: 1px solid #ddd;
   border-radius: 4px;
   font-family: inherit;
+  box-sizing: border-box;
+  resize: vertical;
+  min-height: 120px;
+  max-width: 100%;
 }
 
 .error-border {
@@ -85,4 +93,15 @@
 
 .submit-button:hover {
   background-color: #0056b3;
+}
+
+/* 响应式样式 */
+@media (max-width: 768px) {
+  .review-form {
+    padding: 1rem;
+  }
+  
+  .form-group textarea {
+    min-height: 100px;
+  }
 }
