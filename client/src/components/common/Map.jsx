@@ -1,4 +1,4 @@
-import React, { useRef, useEffect, useMemo } from 'react';
+import React, { useRef, useEffect } from 'react';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 
@@ -10,21 +10,13 @@ L.Icon.Default.mergeOptions({
     shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
 });
 
-const Map = ({ center, markers = [], zoom = 13 }) => {
+const Map = ({ coordinates, title, description }) => {
     const mapRef = useRef(null);
     const mapInstance = useRef(null);
-    const markersRef = useRef([]);
-
-    // Memoize the center and markers to prevent unnecessary updates
-    const memoizedCenter = useMemo(() => center, [center[0], center[1]]);
-    const memoizedMarkers = useMemo(() => markers, [JSON.stringify(markers)]);
-
-    // Check if input is valid
-    const isValidInput = memoizedCenter && Array.isArray(memoizedCenter) && memoizedCenter.length === 2;
 
     useEffect(() => {
-        if (!isValidInput) {
-            console.error('Invalid map input:', { center: memoizedCenter, markers: memoizedMarkers });
+        if (!coordinates || !Array.isArray(coordinates) || coordinates.length !== 2) {
+            console.error('Invalid coordinates:', coordinates);
             return;
         }
 
@@ -36,7 +28,7 @@ const Map = ({ center, markers = [], zoom = 13 }) => {
                 doubleClickZoom: true,
                 touchZoom: true,
                 dragging: true
-            }).setView(memoizedCenter, zoom);
+            }).setView(coordinates, 13);
 
             // Add tile layer
             L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
@@ -45,38 +37,12 @@ const Map = ({ center, markers = [], zoom = 13 }) => {
                 minZoom: 3
             }).addTo(mapInstance.current);
 
-            // Add zoom control
-            L.control.zoom({
-                position: 'topright'
-            }).addTo(mapInstance.current);
-        } else {
-            // Update center if it changed
-            mapInstance.current.setView(memoizedCenter, zoom);
-        }
+            // Add marker
+            const marker = L.marker(coordinates)
+                .addTo(mapInstance.current);
 
-        // Remove only the markers that are no longer needed
-        markersRef.current.forEach(marker => {
-            if (!memoizedMarkers.some(m => m[0] === marker.getLatLng().lat && m[1] === marker.getLatLng().lng)) {
-                mapInstance.current.removeLayer(marker);
-            }
-        });
-
-        // Add new markers that don't exist yet
-        memoizedMarkers.forEach(marker => {
-            const markerExists = markersRef.current.some(m => 
-                m.getLatLng().lat === marker[0] && m.getLatLng().lng === marker[1]
-            );
-
-            if (!markerExists) {
-                const customIcon = L.icon({
-                    iconUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon.png',
-                    iconSize: [25, 41],
-                    iconAnchor: [12, 41],
-                    popupAnchor: [1, -34],
-                    shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
-                    shadowSize: [41, 41]
-                });
-
+            // Add popup if title or description exists
+            if (title || description) {
                 const popupContent = `
                     <div style="
                         background-color: #ffffff;
@@ -85,50 +51,25 @@ const Map = ({ center, markers = [], zoom = 13 }) => {
                         border-radius: 4px;
                         box-shadow: 0 2px 4px rgba(0,0,0,0.2);
                     ">
-                        <h3 style="margin: 0 0 8px 0; color: #000000;">${marker.title || 'Location'}</h3>
-                        <p style="margin: 0; color: #000000;">${marker.description || 'No description available'}</p>
+                        <h3 style="margin: 0 0 8px 0; color: #000000;">${title || 'Location'}</h3>
+                        <p style="margin: 0; color: #000000;">${description || 'No description available'}</p>
                     </div>
                 `;
-
-                const newMarker = L.marker(marker, { icon: customIcon })
-                    .addTo(mapInstance.current)
-                    .bindPopup(popupContent)
-                    .openPopup();
-
-                markersRef.current.push(newMarker);
+                marker.bindPopup(popupContent).openPopup();
             }
-        });
-
-        // Update markersRef to only include current markers
-        markersRef.current = markersRef.current.filter(marker => 
-            memoizedMarkers.some(m => m[0] === marker.getLatLng().lat && m[1] === marker.getLatLng().lng)
-        );
+        } else {
+            // Update center if coordinates changed
+            mapInstance.current.setView(coordinates, 13);
+        }
 
         // Cleanup function
         return () => {
             if (mapInstance.current) {
                 mapInstance.current.remove();
                 mapInstance.current = null;
-                markersRef.current = [];
             }
         };
-    }, [memoizedCenter, zoom, memoizedMarkers, isValidInput]);
-
-    if (!isValidInput) {
-        return (
-            <div className="map-container" style={{ 
-                height: '300px', 
-                background: '#f0f0f0',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                margin: '1rem 0',
-                borderRadius: '8px'
-            }}>
-                <p>Invalid map data</p>
-            </div>
-        );
-    }
+    }, [coordinates, title, description]);
 
     return (
         <div 
@@ -142,7 +83,7 @@ const Map = ({ center, markers = [], zoom = 13 }) => {
             }}
             role="application"
             aria-label="Interactive map"
-            aria-roledescription="Map showing camp locations"
+            aria-roledescription="Map showing camp location"
             tabIndex={0}
         />
     );
