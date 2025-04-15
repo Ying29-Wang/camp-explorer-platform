@@ -220,98 +220,89 @@ const CampDetailsPage = () => {
                         <p style={{ color: '#000000' }}>{camp.description}</p>
                     </div>
 
-                    <div className="camp-details-section" role="region" aria-labelledby="age-range-heading">
-                        <h2 id="age-range-heading" style={{ color: '#000000' }}>Age Range</h2>
+                    <div className="camp-details-section" role="region" aria-labelledby="basic-info-heading">
+                        <h2 id="basic-info-heading" style={{ color: '#000000' }}>Basic Information</h2>
                         <ul className="camp-details-list">
                             <li style={{ color: '#000000' }}>
-                                <strong style={{ color: '#000000' }}>Minimum Age:</strong> {camp.minAge || 'Not specified'}
+                                <strong style={{ color: '#000000' }}>Age Range:</strong> {camp.ageRange.min} - {camp.ageRange.max} years
                             </li>
                             <li style={{ color: '#000000' }}>
-                                <strong style={{ color: '#000000' }}>Maximum Age:</strong> {camp.maxAge || 'Not specified'}
+                                <strong style={{ color: '#000000' }}>Price:</strong> ${camp.price}
                             </li>
-                            {camp.ageGroups && camp.ageGroups.length > 0 && (
+                            <li style={{ color: '#000000' }}>
+                                <strong style={{ color: '#000000' }}>Duration:</strong> {camp.duration}
+                            </li>
+                            {camp.schedule && (
                                 <li style={{ color: '#000000' }}>
-                                    <strong style={{ color: '#000000' }}>Age Groups:</strong> {camp.ageGroups.join(', ')}
+                                    <strong style={{ color: '#000000' }}>Schedule:</strong> {camp.schedule}
                                 </li>
                             )}
                         </ul>
                     </div>
 
-                    <div className="camp-details-section" role="region" aria-labelledby="schedule-heading">
-                        <h2 id="schedule-heading" style={{ color: '#000000' }}>Schedule</h2>
+                    <div className="camp-details-section" role="region" aria-labelledby="contact-heading">
+                        <h2 id="contact-heading" style={{ color: '#000000' }}>Contact Information</h2>
                         <ul className="camp-details-list">
-                            <li style={{ color: '#000000' }}>
-                                <strong style={{ color: '#000000' }}>Start Date:</strong> {camp.startDate ? new Date(camp.startDate).toLocaleDateString() : 'Not specified'}
-                            </li>
-                            <li style={{ color: '#000000' }}>
-                                <strong style={{ color: '#000000' }}>End Date:</strong> {camp.endDate ? new Date(camp.endDate).toLocaleDateString() : 'Not specified'}
-                            </li>
-                            <li style={{ color: '#000000' }}>
-                                <strong style={{ color: '#000000' }}>Duration:</strong> {camp.duration || 'Not specified'}
-                            </li>
-                            <li style={{ color: '#000000' }}>
-                                <strong style={{ color: '#000000' }}>Daily Schedule:</strong> {camp.dailySchedule || 'Not specified'}
-                            </li>
-                            {camp.dropOffTime && (
+                            {camp.contactPerson && (
                                 <li style={{ color: '#000000' }}>
-                                    <strong style={{ color: '#000000' }}>Drop-off Time:</strong> {camp.dropOffTime}
+                                    <strong style={{ color: '#000000' }}>Contact Person:</strong> {camp.contactPerson}
                                 </li>
                             )}
-                            {camp.pickUpTime && (
+                            {camp.email && (
                                 <li style={{ color: '#000000' }}>
-                                    <strong style={{ color: '#000000' }}>Pick-up Time:</strong> {camp.pickUpTime}
+                                    <strong style={{ color: '#000000' }}>Email:</strong>
+                                    <a 
+                                        href={`mailto:${camp.email}`}
+                                        style={{ color: '#0052CC', marginLeft: '0.5rem' }}
+                                    >
+                                        {camp.email}
+                                    </a>
+                                </li>
+                            )}
+                            {camp.phone && (
+                                <li style={{ color: '#000000' }}>
+                                    <strong style={{ color: '#000000' }}>Phone:</strong>
+                                    <a 
+                                        href={`tel:${camp.phone}`}
+                                        style={{ color: '#0052CC', marginLeft: '0.5rem' }}
+                                    >
+                                        {camp.phone}
+                                    </a>
+                                </li>
+                            )}
+                            {camp.website && (
+                                <li style={{ color: '#000000' }}>
+                                    <strong style={{ color: '#000000' }}>Website:</strong>
+                                    <a 
+                                        href={camp.website}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        style={{ color: '#0052CC', marginLeft: '0.5rem' }}
+                                    >
+                                        Visit Website
+                                    </a>
                                 </li>
                             )}
                         </ul>
                     </div>
 
-                    {camp.activities && camp.activities.length > 0 && (
-                        <div className="camp-activities" role="region" aria-labelledby="activities-heading">
-                            <h2 id="activities-heading" style={{ color: '#000000' }}>Activities</h2>
-                            <ul className="camp-details-list">
-                                {camp.activities.map((activity, index) => (
-                                    <li key={index} style={{ color: '#000000' }}>{activity}</li>
-                                ))}
-                            </ul>
-                        </div>
-                    )}
-
-                    {camp.amenities && camp.amenities.length > 0 && (
-                        <div className="camp-amenities" role="region" aria-labelledby="amenities-heading">
-                            <h2 id="amenities-heading" style={{ color: '#000000' }}>Amenities</h2>
-                            <ul className="camp-details-list">
-                                {camp.amenities.map((amenity, index) => (
-                                    <li key={index} style={{ color: '#000000' }}>{amenity}</li>
-                                ))}
-                            </ul>
-                        </div>
-                    )}
-
-                    {camp.contact && (
-                        <div className="camp-contact" role="region" aria-labelledby="contact-heading">
-                            <h2 id="contact-heading" style={{ color: '#000000' }}>Contact Information</h2>
-                            <ul className="camp-details-list">
-                                <li style={{ color: '#000000' }}>
-                                    <strong style={{ color: '#000000' }}>Email:</strong> {camp.contact.email}
-                                </li>
-                                <li style={{ color: '#000000' }}>
-                                    <strong style={{ color: '#000000' }}>Phone:</strong> {camp.contact.phone}
-                                </li>
-                                <li style={{ color: '#000000' }}>
-                                    <strong style={{ color: '#000000' }}>Website:</strong> {camp.contact.website}
-                                </li>
-                            </ul>
-                        </div>
-                    )}
+                    <div className="camp-details-section" role="region" aria-labelledby="activities-heading">
+                        <h2 id="activities-heading" style={{ color: '#000000' }}>Activities</h2>
+                        <ul className="camp-details-list">
+                            {camp.activities.map((activity, index) => (
+                                <li key={index} style={{ color: '#000000' }}>{activity}</li>
+                            ))}
+                        </ul>
+                    </div>
 
                     {coordinates && (
-                        <div className="map-section" role="region" aria-label="Map showing camp location">
+                        <div className="map-section" role="region" aria-labelledby="location-heading">
+                            <h2 id="location-heading" style={{ color: '#000000' }}>Location</h2>
                             <div className="map-container">
                                 <Map 
-                                    center={coordinates}
-                                    markers={[coordinates]}
-                                    zoom={13}
-                                    aria-label={`Map showing location of ${camp.name}`}
+                                    coordinates={coordinates}
+                                    title={camp.name}
+                                    description={camp.location}
                                 />
                             </div>
                         </div>
