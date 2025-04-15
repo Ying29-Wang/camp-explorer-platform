@@ -14,10 +14,8 @@ const CampCard = ({ camp, variant = 'default' }) => {
   return (
     <div 
       className={`camp-card ${variant}`}
-      onClick={handleViewDetails}
-      role="button"
-      tabIndex={0}
-      aria-label={`View ${camp.name} details`}
+      role="article"
+      aria-label={`${camp.name} camp information`}
     >
       <div className="card-image-container">
         <img
@@ -35,7 +33,7 @@ const CampCard = ({ camp, variant = 'default' }) => {
       <div className="card-content">
         <h3 className="camp-name">{camp.name}</h3>
         <p className="camp-location">
-          <i className="fas fa-map-marker-alt"></i> {camp.location}
+          <i className="fas fa-map-marker-alt" aria-hidden="true"></i> {camp.location}
         </p>
         <p className="camp-description">
           {camp.description?.substring(0, 100)}...
@@ -45,6 +43,7 @@ const CampCard = ({ camp, variant = 'default' }) => {
           <button 
             className="view-details-button"
             onClick={handleViewDetails}
+            aria-label={`View details of ${camp.name}`}
           >
             View Details
           </button>
@@ -55,9 +54,9 @@ const CampCard = ({ camp, variant = 'default' }) => {
                 e.stopPropagation();
                 // Your bookmark logic here
               }}
-              aria-label="Bookmark this camp"
+              aria-label={`Bookmark ${camp.name}`}
             >
-              <i className="far fa-bookmark"></i>
+              <i className="far fa-bookmark" aria-hidden="true"></i>
             </button>
           )}
         </div>
