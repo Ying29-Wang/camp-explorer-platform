@@ -15,19 +15,31 @@ const app = express();
 // CORS middleware with specific configuration
 const corsOptions = {
     origin: function (origin, callback) {
+        // 允许的源列表
         const allowedOrigins = [
             'https://camp-explorer-client.onrender.com',
-            'http://localhost:5173'
+            'http://localhost:5173',
+            'http://127.0.0.1:5173'
         ];
-        if (!origin || allowedOrigins.indexOf(origin) !== -1) {
+        
+        // 在开发环境中允许所有源
+        if (process.env.NODE_ENV === 'development') {
+            callback(null, true);
+            return;
+        }
+        
+        // 在生产环境中检查源
+        if (!origin || allowedOrigins.includes(origin)) {
             callback(null, true);
         } else {
             callback(new Error('Not allowed by CORS'));
         }
     },
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization'],
-    credentials: true
+    allowedHeaders: ['Content-Type', 'Authorization', 'x-auth-token'],
+    credentials: true,
+    preflightContinue: false,
+    optionsSuccessStatus: 204
 };
 
 app.use(cors(corsOptions));
@@ -41,6 +53,7 @@ app.use((req, res, next) => {
     console.log('=== New Request ===');
     console.log('Method:', req.method);
     console.log('Path:', req.path);
+    console.log('Headers:', req.headers);
     console.log('Body:', req.body);
     console.log('==================');
     next();
@@ -57,10 +70,49 @@ app.use('/api/bookmarks', require('./routes/bookmarks'));
 app.use('/api/recently-viewed', require('./routes/recentlyViewed'));
 app.use('/api/ai', require('./routes/ai'));
 
-// Error handling middleware
+// 增强的错误处理中间件
 app.use((err, req, res, next) => {
-    console.error('Error:', err);
-    res.status(500).json({ error: err.message });
+    console.error('=== Error Details ===');
+    console.error('Error message:', err.message);
+    console.error('Error stack:', err.stack);
+    console.error('Request path:', req.path);
+    console.error('Request method:', req.method);
+    console.error('Request body:', req.body);
+    console.error('Request headers:', req.headers);
+    console.error('==================');
+
+    // 如果是数据库连接错误
+    if (err.name === 'MongoError' || err.name === 'MongooseError') {
+        return res.status(500).json({ 
+            error: 'Database error',
+            message: err.message,
+            details: process.env.NODE_ENV === 'development' ? err.stack : undefined
+        });
+    }
+
+    // 如果是验证错误
+    if (err.name === 'ValidationError') {
+        return res.status(400).json({ 
+            error: 'Validation error',
+            message: err.message,
+            details: err.errors
+        });
+    }
+
+    // 如果是 JWT 错误
+    if (err.name === 'JsonWebTokenError') {
+        return res.status(401).json({ 
+            error: 'Authentication error',
+            message: 'Invalid token'
+        });
+    }
+
+    // 默认错误响应
+    res.status(500).json({ 
+        error: 'Server error',
+        message: err.message,
+        details: process.env.NODE_ENV === 'development' ? err.stack : undefined
+    });
 });
 
 // Default route
