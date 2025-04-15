@@ -269,7 +269,7 @@ router.get('/test', async (req, res) => {
 // @access  Private
 router.get('/owner', auth, async (req, res) => {
     try {
-        const camps = await Camp.find({ owner: req.user.id });
+        const camps = await Camp.find({ owner: req.user.id }).nonDeleted();
         res.json(camps);
     } catch (err) {
         console.error('Error in /api/camps/owner:', err.message);
@@ -388,12 +388,13 @@ router.delete('/:id', auth, async (req, res) => {
         // Perform soft delete
         await Camp.findByIdAndUpdate(req.params.id, {
             $set: {
-                status: 'deleted',
-                deletedAt: new Date()
+                isDeleted: true,
+                deletedAt: new Date(),
+                deletedBy: req.user.id
             }
         });
         
-        res.json({ message: 'Camp soft deleted successfully' });
+        res.json({ message: 'Camp deleted successfully' });
     } catch (error) {
         console.error('Error deleting camp:', error);
         res.status(500).json({ message: 'Server error', error: error.message });

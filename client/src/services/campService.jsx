@@ -51,7 +51,7 @@ export const fetchCampsByOwner = async () => {
         throw new Error('No authentication token found');
     }
 
-    const response = await fetch(`${API_BASE}/camps/owner`, {
+    const response = await fetch(`${API_BASE}/camps/owner?nonDeleted=true`, {
         headers: {
             'Authorization': `Bearer ${token}`
         }
