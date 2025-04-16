@@ -14,8 +14,7 @@ A comprehensive platform for discovering and managing summer camps, built with R
 
 ## Live Demo
 
-- Frontend: [https://camp-explorer-client.onrender.com/](https://camp-explorer-client.onrender.com/)
-- Backend API: [https://camp-explorer-server.onrender.com/api](https://camp-explorer-server.onrender.com/api)
+- https://camp-explorer-platform.onrender.com/
 
 ## Features
 
