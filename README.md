@@ -1,6 +1,7 @@
 # Camp Explorer Platform
 
 A comprehensive platform for discovering and managing summer camps, built with React, Node.js, and MongoDB.
+image.png
 
 ## Authors
 
