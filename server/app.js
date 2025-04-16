@@ -12,8 +12,13 @@ try {
 
 const app = express();
 
-// CORS middleware
-app.use(cors());
+// Updated CORS configuration
+app.use(cors({
+    origin: ['https://camp-explorer-platform.onrender.com', 'http://localhost:5173'],
+    credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization']
+}));
 
 // Body parsing middleware
 app.use(express.json());
