@@ -12,12 +12,20 @@ try {
 
 const app = express();
 
-// CORS middleware
-app.use(cors());
+// Updated CORS configuration
+app.use(cors({
+    origin: ['https://camp-explorer-platform.onrender.com', 'http://localhost:5173'],
+    credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization']
+}));
 
 // Body parsing middleware
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+
+// Serve static files from public directory
+app.use(express.static(path.join(__dirname, 'public')));
 
 // Request logging middleware
 app.use((req, res, next) => {
@@ -39,6 +47,11 @@ app.use('/api/payments', require('./routes/payments'));
 app.use('/api/bookmarks', require('./routes/bookmarks'));
 app.use('/api/recently-viewed', require('./routes/recentlyViewed'));
 app.use('/api/ai', require('./routes/ai'));
+
+// Catch-all route for client-side routing
+app.get('*', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'index.html'));
+});
 
 // Error handling middleware
 app.use((err, req, res, next) => {

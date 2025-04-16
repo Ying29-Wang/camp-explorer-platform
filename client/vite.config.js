@@ -32,6 +32,8 @@ export default defineConfig({
   plugins: [react()],
   base: '/',
   build: {
+    outDir: '../server/public',
+    emptyOutDir: true,
     commonjsOptions: {
       include: [/node_modules/],
     },
